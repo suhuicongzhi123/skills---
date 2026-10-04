@@ -1,0 +1,66 @@
+# 拐杖物理属性（纯数据）
+# 供 topics/crutch-usage.md 及 types/{type}.md#拐杖使用差异 引用
+# 单腿截肢者（尤其髋离断）以双拐为主要行走工具
+
+crutch_types:
+  axillary:
+    name: 腋拐
+    alias: [腋杖, underarm crutch]
+    common_use: 短期或间歇使用；髋离断者常用
+    structure:
+      axillary_pad: {name: 腋托, material: 海绵/橡胶软垫, function: 抵腋窝}
+      handgrip: {name: 手柄, material: 泡沫/橡胶/塑料, function: 握持, position: 中部}
+      uprights: {name: 双立杆, material: 木/铝/碳纤维, function: 承重}
+      crossbar: {name: 横梁, function: 连接双杆加固}
+      tip: {name: 拐头, material: 橡胶/聚氨酯, function: 防滑缓冲静音, wear: 易磨损需更换}
+    weight_kg: {wood: 1.0~1.5, aluminum: 0.7~1.0, carbon: 0.5~0.7}
+    height_adjustment: 调节孔位或伸缩锁扣
+  forearm:
+    name: 前臂拐
+    alias: [Lofstrand, 洛氏拐, 肘拐, forearm crutch]
+    common_use: 长期使用者首选；更灵活省力
+    structure:
+      cuff: {name: 前臂套, material: 金属/塑料, function: 固定前臂, position: 前臂中下段}
+      handgrip: {name: 手柄, position: 与腕横纹齐}
+      upright: {name: 单立杆, material: 铝/碳纤维}
+      tip: {name: 拐头, material: 橡胶/聚氨酯}
+    weight_kg: {aluminum: 0.5~0.8, carbon: 0.4~0.6}
+  platform:
+    name: 平台拐
+    alias: [平台式前臂拐]
+    common_use: 手部握力不足或关节受限者
+    structure:
+      platform: {name: 前臂平台, function: 承托前臂}
+      upright: {name: 单立杆}
+      tip: {name: 拐头}
+
+sizing:
+  axillary:
+    腋托高度: 站立腋下至地面减约5cm（约平大转子）
+    手柄高度: 屈肘约30°、腕横纹处
+    原理: 腋托过高压腋窝神经血管，过低肩带受力不当
+  forearm:
+    手柄高度: 腕横纹处
+    cuff高度: 前臂中下1/3
+  通用: 拐头落地时杆身垂直，防滑头全接触地面
+
+gait_patterns:
+  三点步态:
+    适用: 单腿截肢双拐（患侧无负重）
+    顺序: 双拐先出→健腿跟进至拐杖水平
+    特点: 稳定，速度中
+  摆至步:
+    顺序: 双拐先出→健腿摆至拐杖水平
+    特点: 省力，速度慢，台阶/拥挤处常用
+  摆过步:
+    顺序: 双拐先出→健腿摆过拐杖前方
+    特点: 省力快，步幅大，平地常用
+  四点步态:
+    顺序: 右拐→左腿→左拐→右腿
+    适用: 双腿均有部分负重（截肢者较少用）
+
+stairs:
+  上楼: 健腿先上→拐杖跟上
+  下楼: 拐杖先下→健腿跟下
+  口诀: 健上拐下（好腿先上，拐杖先下）
+  扶手: 有扶手时一手扶栏一手持双拐并拢
