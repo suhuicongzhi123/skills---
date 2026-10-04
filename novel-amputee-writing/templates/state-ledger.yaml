@@ -3,7 +3,7 @@
 # 固定属性全书锁定，动态属性跟踪
 
 角色固定属性:
-  截肢类型: hip-disarticulation    # 全书不可变
+  截肢类型: 髋离断                  # 全书不可变（对应 types/hip-disarticulation.md）
   截肢侧别: 右                      # 全书不可变
   截肢部位: 髋关节离断              # 全书不可变
 

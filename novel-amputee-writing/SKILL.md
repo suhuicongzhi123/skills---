@@ -1,6 +1,6 @@
 ---
 name: novel-amputee-writing
-version: 4.0.0
+version: 4.0.1
 author: 溯洄从之
 description: 面向慕残者(devotee/wannabe)群体的截肢者题材小说写作技能。主角为截肢者，单腿截肢为主，髋离断为主、其他类型为辅。涵盖截肢者日常生活方方面面（拐杖、假肢、日常动作、身体细节、幻肢感、亲密关系、W视角等），覆盖几乎所有小说题材（现实向为主、幻想向为辅）。触发条件：用户要求写截肢者/残障者题材小说、续写、大纲、人物设定、章节，或提到"慕残""截肢""残肢""拐杖""假肢""髋离断""幻肢"等；或明确要求本技能。不触发：非截肢题材普通小说、纯医学/康复专业内容、猎奇式苦难叙事。
 ---
@@ -16,7 +16,7 @@ description: 面向慕残者(devotee/wannabe)群体的截肢者题材小说写�
 ## 一、受众与内容定位
 
 - **受众**：慕残者（devotee）+ W视角（wannabe），详见 `core/audience.md`
-- **主角**：截肢者，单腿截肢为主，髋离断为主、其他类型为辅
+- **主角**：截肢者，单腿截肢为主，髋离断为主、其他类型为辅，默认女性
 - **内容偏好**：日常生活样态、行动受限与不便、幻肢感（非幻肢痛）、截肢后剩余部分描写（残肢晃动/抖动、剩余肌肉软组织收缩颤动）、代入感
 - **回避**：苦难叙事（幻肢痛、健腿劳损、伤口处理）、医学临床化、猎奇渲染、励志二元叙事
 - **W视角**：可含求截肢行为，但主剧情以截肢后生活为主
@@ -83,9 +83,12 @@ injection:
     - topics/intimacy.md
   写到W视角:
     - topics/wannabe.md
+  写到器具风险/丢失/损坏场景:
+    - topics/equipment-risk.md
   题材适配:
     现实向: genre/realistic.md
     幻想向: genre/fantasy.md
+    末世/丧尸/生存: genre/postapocalyptic.md
   产出模板:
     大纲: templates/outline.md
     人物卡: templates/character-card.md
@@ -110,7 +113,8 @@ types:
 
 - `topics/crutch-spec.yaml` + `topics/crutch-usage.md`：✅ 已完善
 - `types/hip-disarticulation.md`：✅ 已完善
-- `topics/hands-occupied.md`、`topics/clothing.md`：✅ 已完善
+- `topics/hands-occupied.md`、`topics/clothing.md`、`topics/equipment-risk.md`：✅ 已完善
+- `genre/postapocalyptic.md`：✅ 已新增
 - `core/cold-review.md`、`templates/state-ledger.yaml`：✅ 已新增
 - `core/*`、`topics/*`、`types/*`、`genre/*`、`templates/*`：✅ 已完善初版
 
