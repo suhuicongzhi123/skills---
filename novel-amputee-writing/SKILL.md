@@ -1,6 +1,6 @@
 ---
 name: novel-amputee-writing
-version: 4.0.1
+version: 4.0.2
 author: 溯洄从之
 description: 面向慕残者(devotee/wannabe)群体的截肢者题材小说写作技能。主角为截肢者，单腿截肢为主，髋离断为主、其他类型为辅。涵盖截肢者日常生活方方面面（拐杖、假肢、日常动作、身体细节、幻肢感、亲密关系、W视角等），覆盖几乎所有小说题材（现实向为主、幻想向为辅）。触发条件：用户要求写截肢者/残障者题材小说、续写、大纲、人物设定、章节，或提到"慕残""截肢""残肢""拐杖""假肢""髋离断""幻肢"等；或明确要求本技能。不触发：非截肢题材普通小说、纯医学/康复专业内容、猎奇式苦难叙事。
 ---
@@ -40,7 +40,7 @@ description: 面向慕残者(devotee/wannabe)群体的截肢者题材小说写�
 ## 三、拆分原理
 
 1. **类型无关/相关分离**：`core/`+`topics/` 跨类型复用，`types/` 放类型差异。新增截肢类型只在 `types/` 加一文件，不动其余。
-2. **主题域解耦类型差异**：`topics/X.md` 写通用规则，类型特有差异在 `types/{type}.md#X` 小节。
+2. **主题域解耦类型差异**：`topics/` 下各主题文件写通用规则，类型特有差异在 `types/{type}.md` 对应小节。
 3. **按需注入**：本总纲放注入索引，Agent 按需读取专项，省上下文与创作成本。
 
 ## 四、创作工作流
@@ -94,6 +94,9 @@ injection:
     人物卡: templates/character-card.md
     章节: templates/chapter.md
     状态账本: templates/state-ledger.yaml
+  章末必过审查:
+    生理事实兜底: core/physio-audit.md
+    类型不可能动作: types/{type}.md#不可能动作
   推荐流程:
     状态核查流水账: core/workflow.md#6-状态核查流水账
     冷读稽查(可选): core/cold-review.md
@@ -115,7 +118,7 @@ types:
 - `types/hip-disarticulation.md`：✅ 已完善
 - `topics/hands-occupied.md`、`topics/clothing.md`、`topics/equipment-risk.md`：✅ 已完善
 - `genre/postapocalyptic.md`：✅ 已新增
-- `core/cold-review.md`、`templates/state-ledger.yaml`：✅ 已新增
+- `core/cold-review.md`、`templates/state-ledger.yaml`、`core/physio-audit.md`：✅ 已新增
 - `core/*`、`topics/*`、`types/*`、`genre/*`、`templates/*`：✅ 已完善初版
 
 > 所有专项已完善初版内容，后续按实际创作反馈迭代。
