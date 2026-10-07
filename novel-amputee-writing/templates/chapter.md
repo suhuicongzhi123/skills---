@@ -27,5 +27,6 @@
 - [ ] 风格统一（口语化、生动）
 - [ ] 去AI化（无套话/升华/排比堆砌/书面腔）
 - [ ] 章节结尾不升华（停在动作/画面/情绪/悬念）
+- [ ] setup/payoff 状态更新（`state-ledger.yaml` 的 open_setups）
 - [ ] 已更新 `state-ledger.yaml`
 - [ ] 冷读子代理稽查（可选，`core/cold-review.md`）

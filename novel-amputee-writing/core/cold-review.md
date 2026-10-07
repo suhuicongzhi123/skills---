@@ -11,33 +11,48 @@
 ## 二、子代理读取内容（冷读输入）
 1. 待核查章节文本（刚写完的章）
 2. `state-ledger.yaml`（账本，核对一致性）
-3. `core/character-setup.md`（设定基准：侧别/部位/类型）
+3. `core/character-setup.md`（设定基准：部位大类/侧别/部位/类型）
 4. `types/{type}.md`（生理事实，核对动作可能性）
-5. `topics/hands-occupied.md`（双手占用矛盾）
-6. `topics/clothing.md`（服装处理）
-7. `topics/crutch-usage.md` + `topics/crutch-spec.yaml`（拐杖）
+5. `topics/clothing.md`（服装处理）
+6. 下肢截肢：`topics/hands-occupied.md`（双手占用）+ `topics/crutch-usage.md` + `topics/crutch-spec.yaml`（拐杖）
+7. 上肢截肢：`topics/one-handed-daily.md`（单手日常）
 8. `core/style.md`（回避清单）
 
 ## 三、子代理注入内容（纠错输出）
 - **错误清单**：每条标注位置 / 错误类型 / 正确做法
-- **一致性报告**：截肢侧别 / 部位 / 拐杖连续性 / 物品位置
+- **一致性报告**：截肢部位大类 / 侧别 / 部位 / 拐杖连续性（下肢） / 物品位置
 - **回避清单触发**：是否写幻肢痛/劳损/伤口/猎奇/励志二元
-- **双手占用核查**：每个"双手+移动"场景是否处理拐杖占手
-- **拐杖动作链**：放下/拿起是否完整
+- **双手占用核查**（下肢）：每个"双手+移动"场景是否处理拐杖占手
+- **单手任务核查**（上肢）：双手任务是否给单手替代或求助
+- **拐杖动作链**（下肢）：放下/拿起是否完整
 - **幻肢感 vs 幻肢痛**：是否写错成痛
 - **修正建议**：具体改法
 - **更新后的 `state-ledger.yaml`**
 
 ## 四、稽查维度（按错误率排序）
-1. 拐杖位置连续性（放下/拿起漏写）
+1. 截肢部位大类（上下肢写混）
 2. 截肢侧别（左/右写混）
 3. 截肢部位（类型写串）
 4. 物品位置（凭空转移）
-5. 双手+移动场景（拐杖占手矛盾）
+5. 下肢：双手+移动场景（拐杖占手矛盾）；上肢：双手任务（单手替代是否合理）
 6. 回避清单（幻肢痛/劳损/伤口/苦难渲染）
-7. 服装处理（空裤腿飘荡/打结误用）
+7. 服装处理（空裤腿/空袖管飘荡/打结误用）
 8. 幻肢感 vs 幻肢痛（写错成痛）
 9. 生理事实可行性（截肢部位参与不可能动作，见 `core/physio-audit.md`）
+
+## 四-bis、按草稿阶段分配注意力
+- **Early draft**：重结构和角色，行级 prose 不重要（场景该不该存在、动机是否成立）。结构问题不用行编辑解决
+- **Mid draft**：结构应稳，重 voice/pacing/场景连接
+- **Late draft**：结构角色已定，重 prose/行级节奏/用词/polish
+- **先结构后行级**：场景缺 turn 的话漂亮句子也修不好；弧线中段塌陷的话润色中段也给不了动量
+
+## 四-ter、五级编辑顺序（自结构到表面，每层假设上层稳定）
+1. Reader promise（开篇许诺的体验/类型/问题/情感契约，余下草稿是否兑现）
+2. Developmental structure（premise/causality/stakes/pacing/escalation/character arc/scene necessity，见 `core/structure.md`）
+3. Voice and style（见 `core/style.md`）
+4. Line-level execution（行级节奏/用词，见 `core/pacing.md` 句子节奏）
+5. Copy/proof surface（只标注重复模式，不标注单例）
+- 截肢领域稽查（生理事实/侧别/部位）贯穿所有阶段：Early 重设定一致，Late 重细节连续
 
 ## 五、调用方式
 - 主代理用 Task 工具调用独立子代理（general 型，全新上下文）
