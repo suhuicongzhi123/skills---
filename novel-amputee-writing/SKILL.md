@@ -1,6 +1,6 @@
 ---
 name: novel-amputee-writing
-version: 4.1.1
+version: 4.2.0
 author: 溯洄从之
 description: 面向慕残者(devotee/wannabe)群体的截肢者题材小说写作技能。主角为截肢者，下肢截肢为主（髋离断为主）、上肢截肢为辅（肩离断）。涵盖截肢者日常生活方方面面（拐杖、假肢、日常动作、身体细节、幻肢感、亲密关系、W视角等），含剧情节奏/弧线/场景结构通用写作技法，覆盖几乎所有小说题材（现实向为主、幻想向为辅）。触发条件：用户要求写截肢者/残障者题材小说、续写、大纲、人物设定、章节，或提到"慕残""截肢""残肢""拐杖""假肢""髋离断""幻肢""独臂""肩离断""单臂"等；或明确要求本技能。不触发：非截肢题材普通小说、纯医学/康复专业内容、猎奇式苦难叙事。
 ---
@@ -26,7 +26,7 @@ description: 面向慕残者(devotee/wannabe)群体的截肢者题材小说写�
 
 | 目录 | 格式 | 职责 |
 |------|------|------|
-| `core/` | md | 类型无关核心规则（工作流/风格/受众/角色设定/节奏/弧线/场景） |
+| `core/` | md | 类型无关核心规则（工作流/风格/受众/角色设定/节奏/弧线/场景/开篇） |
 | `types/` | md | 截肢生理事实，按类型隔离（易扩展） |
 | `topics/` | md + yaml | 主题域专项（跨类型） |
 | `genre/` | md | 题材适配 |
@@ -45,7 +45,7 @@ description: 面向慕残者(devotee/wannabe)群体的截肢者题材小说写�
 
 ## 四、创作工作流
 
-详见 `core/workflow.md`。概要：构思→大纲→人物设定→章节写作→润色。每阶段按需注入对应专项。
+详见 `core/workflow.md`。概要：构思→大纲→人物设定→章节写作→润色。每阶段按需注入对应专项。**逐章创作，禁止一次生成整篇**。
 
 ## 五、按需注入索引
 
@@ -62,6 +62,10 @@ injection:
     - types/{type}.md
   大纲/弧线规划阶段:
     - core/structure.md
+    - core/opening.md
+  开篇阶段:
+    - core/opening.md
+    - genre/{题材}.md#推荐开篇类型
   上肢截肢分支(肩离断等):
     不注入: [topics/crutch-spec.yaml, topics/crutch-usage.md, topics/hands-occupied.md, topics/daily-actions.md]
     改注入:
@@ -115,7 +119,7 @@ injection:
     setup/payoff跟踪: templates/state-ledger.yaml#open_setups
   推荐流程:
     状态核查流水账: core/workflow.md#6-状态核查流水账
-    冷读稽查(可选): core/cold-review.md
+    冷读稽查(创作前询问用户): core/cold-review.md
 ```
 
 ## 六、截肢类型清单
@@ -138,8 +142,10 @@ types:
 - `core/cold-review.md`、`templates/state-ledger.yaml`、`core/physio-audit.md`：✅ 已新增
 - `types/shoulder-disarticulation.md`、`topics/one-handed-daily.md`：✅ 已新增（上肢截肢支持）
 - `core/pacing.md`、`core/structure.md`、`core/scene.md`：✅ 已新增（通用写作技法，借鉴自 creative-writing-skills）
+- `core/opening.md`：✅ 已新增（开篇切入方式库 + 多样性约束，解决开篇套路化）
 - `core/*`、`topics/*`、`types/*`、`genre/*`、`templates/*`：✅ 已完善初版
 
+> **4.2.0 增补**：新增 `core/opening.md` 开篇切入方式库（10 维度）+ 多样性硬约束 + 烂开篇反例清单 + 题材→推荐开篇映射；`core/workflow.md` 加逐章创作硬性要求（禁止一次生成整篇）+ 大纲阶段选开篇 + 构思阶段询问用户是否开启冷读稽查；`core/scene.md` 例外条款加限制；`templates/outline.md` 第一章行改为分布池选 1–2 个 + 强制首章含钩子；`core/style.md` 重点内容降级为全书密度目标 + 新增声口多样性；`core/character-setup.md` 加多样性自检 + 设定摇号表；`genre/*.md` 各加推荐开篇类型；`templates/chapter.md` 核查清单加开篇雷同检查；`templates/state-ledger.yaml` 加 distribution 字段。
 > **4.1.1 增补**：髋离断假肢上下楼梯规则（`types/hip-disarticulation.md` + `topics/prosthesis.md`）；假肢为常用辅具时空裤腿默认折叠塞裤腰不裁剪（`topics/clothing.md`）。
 > 所有专项已完善初版内容，后续按实际创作反馈迭代。
-> **推荐流程**：状态核查流水账（章末自查，零成本）+ 冷读子代理稽查（可选，测试后定是否启用）。
+> **推荐流程**：状态核查流水账（章末自查，零成本）+ 冷读子代理稽查（创作前询问用户是否开启）。

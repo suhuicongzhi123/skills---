@@ -26,6 +26,12 @@
     杯:
   上一动作:
 
+distribution:                      # 招牌 beat 全书分布跟踪，禁止前两章一次性铺完（见 core/opening.md）
+  已铺beat:                        # 已铺到的招牌 beat
+    # - "幻肢感"
+    # - "残肢颤动"
+  已铺章: 0                        # 已铺 beat 覆盖到第几章
+  开篇维度:                         # 本本所选开篇维度（见 core/opening.md）
 open_setups:                       # 跨弧线跟踪 setup/payoff，每章更新（见 core/structure.md）
   # - 描述: "第2章提到主角回避配新拐杖"
   #   状态: open                    # open/paid/abandoned

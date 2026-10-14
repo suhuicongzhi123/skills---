@@ -12,7 +12,8 @@
 
 ## 场景入口
 - 中途切入：角色 mid-task / mid-conversation / mid-thought，给读者可追踪的东西
-- 例外：设定本身就是 story beat 时，描写带叙事重量，挣得开篇
+- 例外：设定本身就是 story beat 时，描写带叙事重量，挣得开篇——**仅当身体设定与本章钩子直接相关时**才允许 routine 开场，否则优先 in-media-res
+- 开篇切入方式从 `core/opening.md` 维度库中选择，避免从铺陈起笔
 - 忌：从铺陈起笔
 
 ## 对话双功能
