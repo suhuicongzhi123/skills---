@@ -1,6 +1,6 @@
 ---
 name: novel-amputee-writing
-version: 4.2.0
+version: 4.3.0
 author: 溯洄从之
 description: 面向慕残者(devotee/wannabe)群体的截肢者题材小说写作技能。主角为截肢者，下肢截肢为主（髋离断为主）、上肢截肢为辅（肩离断）。涵盖截肢者日常生活方方面面（拐杖、假肢、日常动作、身体细节、幻肢感、亲密关系、W视角等），含剧情节奏/弧线/场景结构通用写作技法，覆盖几乎所有小说题材（现实向为主、幻想向为辅）。触发条件：用户要求写截肢者/残障者题材小说、续写、大纲、人物设定、章节，或提到"慕残""截肢""残肢""拐杖""假肢""髋离断""幻肢""独臂""肩离断""单臂"等；或明确要求本技能。不触发：非截肢题材普通小说、纯医学/康复专业内容、猎奇式苦难叙事。
 ---
@@ -59,6 +59,7 @@ injection:
     - core/audience.md
   角色设定阶段:
     - core/character-setup.md
+    - topics/timeline.md
     - types/{type}.md
   大纲/弧线规划阶段:
     - core/structure.md
@@ -116,6 +117,8 @@ injection:
   章末必过审查:
     生理事实兜底: core/physio-audit.md
     类型不可能动作: types/{type}.md#不可能动作
+    幻肢频率对档位: topics/timeline.md
+    招牌元素未连续重复: core/audience.md#招牌元素密度与疲劳控制
     setup/payoff跟踪: templates/state-ledger.yaml#open_setups
   推荐流程:
     状态核查流水账: core/workflow.md#6-状态核查流水账
@@ -135,6 +138,10 @@ types:
 
 ## 七、专项完善状态
 
+- `topics/timeline.md`：✅ 已新增（截肢时长分档：先天/近期/多年 + 幻肢感频率锚点）
+- `core/audience.md`：✅ 已补（受众身份定位、devotee/wannabe 入戏约束、★招牌元素密度与疲劳控制）
+- `types/*#服装` 与 `topics/clothing.md`：✅ 已修正（患侧**裁剪位置**：髋离断=大腿根部/裆线，
+  膝上=残端下缘，膝下=残端下缘，肩离断=肩峰下缘；髋离断无"空裤管"，常服在裆线处结束）
 - `topics/crutch-spec.yaml` + `topics/crutch-usage.md`：✅ 已完善
 - `types/hip-disarticulation.md`：✅ 已完善
 - `topics/hands-occupied.md`、`topics/clothing.md`、`topics/equipment-risk.md`：✅ 已完善
@@ -145,6 +152,19 @@ types:
 - `core/opening.md`：✅ 已新增（开篇切入方式库 + 多样性约束，解决开篇套路化）
 - `core/*`、`topics/*`、`types/*`、`genre/*`、`templates/*`：✅ 已完善初版
 
+> **4.3.0 增补（受众驱动校准）**：
+> ① `core/audience.md` 明确"本技能为受众驱动、不是写实记录"——当"医学上更常见"与"读者更爱看"冲突时取后者；
+> 确立 **devotee 默认为读者身份**（非角色），devotee/wannabe 可入戏但须从属主线、不得改变 central question；
+> 新增 **★招牌元素密度与疲劳控制**硬约束（同一元素不连续两章出现、每 2–3 章 1 个、全书在清单内轮转，
+> 不得只盯 2–3 个元素反复写）。
+> ② 新增 `topics/timeline.md`：**幻肢感频率与截肢时长匹配**（先天=默认不写／近期=每 1–2 章／多年=每 3–5 章），
+> 档位全书锁定并写入角色卡与 state-ledger；`character-setup.md` 的"截肢时间"改为"截肢时长档位"。
+> ③ 修正患侧**裁剪位置**：髋离断=**大腿根部（裆线/腹股沟）**（原写"裁剪至骨盆处"，骨盆非成衣基准线，且髋离断无空裤管）；
+> 膝上/膝下=残端下缘；肩离断上装=肩峰下缘。`topics/clothing.md` 新增"类型差异：裁剪位置"对照表与常见错误。
+> ④ 用户裁定记录：**轮椅不设为单腿截肢角色的常用辅具，维持拐杖为主**（受众偏好优先于写实常见度）；
+> **不设未成年人硬约束**（由 Agent 自行判断）。
+> ⑤ 顺带修正两处硬事实错误：`types/shoulder-disarticulation.md` 肩离断肌电假肢表述、
+> `topics/crutch-usage.md` 三点步态与摆至步重复。
 > **4.2.0 增补**：新增 `core/opening.md` 开篇切入方式库（10 维度）+ 多样性硬约束 + 烂开篇反例清单 + 题材→推荐开篇映射；`core/workflow.md` 加逐章创作硬性要求（禁止一次生成整篇）+ 大纲阶段选开篇 + 构思阶段询问用户是否开启冷读稽查；`core/scene.md` 例外条款加限制；`templates/outline.md` 第一章行改为分布池选 1–2 个 + 强制首章含钩子；`core/style.md` 重点内容降级为全书密度目标 + 新增声口多样性；`core/character-setup.md` 加多样性自检 + 设定摇号表；`genre/*.md` 各加推荐开篇类型；`templates/chapter.md` 核查清单加开篇雷同检查；`templates/state-ledger.yaml` 加 distribution 字段。
 > **4.1.1 增补**：髋离断假肢上下楼梯规则（`types/hip-disarticulation.md` + `topics/prosthesis.md`）；假肢为常用辅具时空裤腿默认折叠塞裤腰不裁剪（`topics/clothing.md`）。
 > 所有专项已完善初版内容，后续按实际创作反馈迭代。

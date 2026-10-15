@@ -23,7 +23,11 @@
 - [ ] 回避幻肢痛/劳损/伤口
 - [ ] 不渲染苦难/猎奇/励志二元
 - [ ] 幻肢感未误写为幻肢痛
-- [ ] 服装处理符合 `topics/clothing.md`
+- [ ] **幻肢感频率符合截肢时长档位**（先天档不得写、多年档须低频，见 `topics/timeline.md`）
+- [ ] **招牌元素未连续重复**：本章 beat 类型与上一章不同，且未在清单里只盯 2–3 个元素
+      （见 `core/audience.md#招牌元素密度与疲劳控制` 与 state-ledger 的近三章 beat）
+- [ ] **devotee/wannabe 角色**（若有）未喧宾夺主、未改变 central question（见 `core/audience.md`）
+- [ ] 服装处理符合 `topics/clothing.md`（含患侧裁剪位置是否正确）
 - [ ] 代入感与日常真实
 - [ ] 风格统一（口语化、生动）
 - [ ] 去AI化（无套话/升华/排比堆砌/书面腔）
