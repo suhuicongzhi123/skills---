@@ -3,10 +3,12 @@
 # 固定属性全书锁定，动态属性跟踪
 
 角色固定属性:
-  截肢部位大类: 下肢              # 上肢 | 下肢，全书不可变
-  截肢类型: 髋离断                  # 全书不可变（对应 types/hip-disarticulation.md）
-  截肢侧别: 右                      # 全书不可变
-  截肢部位: 髋关节离断              # 全书不可变
+  截肢部位大类: <从character-setup锁定>   # 上肢 | 下肢，全书不可变
+  截肢类型: <从character-setup锁定>       # 全书不可变（对应 types/{type}.md）
+  截肢侧别: <从character-setup锁定>       # 全书不可变
+  截肢部位: <从character-setup锁定>       # 全书不可变
+  截肢时长档位: <先天|近期|多年>          # 全书锁定；决定幻肢感频率，见 topics/timeline.md
+  受众视角: devotee                       # devotee(默认) | wannabe | 双视角；默认读者身份，非角色
 
 当前状态:
   章: 1
@@ -26,11 +28,19 @@
     杯:
   上一动作:
 
-distribution:                      # 招牌 beat 全书分布跟踪，禁止前两章一次性铺完（见 core/opening.md）
+distribution:                      # 招牌 beat 全书分布跟踪（见 core/audience.md#密度与疲劳控制）
   已铺beat:                        # 已铺到的招牌 beat
     # - "幻肢感"
     # - "残肢颤动"
   已铺章: 0                        # 已铺 beat 覆盖到第几章
+  近三章beat:                      # 防连续重复：同一 beat 不得连续两章出现
+    # - 章: 1
+    #   beat: 幻肢感
+    # - 章: 2
+    #   beat: 空裤管
+  幻肢感出现章:                    # 对照时间档位核验频率（见 topics/timeline.md）
+    # - 3
+    # - 7
   开篇维度:                         # 本本所选开篇维度（见 core/opening.md）
 open_setups:                       # 跨弧线跟踪 setup/payoff，每章更新（见 core/structure.md）
   # - 描述: "第2章提到主角回避配新拐杖"

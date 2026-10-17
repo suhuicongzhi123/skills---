@@ -6,7 +6,9 @@ crutch_types:
   axillary:
     name: 腋拐
     alias: [腋杖, underarm crutch]
-    common_use: 短期或间歇使用；髋离断者常用
+    common_use: 髋离断者常用；**本技能默认辅具**
+    note: 受众偏好优先——腋拐是本受众最具标识度的外观，故设为默认。
+      可写腋下压痕/不适（属日常不便，不作苦难渲染）
     structure:
       axillary_pad: {name: 腋托, material: 海绵/橡胶软垫, function: 抵腋窝}
       handgrip: {name: 手柄, material: 泡沫/橡胶/塑料, function: 握持, position: 中部}
@@ -18,7 +20,7 @@ crutch_types:
   forearm:
     name: 前臂拐
     alias: [Lofstrand, 洛氏拐, 肘拐, forearm crutch]
-    common_use: 长期使用者首选；更灵活省力
+    common_use: 可选辅具（本技能默认腋拐；前臂拐为可替换选项，较轻便灵活）
     structure:
       cuff: {name: 前臂套, material: 金属/塑料, function: 固定前臂, position: 前臂中下段}
       handgrip: {name: 手柄, position: 与腕横纹齐}
@@ -46,9 +48,9 @@ sizing:
 
 gait_patterns:
   三点步态:
-    适用: 单腿截肢双拐（患侧无负重）
-    顺序: 双拐先出→健腿跟进至拐杖水平
-    特点: 稳定，速度中
+    适用: 患侧可部分负重者；单腿截肢未穿假肢时不适用（勿写）
+    说明: 指"双拐+健腿"三点着地的形态描述，实操即摆至/摆过，
+      不作为第三种独立步态（避免与摆至步重复）
   摆至步:
     顺序: 双拐先出→健腿摆至拐杖水平
     特点: 省力，速度慢，台阶/拥挤处常用
