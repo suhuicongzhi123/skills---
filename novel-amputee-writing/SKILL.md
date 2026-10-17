@@ -1,6 +1,6 @@
 ---
 name: novel-amputee-writing
-version: 4.4.2
+version: 4.5.0
 author: 溯洄从之
 description: 面向慕残者(devotee/wannabe)群体的截肢者题材小说写作技能。主角为截肢者，下肢截肢为主（髋离断为主）、上肢截肢为辅（肩离断）。涵盖截肢者日常生活方方面面（拐杖、假肢、日常动作、身体细节、幻肢感、亲密关系、W视角等），含剧情节奏/弧线/场景结构通用写作技法，覆盖几乎所有小说题材（现实向为主、幻想向为辅）。触发条件：用户要求写截肢者/残障者题材小说、续写、大纲、人物设定、章节，或提到"慕残""截肢""残肢""拐杖""假肢""髋离断""幻肢""独臂""肩离断""单臂"等；或明确要求本技能。不触发：非截肢题材普通小说、纯医学/康复专业内容、猎奇式苦难叙事。
 ---
@@ -63,6 +63,8 @@ injection:
     - types/{type}.md
   大纲/弧线规划阶段:
     - core/structure.md
+    - core/worldbuilding.md
+    - core/chapter-planning.md
     - core/opening.md
   开篇阶段:
     - core/opening.md
@@ -120,6 +122,7 @@ injection:
     幻肢频率对档位: topics/timeline.md
     招牌元素未连续重复: core/audience.md#招牌元素密度与疲劳控制
     setup/payoff跟踪: templates/state-ledger.yaml#open_setups
+    本章beat与钩子: core/chapter-planning.md#一、章五要素
   推荐流程:
     状态核查流水账: core/workflow.md#6-状态核查流水账
     冷读稽查(创作前询问用户): core/cold-review.md
@@ -152,6 +155,14 @@ types:
 - `core/opening.md`：✅ 已新增（开篇切入方式库 + 多样性约束，解决开篇套路化）
 - `core/*`、`topics/*`、`types/*`、`genre/*`、`templates/*`：✅ 已完善初版
 
+> **4.5.0 增补（剧情与大纲体系）**：新增 `core/worldbuilding.md`（世界观建立，
+>   含无障碍水平/社会态度/器具可得性，锁定跨章一致性）与 `core/chapter-planning.md`
+>   （章五要素/章末钩子类型库/功能配比/章间连接）；
+>   扩充 `templates/outline.md`（世界观区块、弧线编排表、招牌元素全书分布计划表）
+>   与 `templates/state-ledger.yaml`（时间线/关系状态/信息状态/角色弧状态）；
+>   联动更新注入索引、`core/workflow.md` 大纲阶段（加大纲质量闸）、
+>   `templates/chapter.md` 核查清单（加剧情项）、`core/cold-review.md`（加剧情结构稽查维度）；
+>   修正「无障碍水平」相关表述——**受限来源是身体结构，环境只放大难度**
 > **4.4.2 增补（残留清理二）**：`body-details.md` 坐姿条加髋离断限定（写空椅面）；`hip-disarticulation.md` 服装节空行清理
 > **4.4.1 增补（残留清理）**：删除 `hip-disarticulation.md` 中与「三层模型」矛盾的「裤管扁瘪」残留
 > （日常动作表坐行、身体细节坐姿条）；坐姿改用已确立的「空椅面」意象；服装节空行清理
