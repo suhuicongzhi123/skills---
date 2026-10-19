@@ -17,6 +17,14 @@
 - 弧线与结构规划（`core/structure.md`：四层级/四法则/弧线五组件）
 - **开篇切入方式选择**（`core/opening.md`：从维度库选一个维度并标注，禁止默认走 routine）
 - 标注哪些场景涉及拐杖/假肢/日常动作/身体细节/亲密/W视角
+- **大纲质量闸（进章节写作前须过）**：
+  - [ ] 世界观已建立并锁定（无障碍水平/社会态度/器具可得性，见 `core/worldbuilding.md`）
+  - [ ] central question 已定义，且**非默认"她能否接受自己"**（除非题材确为身份认同，见 `core/structure.md`）
+  - [ ] 弧线编排表已填：每段弧线有 question / midpoint shift / crisis / resolution
+  - [ ] 每段弧线改变故事**永久状态**，无 filler arc
+  - [ ] 招牌元素已**全书分配**（每 2–3 章 1 个、不连续重复、清单内轮转）
+  - [ ] 时间线已排（跨度/间隔/季节无矛盾）
+  - [ ] 每章五要素可填（beat / turn / 新信息 / stakes 变化 / 钩子，见 `core/chapter-planning.md`）
 - 产出：`templates/outline.md`
 
 ## 3. 人物设定
