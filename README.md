@@ -7,7 +7,7 @@
 | 分支 | tag | 状态 |
 |------|-----|------|
 | `main` | `v4.5.1` | 稳定版（默认） |
-| `preview` | `v4.6.2` | 测试版 |
+| `preview` | `v4.6.3` | 测试版 |
 
 ### 安装
 
@@ -23,7 +23,7 @@ git clone -b preview https://github.com/suhuicongzhi123/skills---.git
 
 指定版本（clone 后）：
 ```bash
-git checkout v4.6.2   # 或 v4.5.1
+git checkout v4.6.3   # 或 v4.5.1
 ```
 
 ## 技能说明

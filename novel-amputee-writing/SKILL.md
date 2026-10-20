@@ -1,6 +1,6 @@
 ---
 name: novel-amputee-writing
-version: 4.6.2
+version: 4.6.3
 author: 溯洄从之
 description: 面向慕残者(devotee/wannabe)群体的截肢者题材小说写作技能。主角为截肢者，下肢截肢为主（髋离断为主）、上肢截肢为辅（肩离断，含肘离断/腕离断）。覆盖拐杖、假肢、日常动作、高频生活场景、身体细节、幻肢感、亲密关系、W视角等主要方面，含剧情节奏/弧线/场景结构/长篇连续性通用写作技法，支持现实向、幻想向、末世、古装四类题材。触发条件：用户要求写截肢者/残障者题材小说、续写、大纲、人物设定、章节，或提到"慕残""截肢""残肢""拐杖""假肢""髋离断""幻肢""独臂""肩离断""肘离断""腕离断""单臂"等；或明确要求本技能。不触发：非截肢题材普通小说、纯医学/康复专业内容、猎奇式苦难叙事。
 ---
@@ -124,8 +124,11 @@ injection:
     - topics/intimacy.md
   写到W视角:
     - topics/wannabe.md
-  写到器具风险/丢失/损坏场景:
-    - topics/equipment-risk.md
+  章级规划受限beat:               # 每章开写前选 1 个
+    - topics/limitation-scenes.md
+    - types/{type}.md#受限清单
+  写到受限场景(冲突/追赶/双手占用/对立):
+    - topics/limitation-scenes.md  # 能力丧失 / 器具剥夺 / 双手占用 / 速度劣势 / 对立挑衅
   写到节奏/张力场景:
     - core/pacing.md
   题材适配:
@@ -145,6 +148,8 @@ injection:
     招牌元素未连续重复: core/audience.md#招牌元素密度与疲劳控制
     setup/payoff跟踪: templates/state-ledger.yaml#open_setups
     本章beat与钩子: core/chapter-planning.md#一、章五要素
+    受限beat≥1且不重复: core/audience.md#★受限清单（章级必备，与招牌元素分开计数）
+    幻肢档位真实度: topics/timeline.md#幻肢档位总表（触发 × 意图 × 残肢 × 后果）
     章级质量落点:                        # 上四项的执行点，缺一即不可查
       章五要素勾选: templates/chapter.md#章末核查清单
       账本登记: templates/state-ledger.yaml#本章登记
@@ -180,7 +185,7 @@ types:
   膝上=残端下缘，膝下=残端下缘，肩离断=肩峰下缘；髋离断无"空裤管"，常服在裆线处结束）
 - `topics/crutch-spec.yaml` + `topics/crutch-usage.md`：✅ 已完善
 - `types/hip-disarticulation.md`：✅ 已完善
-- `topics/hands-occupied.md`、`topics/clothing.md`、`topics/equipment-risk.md`：✅ 已完善
+- `topics/hands-occupied.md`、`topics/clothing.md`、`topics/limitation-scenes.md`：✅ 已完善
 - `genre/postapocalyptic.md`：✅ 已新增
 - `core/cold-review.md`、`templates/state-ledger.yaml`、`core/physio-audit.md`：✅ 已新增
 - `types/shoulder-disarticulation.md`、`topics/one-handed-daily.md`：✅ 已新增（上肢截肢支持）
@@ -188,6 +193,18 @@ types:
 - `core/opening.md`：✅ 已新增（开篇切入方式库 + 多样性约束，解决开篇套路化）
 - `core/*`、`topics/*`、`types/*`、`genre/*`、`templates/*`：✅ 已完善初版
 
+> **4.6.3 增补（幻肢与受限整体重构）**
+> **A. 受限**：确立定义（肢体缺失让某件事变难或无法完成；拐杖卡住/打滑/上楼费劲只作场景点缀）；
+> 立**两条生成轴**（不可能动作 + 辅具依赖）；立 5 类（能力丧失/器具剥夺/双手占用/速度劣势/对立挑衅）；
+> 新建 `topics/limitation-scenes.md` 集中承载，并**删除旧的器具风险文件**（其定位装不下全 5 类，
+> 且是受限分散的根源）；另立受限清单与招牌清单**并行**（招牌管上限、受限管下限，分开计数互不挤占）；
+> 落机制（账本 `受限beat` / 章末 5 项勾选 / 章级规则 / 冷读 2 项 / 类型文件必设节）；
+> `hands-occupied.md` 补③的闭环"跳回去拿拐杖"
+> **B. 幻肢**：`timeline.md` 频率锚点 → **档位总表**（频率 × 触发 × 意图 × 残肢 × 后果）；
+> B 近期档＝真的想用 → 动作未完成 → **真摔倒**；C 多年档＝不会真想用 → 仅肌肉反应 → 无后果，
+> 且**仅紧急情况触发**；新增合法触发清单，幻肢必须有剧情触发；
+> `physio-audit.md` 豁免按档位重写（**动作做成＝违规，没做成＝幻肢**）；
+> 4 个类型文件的幻肢节按档位改写
 > **4.6.2 增补（术语消歧）**：`core/audience.md` 招牌元素清单第 ⑤ 类统一为
 > 「辅助器具特写」，并加**统摄限定**——清单 7 类均须与截肢身体/辅助器具直接相关，
 > 剧情道具（信物/武器/文书/钥匙/照片等）不属招牌元素、不占密度预算；
@@ -202,7 +219,7 @@ types:
 > **保留** `core/audience.md` 招牌元素清单第 ④ 类「空」并加类型限定
 > ② 8 处裸「多写 / 写细」收紧为「写细，分布服从 `core/audience.md` 密度规则与 `topics/timeline.md` 档位」
 > ③ 补仲裁：`topics/timeline.md` B 档（近期）频率上限优先于「不连续两章」，B 档取「每 2 章」为常态
-> ④ 主体性修正：「韧性」3 处（crutch-usage / equipment-risk / postapocalyptic）改动作智慧与主动权；
+> ④ 主体性修正：「韧性」3 处（crutch-usage / 旧器具风险文件 / postapocalyptic）改动作智慧与主动权；
 > 「无助」「最脆弱」2 处改处置顺序与判断
 > ⑤ 可消除性修正：`core/opening.md` 维度 I 加「环境不作受限来源」限定，A/H 维度加苦难边界
 > **B. 规则落点（让规则可执行）**

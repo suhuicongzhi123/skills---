@@ -18,7 +18,8 @@
 7. 上肢截肢：`topics/one-handed-daily.md`（单手日常）
 8. `core/style.md`（回避清单）
 9. `templates/outline.md`（弧线编排表与招牌元素全书分布计划——稽查第 10 项的对比基准）
-10. `core/audience.md`（招牌元素密度与疲劳控制、幻肢频率档位）
+10. `core/audience.md`（招牌元素密度与疲劳控制、受限清单、幻肢频率档位）
+11. `topics/limitation-scenes.md`（受限 5 类与题材适配——稽查第 13 项的对比基准）
 
 ## 三、子代理注入内容（纠错输出）
 - **错误清单**：每条标注位置 / 错误类型 / 正确做法
@@ -47,6 +48,11 @@
 11. **跨章一致性**：时间线/关系阶段/信息知情状态是否与 `state-ledger.yaml` 登记一致
 12. **密度与疲劳**：招牌元素是否连续两章重复（对照账本 distribution） ·
     幻肢感频率是否符合时长档位（对照 `topics/timeline.md`）
+13. **受限 beat**：本章是否 ≥1 个 · 是否只有呈现没有处置 · 类型是否与上章重复
+    （对照 `topics/limitation-scenes.md` 与账本 `受限beat`）
+14. **幻肢真实度**：B 档是否写成「真的想用 → 动作未完成 → 真摔倒」；
+    C 档是否写成「不会真想用 → 仅肌肉反应 → 无后果」
+    （对照 `topics/timeline.md` 档位总表与 `core/physio-audit.md#幻肢感豁免`）
 
 ## 四-bis、按草稿阶段分配注意力
 
