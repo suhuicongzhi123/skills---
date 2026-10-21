@@ -11,15 +11,15 @@
 ## 二、子代理读取内容（冷读输入）
 1. 待核查章节文本（刚写完的章）
 2. `state-ledger.yaml`（账本，核对一致性）
-3. `core/character-setup.md`（设定基准：部位大类/侧别/部位/类型）
+3. 运行时人物卡（`templates/character-card.md` 的实例）+ `state-ledger.yaml` 角色固定属性（设定基准：以实际登记值为准，不以收集模板为准）
 4. `types/{type}.md`（生理事实，核对动作可能性）
 5. `topics/clothing.md`（服装处理）
 6. 下肢截肢：`topics/hands-occupied.md`（双手占用）+ `topics/crutch-usage.md` + `topics/crutch-spec.yaml`（拐杖）
 7. 上肢截肢：`topics/one-handed-daily.md`（单手日常）
-8. `core/style.md`（回避清单）
+8. `core/audience.md`（回避清单）——`core/style.md` 仅保留指针
 9. `templates/outline.md`（弧线编排表与招牌元素全书分布计划——稽查第 10 项的对比基准）
 10. `core/audience.md`（招牌元素密度与疲劳控制、受限清单、幻肢频率档位）
-11. `topics/limitation-scenes.md`（受限 5 类与题材适配——稽查第 13 项的对比基准）
+11. `topics/limitation-scenes.md`（受限 6 类与题材适配——稽查第 13 项的对比基准；受限强度分档见该文件「一-补」）
 
 ## 三、子代理注入内容（纠错输出）
 - **错误清单**：每条标注位置 / 错误类型 / 正确做法
@@ -46,7 +46,7 @@
 8. 幻肢感 vs 幻肢痛（写错成痛）
 9. 生理事实可行性（截肢部位参与不可能动作，见 `core/physio-audit.md`）
 10. **剧情结构**：本章 beat 是否推进弧线（对照 `templates/outline.md` 的弧线编排表） · 是否有 turn ·
-    有无新信息 · stakes 变化（对照账本 `stakes`） · 章末钩子类型是否与上章重复
+    有无新信息 · stakes 变化（对照账本 `stakes`） · 章末钩子与上章不同类、近 5 章内同类型至多 1 次
     （对照账本 `章末钩子类型`，见 `core/chapter-planning.md`）
 11. **跨章一致性**：时间线/关系阶段/信息知情状态是否与 `state-ledger.yaml` 登记一致
 12. **密度与疲劳**：招牌元素是否连续两章重复（对照账本 distribution） ·

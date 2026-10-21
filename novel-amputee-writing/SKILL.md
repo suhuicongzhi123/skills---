@@ -1,6 +1,6 @@
 ---
 name: novel-amputee-writing
-version: 4.8.4
+version: 4.9.0
 author: 溯洄从之
 description: 面向慕残者(devotee/wannabe)群体的截肢者题材小说写作技能。主角为截肢者，下肢截肢为主（髋离断为主）、上肢截肢为辅（肩离断，含肘离断/腕离断）。覆盖拐杖、假肢、日常动作、高频生活场景、身体细节、幻肢感、亲密关系、W视角等主要方面，含剧情节奏/弧线/场景结构/长篇连续性通用写作技法，支持现实向、幻想向、末世、古装四类题材。触发条件：用户要求写截肢者/残障者题材小说、续写、大纲、人物设定、章节，或提到"慕残""截肢""残肢""拐杖""假肢""髋离断""幻肢""独臂""肩离断""肘离断""腕离断""单臂"等；或明确要求本技能。不触发：非截肢题材普通小说、纯医学/康复专业内容、猎奇式苦难叙事。
 ---
@@ -12,7 +12,7 @@ description: 面向慕残者(devotee/wannabe)群体的截肢者题材小说写�
 > **强制约束**：角色设定确认后，Agent 不再就流程分支向用户询问下一步操作或决策确认，所有流程分支由 Agent 依据本文档规则决定。
 > **两项例外**：① **章级推进节奏的确认**（写完一章后是否进入下一章，见 `core/workflow.md`）；
 > ② **创作前是否开启冷读稽查**（见 `core/cold-review.md`）。
-> 创作前期需向用户收集角色设定（见 `core/character-setup.md`）。
+> 创作前期需向用户收集角色设定（见 `core/character-setup.md`）——设定先于大纲（大纲质量闸依赖设定输入）。
 
 ---
 
@@ -20,15 +20,14 @@ description: 面向慕残者(devotee/wannabe)群体的截肢者题材小说写�
 
 - **受众**：慕残者（devotee）+ W视角（wannabe），详见 `core/audience.md`
 - **主角**：截肢者，下肢截肢为主（髋离断为主）、上肢截肢为辅（肩离断），默认女性
-- **内容偏好**（重点→次重点）：受限与不便、幻肢感（非幻肢痛）、裸露场景（洗澡/更衣/睡觉/亲密）残肢与剩余部分细节 ＞ 剩余部分颤动、代入感 ＞ 日常样态（次重点，作背景）
-- **回避**：苦难叙事（幻肢痛、健腿劳损、伤口处理）、医学临床化、猎奇渲染、励志二元叙事
+- **内容偏好与回避清单**：以 `core/audience.md` 为准（受限与不便/幻肢感/裸露场景细节为高位偏好；苦难叙事/医学临床化/猎奇/励志二元为回避项）
 - **W视角**：可含求截肢行为，但主剧情以截肢后生活为主
 - **题材**：现实向（主）+ 幻想向 / 末世生存 / 古装向（辅，符合截肢设定事实，按需加入高科技/魔法元素）
 
 ## 二、文件结构与格式
 
-> **改完必跑自检**：`python scripts/selfcheck.py` —— 查注入锚点落空 / 类型必填节 /
-> 已废止表述复发三项。跨版本残留是本包历史上所有冲突的来源，改口径后务必跑。
+> **改完必跑自检**：`python scripts/selfcheck.py` —— 查注入锚点落空 / 悬空引用 /
+> 类型必填节 / 已废止表述复发 / 孤儿文件五项。跨版本残留与孤儿文件是本包历史上所有冲突的来源，改口径后务必跑。
 
 | 目录 | 格式 | 职责 |
 |------|------|------|
@@ -38,20 +37,16 @@ description: 面向慕残者(devotee/wannabe)群体的截肢者题材小说写�
 | `genre/` | md | 题材适配 |
 | `templates/` | md | 产出模板 |
 
-**格式选择原理**：
-- **md**：规则/叙述/指导，注入即指令，支持小节锚点按需引用
-- **yaml**：纯结构化数据（属性-值/枚举），紧凑可解析易扩展
-- **不用 json**：冗长无注释，人工维护不如 yaml
-
 ## 三、拆分原理
 
-1. **类型无关/相关分离**：`core/`+`topics/` 跨类型复用，`types/` 放类型差异。新增截肢类型只在 `types/` 加一文件，不动其余。
+1. **类型无关/相关分离**：`core/`+`topics/` 跨类型复用，`types/` 放类型差异。新增截肢类型只在 `types/` 加文件，不动其余。
 2. **主题域解耦类型差异**：`topics/` 下各主题文件写通用规则，类型特有差异在 `types/{type}.md` 对应小节。
 3. **按需注入**：本总纲放注入索引，Agent 按需读取专项，省上下文与创作成本。
+4. **单一权威源**：同一规则只在一处立权威（如内容偏好/回避清单在 `core/audience.md`、幻肢机制在 `topics/timeline.md`、蹲豁免在各类型文件），其余位置一律指针引用。
 
 ## 四、创作工作流
 
-详见 `core/workflow.md`。概要：构思→大纲→人物设定→章节写作→润色。每阶段按需注入对应专项。**逐章创作，禁止一次生成整篇**。
+详见 `core/workflow.md`。概要：构思→人物设定→大纲→章节写作→润色。每阶段按需注入对应专项。**逐章创作，禁止一次生成整篇**。
 
 ## 五、按需注入索引
 
@@ -62,13 +57,14 @@ injection:
   命名说明:                       # 账本两种写法同指一物，避免"引用了不存在的文件"误判
     源模板: templates/state-ledger.yaml
     运行时: 开书时复制到小说项目工作区，称 state-ledger.yaml
+    归档: state-ledger-archive.yaml 为运行时产物（滚动窗口归档），技能包内无此文件
   触发启动:
     - core/workflow.md
     - core/style.md
     - core/audience.md
   角色设定阶段:
-    - core/character-setup.md
-    - topics/timeline.md
+    - core/character-setup.md     # 含★性格生成轴（人物卡心理区配套）
+    - topics/timeline.md          # 幻肢机制与频率档位权威源
     - types/{type}.md
   类型未登记兜底:                 # 用户要求的类型不在第六节清单内时走此分支
     条件: 该类型未在 types/ 登记
@@ -87,7 +83,7 @@ injection:
   大纲/弧线规划阶段:
     - core/structure.md
     - core/worldbuilding.md
-    - core/chapter-planning.md
+    - core/chapter-planning.md    # 含 turn 的三条生成路径
     - core/opening.md
   开篇阶段:
     - core/opening.md
@@ -108,15 +104,15 @@ injection:
     - topics/crutch-usage.md
     - types/{type}.md#拐杖使用差异
   写到假肢:
-    - topics/prosthesis.md
+    - topics/prosthesis.md        # 含假肢故障（渐进危机的铺陈素材）
     - types/{type}.md#假肢使用差异
   写到日常动作(下肢):
     - topics/daily-actions.md
     - types/{type}.md#日常动作差异
   写到高频私密/公共场景:          # 按场景查对应小节，不全文加载
     - topics/daily-scenes.md      # 一 如厕 / 二 床上起卧与床边转移 / 三 公共交通 /
-      # 四 长距离行走 / 五 负重与楼梯 / 六 厨房与家务 / 七 照护与更衣 /
-      # 八 其他高频（电梯困住·雨雪·运动·门诊·职场·校园）
+      # 四 长距离行走 / 五 负重与楼梯 / 六 厨房与家务 / 七 照护与亲密日常 /
+      # 八 其他高频（电梯困住·雨雪·运动·门诊·职场·校园）/ 十 沐浴与更衣（裸露场景专项）
   写到双手与移动并存场景(下肢):
     - topics/hands-occupied.md
     - types/{type}.md#拐杖使用差异
@@ -129,14 +125,14 @@ injection:
     - topics/body-details.md
     - types/{type}.md#身体细节
   写到亲密关系:
-    - topics/intimacy.md
+    - topics/intimacy.md          # 含体位与接触按类型素材（第八节）
   写到W视角:
-    - topics/wannabe.md
+    - topics/wannabe.md           # 含向往的具象素材/跃迁后的具象素材
   章级规划受限beat:               # 每章开写前选 1 个
-    - topics/limitation-scenes.md
+    - topics/limitation-scenes.md # 含受限强度分档（一-补）与环境与他者第六类
     - types/{type}.md#受限清单
-  写到受限场景(冲突/追赶/双手占用/对立):
-    - topics/limitation-scenes.md  # 能力丧失 / 器具剥夺 / 双手占用 / 速度劣势 / 对立挑衅
+  写到受限场景(冲突/追赶/双手占用/对立/环境与他者):
+    - topics/limitation-scenes.md  # 能力丧失 / 器具剥夺 / 双手占用 / 速度劣势 / 对立挑衅 / 环境与他者
   写到节奏/张力场景:
     - core/pacing.md
   题材适配:
@@ -153,18 +149,18 @@ injection:
     生理事实兜底: core/physio-audit.md
     类型不可能动作: types/{type}.md#不可能动作
     幻肢频率对档位: topics/timeline.md
-    招牌元素未连续重复: core/audience.md#招牌元素密度与疲劳控制
+    招牌元素未连续重复: core/audience.md#★招牌元素密度与疲劳控制（硬约束）
     setup/payoff跟踪: templates/state-ledger.yaml#open_setups
-    本章beat与钩子: core/chapter-planning.md#一、章六要素
+    本章beat与钩子: core/chapter-planning.md#一、章六要素（每章开写前必须填）
     受限beat≥1且不重复: core/audience.md#★受限清单（章级必备，与上方招牌清单并行）
     幻肢档位真实度: topics/timeline.md#幻肢档位总表（频率 × 触发 × 意图 × 残肢 × 后果）
     章级质量落点:                        # 上八项的执行点，缺一即不可查
-      章六要素勾选: templates/chapter.md#章末核查清单
+      章六要素勾选: templates/chapter.md#章末核查清单（必过）
       账本登记: templates/state-ledger.yaml#本章登记
       钩子不重复: templates/state-ledger.yaml#章末钩子类型
       密度可查: templates/state-ledger.yaml#distribution.元素上次出现章
   推荐流程:
-    状态核查流水账: core/workflow.md#6-状态核查流水账
+    状态核查流水账: core/workflow.md#6. 状态核查流水账
     冷读稽查(创作前询问用户): core/cold-review.md
 ```
 
@@ -206,22 +202,13 @@ types:
   # 未登记类型的兜底规则见第五节注入索引「类型未登记兜底」
 ```
 
-> **必填节闸门（两级）**
-> - **独立类型**（`hip-disarticulation` / `transfemoral` / `transtibial` / `shoulder-disarticulation` /
->   `elbow-wrist`）：`types/_template.md` 的 11 节**全部必填，缺失不得登记为新类型**。
->   其中**运动能力**与**体位与动态**为实质要求（须写清可/不可）；
->   其余 9 节可写短节（"见第 X 节 / 本类型不适用"），但**小节名必须在**，否则注入锚点落空。
-> - **叠加层**（`bilateral`——须与单侧类型并行注入，**不单独成立**）：按最小集——
->   适用范围 / 失效条目 / 移动样态 / 身体细节 / 幻肢感 / 受限清单。
->   ❌ 不要求 11 节，不因其缺节而判定违规。
+> **必填节闸门（两级）**：独立类型须含 `types/_template.md` 的 11 节全部（缺失不得登记为新类型；
+> 运动能力与体位与动态为实质要求，其余可短节但小节名必须在，否则注入锚点落空）；
+> 叠加层 `bilateral` 按最小集（适用范围/失效条目/移动样态/身体细节/幻肢感/受限清单），
+> 不要求 11 节。节序不严格；双亚型可采用 elbow-wrist 的「对照表+分型」变体。
 
-## 七、专项完善状态
-
-> 历史变更记录已迁出，见 **`CHANGELOG.md`**（本文件不再承载变更史，以控制常驻上下文体积）。
-> 当前版本见 frontmatter `version`。
-
-## 八、通用说明
+## 七、通用说明
 
 - 所有专项已完善初版内容，后续按实际创作反馈迭代。
 - **推荐流程**：状态核查流水账（章末自查，零成本）+ 冷读子代理稽查（创作前询问用户是否开启）。
-- **版本变更一律记入 `CHANGELOG.md`**，本总纲不再承载变更史（v4.8.0 迁出）。
+- **版本变更一律记入 `CHANGELOG.md`**，本总纲不承载变更史（v4.8.0 迁出）；当前版本见 frontmatter `version`。
