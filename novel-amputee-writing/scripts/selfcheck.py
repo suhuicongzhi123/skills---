@@ -60,23 +60,28 @@ DEAD = [
     "可半蹲",                                  # 4.7.0 蹲分级废止（S-5 曾漏网）
     "章五要素",                                # 4.8.0 改章六要素
     "那一半椅面是空的",                        # 4.8.0 空椅面口径（N-1 曾漏网）
+    "没有裤管", "没有袖管",                    # 4.8.2 禁否定式缺失描写（写了收口还声明缺失）
 ]
+hits = {}          # (file, line) -> [命中的词]，同一行多词只报一次
 for w in DEAD:
     for f in glob.glob("**/*.md", recursive=True):
         # CHANGELOG 记录的是"清理了什么"，必须保留原文，不参与创作注入 → 跳过
         if os.path.basename(f) == "CHANGELOG.md":
             continue
         for i, l in enumerate(open(f, encoding="utf-8", errors="ignore"), 1):
-            if w not in l:
-                continue
-            # 出现在禁令句/废止声明里多半合法 → 列出上下文让维护者判断，不静默放行
-            banned = ("已废止" in l or "❌" in l or "不写" in l)
-            flag = "［禁令句，人工确认］" if banned else "［疑似复发］"
-            print(f"[3] 「{w}」{flag} {f}:{i}")
-            print(f"      {l.strip()[:100]}")
-            if not banned:
-                fail += 1
-print("[3] 废止表述: 检查完毕（上方［］标记项请人工确认）")
+            if w in l:
+                hits.setdefault((f, i), []).append(w)
+for (f, i), ws in sorted(hits.items()):
+    l = open(f, encoding="utf-8", errors="ignore").read().split("\n")[i - 1]
+    # 出现在禁令句/废止声明里多半合法 → 列出上下文让维护者判断，不静默放行
+    banned = ("已废止" in l or "❌" in l or "不写" in l
+              or "禁止" in l or "反例" in l or "追加" in l)
+    flag = "［禁令句，人工确认］" if banned else "［疑似复发］"
+    print(f"[3] 「{'/'.join(ws)}」{flag} {f}:{i}")
+    print(f"      {l.strip()[:100]}")
+    if not banned:
+        fail += 1
+print(f"[3] 废止表述: {len(hits)} 处（上方［］标记项请人工确认）")
 
 print("\n结果:", "PASS" if fail == 0 else f"FAIL ({fail})")
 sys.exit(0 if fail == 0 else 1)

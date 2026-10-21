@@ -59,7 +59,7 @@
 
 ## 写作约束
 
-- 档位在角色设定阶段确定，**全书锁定**（写入 `templates/character-card.md` 与 `state-ledger.yaml`）
+- 档位在角色设定阶段确定，**全书锁定**（写入 `templates/character-card.md` 与 `templates/state-ledger.yaml`）
 - **唯一例外——wannabe 主角**：允许「无 → 近期」的档位跃迁，跃迁时间点写入账本 `时长档位跃迁章`，
   分两段执行（跃迁前按 A 档 0 次，跃迁后按 B 档）；见 `core/character-setup.md`
 - 跨档闪回须明确标注时间点；前史闪回（开篇维度 H）可短暂呈现另一档状态，
