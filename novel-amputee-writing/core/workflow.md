@@ -24,7 +24,7 @@
   - [ ] 每段弧线改变故事**永久状态**，无 filler arc
   - [ ] 招牌元素已**全书分配**（每 2–3 章 1 个、不连续重复、清单内轮转）
   - [ ] 时间线已排（跨度/间隔/季节无矛盾）
-  - [ ] 每章五要素可填（beat / turn / 新信息 / stakes 变化 / 钩子，见 `core/chapter-planning.md`）
+  - [ ] 每章六要素可填（beat / turn / 新信息 / stakes 变化 / 钩子 / 受限 beat，见 `core/chapter-planning.md`）
   - [ ] 题材为幻想向/科幻/赛博朋克时：`题材特有设定` 已写明豁免的 physi 条目
     （见 `core/physio-audit.md#题材豁免`），未写明即不豁免
   - [ ] 古装向题材：器具表已在世界观里自建（见 `genre/historical.md`）
