@@ -29,6 +29,8 @@
 - **大纲质量闸（进章节写作前须过）**：
   - [ ] 世界观已建立并锁定（无障碍水平/社会态度/器具可得性/**缺失解释框架**，见 `core/worldbuilding.md`）
   - [ ] central question 已定义，且**非默认"她能否接受自己"**（除非题材确为身份认同，见 `core/structure.md`）
+  - [ ] **开篇维度已选并标注**（从 `core/opening.md` 维度库主动选择，填入
+    `templates/outline.md` 开篇节；「已用开篇维度」已核对避开——见 opening.md 多样性硬约束）
   - [ ] 弧线编排表已填：每段弧线有 question / midpoint shift / crisis / resolution
   - [ ] 每段弧线改变故事**永久状态**，无 filler arc
   - [ ] 招牌元素**剧情契机已标注**（识别各章天然素材契机，不排班分配——

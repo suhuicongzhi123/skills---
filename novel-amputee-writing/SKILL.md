@@ -1,6 +1,6 @@
 ---
 name: novel-amputee-writing
-version: 4.11.3
+version: 4.11.4
 author: 溯洄从之
 description: 面向慕残者(devotee/wannabe)群体的截肢者题材小说写作技能。主角为截肢者，下肢截肢为主（髋离断为主）、上肢截肢为辅（肩离断，含肘离断/腕离断）。覆盖拐杖、假肢、日常动作、高频生活场景、身体细节、幻肢感、亲密关系、W视角等主要方面，含剧情节奏/弧线/场景结构/长篇连续性通用写作技法，支持现实向、幻想向、末世、古装四类题材。触发条件：用户要求写截肢者/残障者题材小说、续写、大纲、人物设定、章节，或提到"慕残""截肢""残肢""拐杖""假肢""髋离断""幻肢""独臂""肩离断""肘离断""腕离断""单臂"等；或明确要求本技能。不触发：非截肢题材普通小说、纯医学/康复专业内容、猎奇式苦难叙事。
 ---
@@ -88,8 +88,9 @@ injection:
     - core/chapter-planning.md    # 含 turn 的三条生成路径
     - core/opening.md
   开篇阶段:
-    - core/opening.md
-    - genre/{题材}.md#推荐开篇类型
+    - core/opening.md               # 含题材开篇约束（排除式——题材只声明禁什么，
+                                   # 无推荐维度，防推荐收敛形成新烂开篇）
+    - genre/{题材}.md
   上肢截肢分支(肩离断等):
     不注入: [topics/crutch-spec.yaml, topics/crutch-usage.md, topics/hands-occupied.md, topics/daily-actions.md]
     例外: 上下肢复合截肢时（截肢部位=上下肢复合），本分支的"不注入"全部失效，
