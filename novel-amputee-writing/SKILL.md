@@ -1,6 +1,6 @@
 ---
 name: novel-amputee-writing
-version: 4.11.5
+version: 4.11.6
 author: 溯洄从之
 description: 面向慕残者(devotee/wannabe)群体的截肢者题材小说写作技能。主角为截肢者，下肢截肢为主（髋离断为主）、上肢截肢为辅（肩离断，含肘离断/腕离断）。覆盖拐杖、假肢、日常动作、高频生活场景、身体细节、幻肢感、亲密关系、W视角等主要方面，含剧情节奏/弧线/场景结构/长篇连续性通用写作技法，支持现实向、幻想向、末世、古装四类题材。触发条件：用户要求写截肢者/残障者题材小说、续写、大纲、人物设定、章节，或提到"慕残""截肢""残肢""拐杖""假肢""髋离断""幻肢""独臂""肩离断""肘离断""腕离断""单臂"等；或明确要求本技能。不触发：非截肢题材普通小说、纯医学/康复专业内容、猎奇式苦难叙事。
 ---
@@ -14,6 +14,30 @@ description: 面向慕残者(devotee/wannabe)群体的截肢者题材小说写�
 > ② **创作前是否开启冷读稽查**（收集流程末题，见 `core/character-setup.md` 收集流程与 `core/cold-review.md`）。
 > 创作前期需向用户收集角色设定（见 `core/character-setup.md` **收集流程·逐题提问协议**：
 > 一次一题、选项+效果、答后思考再问下一题、随时可跳过直接开写）——设定先于大纲（大纲质量闸依赖设定输入）。
+
+---
+
+## 〇、版本与更新检查（对话首次调用时执行一次）
+
+> **仓库**：https://github.com/suhuicongzhi123/skills---.git
+> **通道**：`main` 稳定 / `preview` 测试 / `develop` 开发线（tag 承载版本号）
+> 本地版本见 frontmatter `version`。
+
+- **检查时机**：每段对话**首次**调用本技能时检查一次，同会话不重复
+- **检查方法**（按环境能力择一，均不可用则跳过检查）：
+  1. `git ls-remote --tags https://github.com/suhuicongzhi123/skills---.git`——最新 tag 号与本地 version 对比
+  2. 无 shell 时抓取 `https://api.github.com/repos/suhuicongzhi123/skills---/tags?per_page=1` 读最新 tag
+- **有更新时提示一次**（非阻塞、不提问、不等回应，提示完直接继续正常流程）：
+  > `[技能更新] 本地 v{当前}，远端 v{最新} 可用。如需更新，在技能目录执行：git pull（或 git clone -b preview <仓库地址>）。本次先按当前版本继续。`
+- **用户要求更新时**给出拉取命令：
+  ```bash
+  git pull                       # 技能目录为 git 仓库时
+  git checkout v{最新}            # 指定版本
+  git clone -b preview https://github.com/suhuicongzhi123/skills---.git  # 全新拉取
+  ```
+- ⚠ **更新检查不进入收集询问链**——它不是设定问题序列的一题，不提问、不打断、
+  不出现在逐题提问环节中（见 `core/character-setup.md` 收集流程）
+- 本地修改过技能文件的场合，`git pull` 前提示用户自行处理冲突
 
 ---
 
