@@ -44,7 +44,9 @@
   （historical 同构断裂的遗漏修复）
 
 **发布记录**：v4.11.4 推送至 preview 测试通道（覆盖 v4.8.4，fast-forward），
-tag `v4.11.4` 与 preview 同一 commit；v4.9.0 开发线分支与 preview 保持同步。
+tag `v4.11.4` 与 preview 同一 commit；开发线分支与 preview 保持同步。
+（后续维护记录：开发线分支 `v4.9.0` 重命名为 `develop`——版本号命名分支
+与持续前进的内容产生歧义；远端旧分支已删除，所有 tag 不受影响。）
 
 ## v4.11.3 · 收集流程逐题提问协议（交互重构）
 

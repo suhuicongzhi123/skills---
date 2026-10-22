@@ -8,7 +8,7 @@
 |------|-----|------|
 | `main` | `v4.5.1` | 稳定版（默认） |
 | `preview` | `v4.11.4` | **测试版（v4.11.4 已推送测试通道，覆盖 v4.8.4）** |
-| `v4.9.0` | `v4.11.4` | 测试版同步分支（v4.9.x–v4.11.x 开发线，与 preview 同步） |
+| `develop` | `v4.11.4` | 开发线（与 preview 同步；原 `v4.9.0` 分支重命名，消除版本号歧义） |
 
 ### 安装
 
@@ -24,7 +24,7 @@ git clone -b preview https://github.com/suhuicongzhi123/skills---.git
 
 开发线分支（与测试版同步）：
 ```bash
-git clone -b v4.9.0 https://github.com/suhuicongzhi123/skills---.git
+git clone -b develop https://github.com/suhuicongzhi123/skills---.git
 ```
 
 指定版本（clone 后）：
