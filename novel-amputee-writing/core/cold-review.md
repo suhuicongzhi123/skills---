@@ -17,9 +17,9 @@
 6. 下肢截肢：`topics/hands-occupied.md`（双手占用）+ `topics/crutch-usage.md` + `topics/crutch-spec.yaml`（拐杖）
 7. 上肢截肢：`topics/one-handed-daily.md`（单手日常）
 8. `core/audience.md`（回避清单）——`core/style.md` 仅保留指针
-9. `templates/outline.md`（弧线编排表与招牌元素全书分布计划——稽查第 10 项的对比基准）
+9. `templates/outline.md`（弧线编排表与**剧情契机标注**——稽查第 10/12 项的对比基准）
 10. `core/audience.md`（招牌元素密度与疲劳控制、受限清单、幻肢频率档位）
-11. `topics/limitation-scenes.md`（受限一主五衍与题材适配——稽查第 13 项的对比基准；受限强度分档见该文件「一-补」、归因判据见「四-补」）
+11. `topics/limitation-scenes.md`（受限一主五衍与题材适配——稽查第 13 项的对比基准；受限强度分档见该文件「一-补」、归因判据见「四-补」、层级判定见「四-补2」）
 
 ## 三、子代理注入内容（纠错输出）
 - **错误清单**：每条标注位置 / 错误类型 / 正确做法
@@ -49,11 +49,14 @@
     有无新信息 · stakes 变化（对照账本 `stakes`） · 章末钩子与上章不同类、近 5 章内同类型至多 1 次
     （对照账本 `章末钩子类型`，见 `core/chapter-planning.md`）
 11. **跨章一致性**：时间线/关系阶段/信息知情状态是否与 `state-ledger.yaml` 登记一致
-12. **密度与疲劳**：常规池招牌元素是否连续两章重复（对照账本 distribution；触发型①②豁免频次
-    判定但无契机不硬写，见 `core/audience.md` 两档供给） ·
-    幻肢感频率是否符合时长档位（对照 `topics/timeline.md`）
-13. **受限 beat**：本章是否 ≥1 个 · 是否只有呈现没有处置 · 类型是否与上章重复
-    （对照 `topics/limitation-scenes.md` 与账本 `受限beat`）
+12. **密度与疲劳（限频体检）**：常规型招牌元素是否间隔 <2 章（对照账本 distribution；
+    触发型①②不限频但无契机不硬写，见 `core/audience.md` 两档供给） ·
+    **素材面健康度**：连续 8 章常规型覆盖 <4 类时提示「检查各章契机标注是否遗漏」
+    （体检提示，不是补写凑数） · 幻肢感频率是否符合时长档位（对照 `topics/timeline.md`）
+13. **受限 beat**：是否从剧情识别天然受限时刻（有无为凑数硬造的痕迹） ·
+    连续 3 章内核心受限是否 ≥2 个 · 弱受限是否被误当核心受限写
+    （层级判定对照 `topics/limitation-scenes.md` 四-补2） · 是否只有呈现没有处置 ·
+    类型是否与上章重复（对照账本 `受限beat`）
 14. **幻肢真实度**：B 档是否写成「真的想用 → 动作未完成 → 真摔倒」；
     C 档是否写成「不会真想用 → 仅肌肉反应 → 无后果」
     （对照 `topics/timeline.md` 档位总表与 `core/physio-audit.md#幻肢感豁免`）

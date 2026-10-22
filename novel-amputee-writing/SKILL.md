@@ -1,6 +1,6 @@
 ---
 name: novel-amputee-writing
-version: 4.10.1
+version: 4.11.0
 author: 溯洄从之
 description: 面向慕残者(devotee/wannabe)群体的截肢者题材小说写作技能。主角为截肢者，下肢截肢为主（髋离断为主）、上肢截肢为辅（肩离断，含肘离断/腕离断）。覆盖拐杖、假肢、日常动作、高频生活场景、身体细节、幻肢感、亲密关系、W视角等主要方面，含剧情节奏/弧线/场景结构/长篇连续性通用写作技法，支持现实向、幻想向、末世、古装四类题材。触发条件：用户要求写截肢者/残障者题材小说、续写、大纲、人物设定、章节，或提到"慕残""截肢""残肢""拐杖""假肢""髋离断""幻肢""独臂""肩离断""肘离断""腕离断""单臂"等；或明确要求本技能。不触发：非截肢题材普通小说、纯医学/康复专业内容、猎奇式苦难叙事。
 ---
@@ -128,8 +128,8 @@ injection:
     - topics/intimacy.md          # 含体位与接触按类型素材（第八节）
   写到W视角:
     - topics/wannabe.md           # 含向往的具象素材/跃迁后的具象素材
-  章级规划受限beat:               # 每章开写前选 1 个
-    - topics/limitation-scenes.md # 一主五衍（主类功能丧失）+强度分档（一-补）+归因判据（四-补）
+  章级规划受限beat:               # 识别优先，无天然不强造；层级判定（四-补2）
+    - topics/limitation-scenes.md # 一主五衍（主类功能丧失）+强度分档（一-补）+归因判据（四-补）+层级判定（四-补2）
     - types/{type}.md#受限清单
   写到受限场景(冲突/追赶/双手占用/对立/环境与他者):
     - topics/limitation-scenes.md  # 主类功能丧失 / 衍生类：辅助器具剥夺 / 双手占用 / 速度劣势 / 对立挑衅 / 环境与他者；
@@ -154,7 +154,8 @@ injection:
     招牌元素未连续重复: core/audience.md#★招牌元素密度与疲劳控制（硬约束）
     setup/payoff跟踪: templates/state-ledger.yaml#open_setups
     本章beat与钩子: core/chapter-planning.md#一、章六要素（每章开写前必须填）
-    受限beat≥1且不重复: core/audience.md#★受限清单（章级必备，与上方招牌清单并行）
+    受限识别优先且不重复: core/audience.md#★受限清单（识别优先，软下限连续3章≥2个核心受限；
+    # 窗口不足时标记提示、后续章优先识别补足，不回改已定稿章、不强造；层级判定见 topics/limitation-scenes.md 四-补2）
     幻肢档位真实度: topics/timeline.md#幻肢档位总表（频率 × 触发 × 意图 × 残肢 × 后果）
     章级质量落点:                        # 上八项的执行点，缺一即不可查
       章六要素勾选: templates/chapter.md#章末核查清单（必过）
