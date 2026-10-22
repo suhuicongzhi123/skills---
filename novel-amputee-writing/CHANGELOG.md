@@ -4,6 +4,75 @@
 > 于 v4.8.0 从 `SKILL.md` 第七节整块迁出，以控制常驻上下文体积（原占 SKILL.md 一半篇幅）。
 > 按**倒序**排列（最新在上）。
 
+## v4.10.0 · 缺失解释框架锁定与清单结构重构
+
+**设定层：防雷同机制**
+- `core/worldbuilding.md` 新增「一-补、缺失解释框架（防雷同锁定字段）」：五档光谱
+  （常态化/神圣化/无解释/病因学/隐秘），一书锁一个，写入 outline 与账本；
+  神圣化须用户显式选定、禁止生成器默认收敛；未锁定时禁止自补解释
+- `core/audience.md` 回避清单新增「补偿叙事」结构级禁令
+  （「你的残缺不是损失，是另一种力量」式框架；神圣化设定下仍不落「赎回/值得」话术）
+- `core/structure.md` 截肢题材适配新增「欲望驱动优先于归因驱动」
+  （天生/早期缺失角色的 central question 走向约束，防止跨书收敛到缺失解释揭秘主线）
+- `templates/state-ledger.yaml` 新增「世界观锁定.缺失解释框架」登记字段；
+  `core/workflow.md` 大纲质量闸补缺失解释框架锁定项
+
+**受限清单重构（一主五衍）**
+- `topics/limitation-scenes.md`：「五类受限」重构为「受限类型（一主五衍）」——
+  功能丧失（原「能力丧失」）升为**主类**（标注受众核心关注、受限写作首选主源），
+  辅助器具剥夺/双手占用/速度劣势/对立挑衅/环境与他者全部改标**衍生类**并注明衍生路径
+- 「器具剥夺」改名「**辅助器具剥夺**」：剥夺对象限定为移动辅具；新增前置条件——
+  角色无辅具时本类不触发；「一、两条生成轴」标注衍生轴无辅具时整体静默
+- 「对立挑衅」补**镜像展示**概念注记（对方做得成的正是她功能丧失做不成的）
+- 受限密度规则补「下限是保底不是配额」口径（不为凑数新建高受限场景）
+- 全库引用同步（旧类名清零）：`core/audience.md` 受限清单节、`core/chapter-planning.md`、
+  `core/cold-review.md`、`templates/state-ledger.yaml` 受限beat 注释、
+  `genre/postapocalyptic.md`（含锚点 `#器具剥夺`→`#辅助器具剥夺`）、
+  `topics/daily-actions.md`、题材适配表、`SKILL.md` 注入索引
+
+**招牌清单频次与方式调整（两档供给）**
+- `core/audience.md` 招牌元素节新增「★两档供给」：①残肢/剩余部分细节、②颤动降为
+  **触发型元素**——依据剧情契机（裸露/半裸、目光与接触、器具穿脱、体感事件四类契机清单）
+  触发才写、写则写足，无契机不硬写；不参与常规轮转、不计入「8 章 ≥4 类」底线；
+  连续多章不出现①②为正常状态（偏好位次不变，供给方式改为契机集中）
+- 常规轮转池（③④⑤⑥⑦）维持每 2 章 1 个节奏轮转；密度规则、
+  「不盯着几个元素」等条目改注「常规池」限定
+- ⑤辅助器具特写补「无辅具类型不适用」限定
+- 内容偏好节补「偏好位次 ≠ 铺陈频次」执行注
+- 同步：`templates/state-ledger.yaml` distribution 注释（①②登记不判轮转）、
+  `templates/outline.md` 分配规则（触发型不排轮转表、标注预期契机）、
+  `templates/chapter.md` 章末核查项、`core/workflow.md` 大纲质量闸
+
+**字段与枚举**
+- `core/character-setup.md` / `templates/state-ledger.yaml` 辅具类型枚举
+  新增「无(单腿跳/替代移动)」值（支撑辅助器具剥夺不触发与招牌⑤不适用的判定）
+
+**元文件**
+- `SKILL.md` version 4.10.0；注入索引大纲阶段/受限条目注释同步
+- `README.md` 版本表更新
+
+**冷读审查修复（同轮，子代理独立审查后合并）**
+- `templates/chapter.md` 章末核查「类型（五类之一）」→ 一主五衍六类枚举
+  （该残留自 v4.9.0 增第六类起漏网两轮）
+- `topics/daily-scenes.md`「受限第六类」旧称谓 → 「衍生类 5」
+- `templates/character-card.md` 辅具类型枚举补「无(单腿跳/替代移动)」
+  （v4.10.0 造成三处枚举漂移，补齐第三处）
+- 「不连续重复」三处补常规池限定/触发型豁免注：`core/audience.md` 密度规则、
+  `templates/state-ledger.yaml` 近三章beat 注释、`core/cold-review.md` 稽查维度 12
+- 无辅具豁免扩展至双手占用：`topics/limitation-scenes.md` 衍生类 2 补前置条件；
+  `core/audience.md` / `core/character-setup.md` / `templates/state-ledger.yaml` /
+  `templates/character-card.md` 的「无辅具不触发」注同步为「辅助器具剥夺」「双手占用」两类
+- `topics/limitation-scenes.md` 衍生类 5 标注「社会性受限」→「主轴的社会投影」（轴体例统一）
+- `templates/outline.md` 世界观区块补「缺失解释框架」字段行（质量闸依赖的产出槽位漏配）
+- `core/character-setup.md` 收集流程补缺失解释框架用户提示入口
+  （「神圣化须用户显式选定」的流程触达点，错过则该档不可达）
+- `topics/body-details.md` / `types/hip-disarticulation.md` 生理触发消歧
+  （样态幅度依据 vs 叙事契机，防止绕过触发型供给）；body-details 写作要点
+  密度复述同步两档供给
+- `scripts/selfcheck.py` DEAD 词表补 v4.10.0 废止词（能力丧失/五类之一/
+  受限第六类/五类受限/器具剥夺），词表项支持 (word, exclude) 元组排除
+  （「器具剥夺」与「辅助器具剥夺」消歧）
+
 ## v4.9.1 · 受限归因判据（实测反馈修复）
 
 **来源**：v4.8.4 实测样本（幻想向·羽人单腿角色取圣骨章）暴露的规则空白——

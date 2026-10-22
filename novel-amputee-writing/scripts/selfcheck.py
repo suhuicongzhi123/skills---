@@ -85,6 +85,8 @@ print(f"[2] 必填节缺失类型数: {miss_total}")
 fail += miss_total
 
 # ── [3] 已废止表述复发（v4.9.0 起扫描含 .yaml）─────────────
+# 词表项为 str 或 (word, exclude) 元组：exclude 为同行排除串——
+# 行内含 exclude 时不判 word 命中（用于「器具剥夺」vs「辅助器具剥夺」消歧）
 DEAD = [
     "蹲不下", "全蹲做不到", "单腿蹲极难",      # 4.7.0 蹲豁免后废止
     "走路时完全不晃",                          # 4.7.2 空管晃动口径后废止
@@ -103,16 +105,23 @@ DEAD = [
     "臀下到床面之间没有腿",                    # → 臀部压住承托面、患侧往前没有腿
     "髋离断没有空裤管",                        # 绝对化 → 已裁剪/未裁剪分流
     "受限高发场景",                            # 「X是受限高发场景」句式（daily-actions 漏网点）
+    # ── v4.10.0 废止项──────────────────────────────────────
+    "能力丧失",                                # 受限类改名 → 功能丧失（一主五衍）
+    "五类之一",                                # 受限类型枚举 → 一主五衍六类
+    "受限第六类",                              # 环境与他者改标衍生类 5
+    "五类受限",                                # 旧结构称谓
+    ("器具剥夺", "辅助器具剥夺"),              # 4.10.0 改名「辅助器具剥夺」；裸用旧名即复发
 ]
 hits = {}          # (file, line) -> [命中的词]，同一行多词只报一次
 scan = sorted(glob.glob("**/*.md", recursive=True) + glob.glob("**/*.yaml", recursive=True))
-for w in DEAD:
+for entry in DEAD:
+    w, excl = entry if isinstance(entry, tuple) else (entry, None)
     for f in scan:
         # CHANGELOG 记录的是"清理了什么"，必须保留原文，不参与创作注入 → 跳过
         if os.path.basename(f) == "CHANGELOG.md":
             continue
         for i, l in enumerate(open(f, encoding="utf-8", errors="ignore"), 1):
-            if w in l:
+            if w in l and not (excl and excl in l):
                 hits.setdefault((f, i), []).append(w)
 for (f, i), ws in sorted(hits.items()):
     l = open(f, encoding="utf-8", errors="ignore").read().split("\n")[i - 1]

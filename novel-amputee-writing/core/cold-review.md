@@ -19,7 +19,7 @@
 8. `core/audience.md`（回避清单）——`core/style.md` 仅保留指针
 9. `templates/outline.md`（弧线编排表与招牌元素全书分布计划——稽查第 10 项的对比基准）
 10. `core/audience.md`（招牌元素密度与疲劳控制、受限清单、幻肢频率档位）
-11. `topics/limitation-scenes.md`（受限 6 类与题材适配——稽查第 13 项的对比基准；受限强度分档见该文件「一-补」）
+11. `topics/limitation-scenes.md`（受限一主五衍与题材适配——稽查第 13 项的对比基准；受限强度分档见该文件「一-补」、归因判据见「四-补」）
 
 ## 三、子代理注入内容（纠错输出）
 - **错误清单**：每条标注位置 / 错误类型 / 正确做法
@@ -49,7 +49,8 @@
     有无新信息 · stakes 变化（对照账本 `stakes`） · 章末钩子与上章不同类、近 5 章内同类型至多 1 次
     （对照账本 `章末钩子类型`，见 `core/chapter-planning.md`）
 11. **跨章一致性**：时间线/关系阶段/信息知情状态是否与 `state-ledger.yaml` 登记一致
-12. **密度与疲劳**：招牌元素是否连续两章重复（对照账本 distribution） ·
+12. **密度与疲劳**：常规池招牌元素是否连续两章重复（对照账本 distribution；触发型①②豁免频次
+    判定但无契机不硬写，见 `core/audience.md` 两档供给） ·
     幻肢感频率是否符合时长档位（对照 `topics/timeline.md`）
 13. **受限 beat**：本章是否 ≥1 个 · 是否只有呈现没有处置 · 类型是否与上章重复
     （对照 `topics/limitation-scenes.md` 与账本 `受限beat`）
