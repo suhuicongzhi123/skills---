@@ -110,6 +110,8 @@ distribution:                      # 招牌 beat 全书分布跟踪（见 core/a
   已用开篇维度: []                  # 跨次去重：同设定多次创作时避开已用维度
 
 open_setups:                       # 跨弧线跟踪 setup/payoff，每章更新（见 core/structure.md）
+                                   # 全书级钩子（心愿线/软肋兑现/关系里程碑/器物人生）也在此登记——
+                                   # 登记格式：类型: 简述: 兑现章计划（见 core/structure.md 截肢题材适配）
   - 描述:
     状态: open                     # open/paid/abandoned
     埋设章:

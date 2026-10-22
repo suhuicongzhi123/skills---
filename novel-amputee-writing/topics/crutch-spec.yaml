@@ -19,12 +19,14 @@ crutch_types:
       tip: {name: 拐头, material: 橡胶/聚氨酯, function: 防滑缓冲静音, wear: 易磨损需更换}
     weight_kg: {wood: 1.0~1.5, aluminum: 0.7~1.0, carbon: 0.5~0.7}
     height_adjustment: 调节孔位或伸缩锁扣
+    use_principle: "**手柄承重原则：体重压在手柄上，腋托只轻触定位、不承重**（压腋窝→桡神经/臂丛受压→拐杖麻痹）。长期使用者的器具勋章在手上：虎口茧、掌心磨、握力疲劳——这些比腋下压痕更高频真实"
   forearm:
     name: 前臂拐
     alias: [Lofstrand, 洛氏拐, 肘拐, forearm crutch]
     common_use: 可选辅具（本技能默认腋拐；前臂拐为可替换选项，较轻便灵活）
     structure:
-      cuff: {name: 前臂套, material: 金属/塑料, function: 固定前臂, position: 前臂中下段}
+      # 理由：近端固定才有效悬吊，前臂远端约2/3外露、手才能自由伸出做事（够门把/捡物/掏钥匙而拐仍挂臂）——这是 topics/hands-occupied.md「挂肘腾手」成立的物理前提；cuff 装远端则肘下无承托、易滑脱、手被锁死
+      cuff: {name: 前臂套, material: 金属/塑料, function: 固定前臂, position: 前臂近端1/3（肘下两三横指）}
       handgrip: {name: 手柄, position: 与腕横纹齐}
       upright: {name: 单立杆, material: 铝/碳纤维}
       tip: {name: 拐头, material: 橡胶/聚氨酯}
@@ -46,7 +48,7 @@ sizing:
     原理: 腋托过高压腋窝神经血管，过低肩带受力不当
   forearm:
     手柄高度: 腕横纹处
-    cuff高度: 前臂中下1/3
+    cuff高度: 前臂近端1/3（肘下两三横指）
   通用: 拐头落地时杆身垂直，防滑头全接触地面
 
 gait_patterns:
@@ -58,7 +60,7 @@ gait_patterns:
     特点: 省力，速度慢，台阶/拥挤处常用
   摆过步:
     顺序: 双拐先出→健腿摆过拐杖前方
-    特点: 省力快，步幅大，平地常用
+    特点: 快、步幅大、**耗力**（熟练者的快走方式，代价是手酸），平地常用
   四点步态:
     顺序: 右拐→左腿→左拐→右腿
     适用: 双腿均有部分负重（截肢者较少用）
