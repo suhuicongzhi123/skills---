@@ -1,15 +1,43 @@
 ---
 name: novel-amputee-writing
-version: 4.5.1
+version: 4.12.1
 author: 溯洄从之
-description: 面向慕残者(devotee/wannabe)群体的截肢者题材小说写作技能。主角为截肢者，下肢截肢为主（髋离断为主）、上肢截肢为辅（肩离断）。涵盖截肢者日常生活方方面面（拐杖、假肢、日常动作、身体细节、幻肢感、亲密关系、W视角等），含剧情节奏/弧线/场景结构通用写作技法，覆盖几乎所有小说题材（现实向为主、幻想向为辅）。触发条件：用户要求写截肢者/残障者题材小说、续写、大纲、人物设定、章节，或提到"慕残""截肢""残肢""拐杖""假肢""髋离断""幻肢""独臂""肩离断""单臂"等；或明确要求本技能。不触发：非截肢题材普通小说、纯医学/康复专业内容、猎奇式苦难叙事。
+description: 面向慕残者(devotee/wannabe)群体的截肢者题材小说写作技能。主角为截肢者，下肢截肢为主（髋离断为主）、上肢截肢为辅（肩离断，含肘离断/腕离断）。覆盖拐杖、假肢、日常动作、高频生活场景、身体细节、幻肢感、亲密关系、W视角等主要方面，含剧情节奏/弧线/场景结构/长篇连续性通用写作技法，支持现实向、幻想向、末世、古装四类题材。触发条件：用户要求写截肢者/残障者题材小说、续写、大纲、人物设定、章节，或提到"慕残""截肢""残肢""拐杖""假肢""髋离断""幻肢""独臂""肩离断""肘离断""腕离断""单臂"等；或明确要求本技能。不触发：非截肢题材普通小说、纯医学/康复专业内容、猎奇式苦难叙事。
 ---
 
 # novel-amputee-writing Skill
 
 面向慕残者群体的截肢者题材小说写作技能。全平台通用，不针对某平台特殊处理。
 
-> **强制约束**：角色设定确认后，Agent 不再就流程分支向用户询问下一步操作或决策确认，所有流程分支由 Agent 依据本文档规则决定。创作前期需向用户收集角色设定（见 `core/character-setup.md`）。
+> **强制约束**：角色设定确认后，Agent 不再就流程分支向用户询问下一步操作或决策确认，所有流程分支由 Agent 依据本文档规则决定。
+> **两项例外**：① **章级推进节奏的确认**（写完一章后是否进入下一章，见 `core/workflow.md`）；
+> ② **创作前是否开启冷读稽查**（收集流程末题，见 `core/character-setup.md` 收集流程与 `core/cold-review.md`）。
+> 创作前期需向用户收集角色设定（见 `core/character-setup.md` **收集流程·逐题提问协议**：
+> 一次一题、选项+效果、答后思考再问下一题、随时可跳过直接开写）——设定先于大纲（大纲质量闸依赖设定输入）。
+
+---
+
+## 〇、版本与更新检查（对话首次调用时执行一次）
+
+> **仓库**：https://github.com/suhuicongzhi123/skills---.git
+> **通道**：`main` 稳定 / `preview` 测试 / `develop` 开发线（tag 承载版本号）
+> 本地版本见 frontmatter `version`。
+
+- **检查时机**：每段对话**首次**调用本技能时检查一次，同会话不重复
+- **检查方法**（按环境能力择一，均不可用则跳过检查）：
+  1. `git ls-remote --tags https://github.com/suhuicongzhi123/skills---.git`——最新 tag 号与本地 version 对比
+  2. 无 shell 时抓取 `https://api.github.com/repos/suhuicongzhi123/skills---/tags?per_page=1` 读最新 tag
+- **有更新时提示一次**（非阻塞、不提问、不等回应，提示完直接继续正常流程）：
+  > `[技能更新] 本地 v{当前}，远端 v{最新} 可用。如需更新，在技能目录执行：git pull（或 git clone -b preview <仓库地址>）。本次先按当前版本继续。`
+- **用户要求更新时**给出拉取命令：
+  ```bash
+  git pull                       # 技能目录为 git 仓库时
+  git checkout v{最新}            # 指定版本
+  git clone -b preview https://github.com/suhuicongzhi123/skills---.git  # 全新拉取
+  ```
+- ⚠ **更新检查不进入收集询问链**——它不是设定问题序列的一题，不提问、不打断、
+  不出现在逐题提问环节中（见 `core/character-setup.md` 收集流程）
+- 本地修改过技能文件的场合，`git pull` 前提示用户自行处理冲突
 
 ---
 
@@ -17,12 +45,14 @@ description: 面向慕残者(devotee/wannabe)群体的截肢者题材小说写�
 
 - **受众**：慕残者（devotee）+ W视角（wannabe），详见 `core/audience.md`
 - **主角**：截肢者，下肢截肢为主（髋离断为主）、上肢截肢为辅（肩离断），默认女性
-- **内容偏好**（重点→次重点）：受限与不便、幻肢感（非幻肢痛）、裸露场景（洗澡/更衣/睡觉/亲密）残肢与剩余部分细节 ＞ 剩余部分颤动、代入感 ＞ 日常样态（次重点，作背景）
-- **回避**：苦难叙事（幻肢痛、健腿劳损、伤口处理）、医学临床化、猎奇渲染、励志二元叙事
+- **内容偏好与回避清单**：以 `core/audience.md` 为准（受限与不便/幻肢感/裸露场景细节为高位偏好；苦难叙事/医学临床化/猎奇/励志二元为回避项）
 - **W视角**：可含求截肢行为，但主剧情以截肢后生活为主
-- **题材**：现实向（主）+ 幻想向（辅，符合截肢设定事实，按需加入高科技/魔法元素）
+- **题材**：现实向（主）+ 幻想向 / 末世生存 / 古装向（辅，符合截肢设定事实，按需加入高科技/魔法元素）
 
 ## 二、文件结构与格式
+
+> **改完必跑自检**：`python scripts/selfcheck.py` —— 查注入锚点落空 / 悬空引用 /
+> 类型必填节 / 已废止表述复发 / 孤儿文件五项。跨版本残留与孤儿文件是本包历史上所有冲突的来源，改口径后务必跑。
 
 | 目录 | 格式 | 职责 |
 |------|------|------|
@@ -32,20 +62,16 @@ description: 面向慕残者(devotee/wannabe)群体的截肢者题材小说写�
 | `genre/` | md | 题材适配 |
 | `templates/` | md | 产出模板 |
 
-**格式选择原理**：
-- **md**：规则/叙述/指导，注入即指令，支持小节锚点按需引用
-- **yaml**：纯结构化数据（属性-值/枚举），紧凑可解析易扩展
-- **不用 json**：冗长无注释，人工维护不如 yaml
-
 ## 三、拆分原理
 
-1. **类型无关/相关分离**：`core/`+`topics/` 跨类型复用，`types/` 放类型差异。新增截肢类型只在 `types/` 加一文件，不动其余。
+1. **类型无关/相关分离**：`core/`+`topics/` 跨类型复用，`types/` 放类型差异。新增截肢类型只在 `types/` 加文件，不动其余。
 2. **主题域解耦类型差异**：`topics/` 下各主题文件写通用规则，类型特有差异在 `types/{type}.md` 对应小节。
 3. **按需注入**：本总纲放注入索引，Agent 按需读取专项，省上下文与创作成本。
+4. **单一权威源**：同一规则只在一处立权威（如内容偏好/回避清单在 `core/audience.md`、幻肢机制在 `topics/timeline.md`、蹲豁免在各类型文件），其余位置一律指针引用。
 
 ## 四、创作工作流
 
-详见 `core/workflow.md`。概要：构思→大纲→人物设定→章节写作→润色。每阶段按需注入对应专项。**逐章创作，禁止一次生成整篇**。
+详见 `core/workflow.md`。概要：构思→人物设定→大纲→章节写作→润色。每阶段按需注入对应专项。**逐章创作，禁止一次生成整篇**。
 
 ## 五、按需注入索引
 
@@ -53,24 +79,46 @@ Agent 按以下规则读取专项（不主动全量加载）：
 
 ```yaml
 injection:
+  命名说明:                       # 账本两种写法同指一物，避免"引用了不存在的文件"误判
+    源模板: templates/state-ledger.yaml
+    运行时: 开书时复制到小说项目工作区，称 state-ledger.yaml
+    归档: state-ledger-archive.yaml 为运行时产物（滚动窗口归档），技能包内无此文件
   触发启动:
     - core/workflow.md
-    - core/style.md
-    - core/audience.md
+    - core/style.md                # 含★句法级对照（平庸vs生动——文笔本体示范）+破折号≤3频率闸门
+    - core/audience.md             # 含★目光的分层+★安全败退阀+通道库（9条可组合）
   角色设定阶段:
-    - core/character-setup.md
-    - topics/timeline.md
+    - core/character-setup.md     # 含★性格生成轴+收集流程·逐题提问协议（一次一题、
+                                   # 选项+效果、答后思考再问、可跳过；末题＝冷读稽查开关）
+    - topics/timeline.md          # 幻肢机制与频率档位权威源+C 档幻肢的形态学质感（四件套）
     - types/{type}.md
+  类型未登记兜底:                 # 用户要求的类型不在第六节清单内时走此分支
+    条件: 该类型未在 types/ 登记
+    步骤:
+      - 向用户确认截断平面（保留哪段骨骼、有无残端、残端可否承重）
+      - 复制 types/_template.md 建立新文件并登记到第六节
+      - 未确认前禁止静默套用最近邻类型的事实条目
+      - 尤其禁止移植：有无残端、可否主动带动、可否用肌电假肢
+  侧别为双:                       # 叠加层，与 types/{type}.md 同时注入
+    - types/bilateral.md          # 冲突处以本文件为准（无健腿）
+  上肢低位分支:                    # 肘离断 / 腕离断
+    - types/elbow-wrist.md
+    - topics/one-handed-daily.md
+  ★上下肢复合注入规则:             # 截肢部位=上下肢复合 时必读
+    - SKILL.md#★上下肢复合（并行注入 · 按域分工）
   大纲/弧线规划阶段:
     - core/structure.md
-    - core/worldbuilding.md
-    - core/chapter-planning.md
+    - core/worldbuilding.md       # 含缺失解释框架锁定（防雷同，神圣化须用户显式选定）
+    - core/chapter-planning.md    # 含 turn 的三条生成路径
     - core/opening.md
   开篇阶段:
-    - core/opening.md
-    - genre/{题材}.md#推荐开篇类型
+    - core/opening.md               # 含题材开篇约束（排除式——题材只声明禁什么，
+                                   # 无推荐维度，防推荐收敛形成新烂开篇）
+    - genre/{题材}.md
   上肢截肢分支(肩离断等):
     不注入: [topics/crutch-spec.yaml, topics/crutch-usage.md, topics/hands-occupied.md, topics/daily-actions.md]
+    例外: 上下肢复合截肢时（截肢部位=上下肢复合），本分支的"不注入"全部失效，
+      按下方「★上下肢复合注入规则」并行注入
     改注入:
       单手日常: topics/one-handed-daily.md
       日常动作差异: types/{type}.md#日常动作差异
@@ -80,16 +128,22 @@ injection:
       服装: types/{type}.md#服装
   写到拐杖场景(下肢):
     - topics/crutch-spec.yaml
-    - topics/crutch-usage.md
+    - topics/crutch-usage.md         # 含移动方式分层（全局默认＝辅具移动；单腿跳仅限无辅具三种情形——拐杖分离检测口径）
     - types/{type}.md#拐杖使用差异
   写到假肢:
-    - topics/prosthesis.md
+    - topics/prosthesis.md        # 含假肢故障（渐进危机的铺陈素材）+现代悬吊体系与消耗品经济账
     - types/{type}.md#假肢使用差异
   写到日常动作(下肢):
-    - topics/daily-actions.md
+    - topics/daily-actions.md     # 含骑车与电动车（双向条目，按类型判定）
     - types/{type}.md#日常动作差异
+  写到高频私密/公共场景:          # 按场景查对应小节，不全文加载
+    - topics/daily-scenes.md      # 一 如厕 / 二 床上起卧与床边转移 / 三 公共交通 /
+      # 四 长距离行走 / 五 负重与楼梯 / 六 厨房与家务 / 七 照护与亲密日常 /
+      # 八 其他高频（电梯困住·雨雪·运动·门诊·职场·校园）/ 十 沐浴与更衣（裸露场景专项，
+      # 含心理底色轮转）/ 十-补 蹲坑（中国公厕）
   写到双手与移动并存场景(下肢):
-    - topics/hands-occupied.md
+    - topics/hands-occupied.md         # 含腾手策略阶梯+放拐门槛三问+十步近距离豁免
+                                      # （放拐是末端解，轻微占手放拐＝拐杖分离同族错误）
     - types/{type}.md#拐杖使用差异
   写到场景构建:
     - core/scene.md
@@ -100,33 +154,72 @@ injection:
     - topics/body-details.md
     - types/{type}.md#身体细节
   写到亲密关系:
-    - topics/intimacy.md
+    - topics/intimacy.md          # 含体位与接触（八）/照顾拉锯（九）/devotee疑虑暗线（十）
   写到W视角:
-    - topics/wannabe.md
-  写到器具风险/丢失/损坏场景:
-    - topics/equipment-risk.md
+    - topics/wannabe.md           # 含向往的具象素材/跃迁后的具象素材（10条素材+档位机制——「终于对了」的日常验证）
+  章级规划受限beat:               # 识别优先，无天然不强造；层级判定（四-补2）
+    - topics/limitation-scenes.md # 一主五衍（主类功能丧失）+强度分档（一-补）+归因判据（四-补）+层级判定（四-补2）+心动条件与弧线升级（四-补3）
+    - types/{type}.md#受限清单
+  写到受限场景(冲突/追赶/双手占用/对立/环境与他者):
+    - topics/limitation-scenes.md  # 主类功能丧失 / 衍生类：辅助器具剥夺 / 双手占用 / 速度劣势 / 对立挑衅 / 环境与他者；
+      # 受阻归因用结构性不用力量性（四-补）；无辅具时「辅助器具剥夺」不触发；
+      # 受限的心动条件＝她在乎结果（四-补3：时间压力/尊严/为他人）；
+      # 剥夺后可留辅具空白期（跨章无辅具状态，三出口：取回/重获/转入无辅具，见衍生类1）
   写到节奏/张力场景:
     - core/pacing.md
   题材适配:
     现实向: genre/realistic.md
     幻想向: genre/fantasy.md
     末世/丧尸/生存: genre/postapocalyptic.md
+    古装向: genre/historical.md           # 含古代器具表（crutch-spec.yaml 仅覆盖现代，本题材不适用）
   产出模板:
     大纲: templates/outline.md
     人物卡: templates/character-card.md
     章节: templates/chapter.md
     状态账本: templates/state-ledger.yaml
-  章末必过审查:
+  章末必过审查:                        # 本节 8 项为「必过子集」；完整勾选清单见 templates/chapter.md
     生理事实兜底: core/physio-audit.md
     类型不可能动作: types/{type}.md#不可能动作
     幻肢频率对档位: topics/timeline.md
-    招牌元素未连续重复: core/audience.md#招牌元素密度与疲劳控制
+    招牌元素未连续重复: core/audience.md#★招牌元素密度与疲劳控制（硬约束）
     setup/payoff跟踪: templates/state-ledger.yaml#open_setups
-    本章beat与钩子: core/chapter-planning.md#一、章五要素
+    本章beat与钩子: core/chapter-planning.md#一、章六要素（每章开写前必须填）
+    受限识别优先且不重复: core/audience.md#★受限清单（识别优先，软下限连续3章≥2个核心受限；
+    # 窗口不足时标记提示、后续章优先识别补足，不回改已定稿章、不强造；层级判定见 topics/limitation-scenes.md 四-补2）
+    幻肢档位真实度: topics/timeline.md#幻肢档位总表（频率 × 触发 × 意图 × 残肢 × 后果）
+    章级质量落点:                        # 上八项的执行点，缺一即不可查
+      章六要素勾选: templates/chapter.md#章末核查清单（必过 + 文学自评）
+      账本登记: templates/state-ledger.yaml#本章登记
+      钩子不重复: templates/state-ledger.yaml#章末钩子类型
+      密度可查: templates/state-ledger.yaml#distribution.元素上次出现章
   推荐流程:
-    状态核查流水账: core/workflow.md#6-状态核查流水账
-    冷读稽查(创作前询问用户): core/cold-review.md
+    状态核查流水账: core/workflow.md#6. 状态核查流水账
+    冷读稽查(收集流程末题询问): core/cold-review.md
 ```
+
+## 五-补、★上下肢复合（并行注入 · 按域分工）
+
+> 触发：`截肢部位: 上下肢复合`（上下肢**均有**截肢，如髋离断 + 肩离断）。
+
+`{type}` **取两份 `types/{type}.md` 并行注入**（上肢一份、下肢一份），
+❌ **不是二选一**——冲突按**域**裁决：
+
+| 域 | 归属 |
+|---|---|
+| 移动 / 体位与动态 / 步态 / 辅具（拐杖·轮椅）/ 受限清单 | **下肢为准** |
+| 手部操作 / 袖管 / 上肢假肢 / 上身体态 / 单手日常 | **上肢为准** |
+| 招牌元素（身体细节 / 幻肢感 / 空 / 被看见 / 亲密中的身体） | **两侧分别取象，都写** |
+| 不可能动作 | **两份并集**（任一侧的不可能动作都成立） |
+| 幻肢感档位 | **同一角色统一档位**，按 `topics/timeline.md`——**不按侧别分档** |
+
+**示例**：髋离断 + 肩离断
+- 移动按髋离断：双拐 / 单腿跳（仅无辅具情形）/ 单腿蹲（正式豁免）；受限走髋离断清单
+- 操作按肩离断：单手，双手协同任务做不到；上肢假肢按肩离断
+- 招牌元素④「空」**两侧都写**：空椅面（下）+ 空袖管（上）
+- 不可能动作取并集：患侧蹲/跪、双腿蹲（下）+ 双臂环抱、双手提物（上）都成立
+
+> ❌ 易错：把复合当成"随便挑一份"，或让上肢去决定移动样态。
+> 移动是章级主干，**永远看下肢体**。
 
 ## 六、截肢类型清单
 
@@ -136,56 +229,19 @@ types:
   transfemoral: 膝上截肢（下肢，辅）
   transtibial: 膝下截肢（下肢，辅）
   shoulder-disarticulation: 肩离断（上肢，辅）
+  elbow-wrist: 肘离断/腕离断（上肢低位，见 types/elbow-wrist.md）
+  bilateral: 双侧截肢（叠加层，见 types/bilateral.md；与上述下肢类型叠加使用）
   # 新增类型：复制 types/_template.md，在 types/ 加文件并在此登记
+  # 未登记类型的兜底规则见第五节注入索引「类型未登记兜底」
 ```
 
-## 七、专项完善状态
+> **必填节闸门（两级）**：独立类型须含 `types/_template.md` 的 11 节全部（缺失不得登记为新类型；
+> 运动能力与体位与动态为实质要求，其余可短节但小节名必须在，否则注入锚点落空）；
+> 叠加层 `bilateral` 按最小集（适用范围/失效条目/移动样态/身体细节/幻肢感/受限清单），
+> 不要求 11 节。节序不严格；双亚型可采用 elbow-wrist 的「对照表+分型」变体。
 
-- `topics/timeline.md`：✅ 已新增（截肢时长分档：先天/近期/多年 + 幻肢感频率锚点）
-- `core/audience.md`：✅ 已补（受众身份定位、devotee/wannabe 入戏约束、★招牌元素密度与疲劳控制）
-- `types/*#服装` 与 `topics/clothing.md`：✅ 已修正（患侧**裁剪位置**：髋离断=大腿根部/裆线，
-  膝上=残端下缘，膝下=残端下缘，肩离断=肩峰下缘；髋离断无"空裤管"，常服在裆线处结束）
-- `topics/crutch-spec.yaml` + `topics/crutch-usage.md`：✅ 已完善
-- `types/hip-disarticulation.md`：✅ 已完善
-- `topics/hands-occupied.md`、`topics/clothing.md`、`topics/equipment-risk.md`：✅ 已完善
-- `genre/postapocalyptic.md`：✅ 已新增
-- `core/cold-review.md`、`templates/state-ledger.yaml`、`core/physio-audit.md`：✅ 已新增
-- `types/shoulder-disarticulation.md`、`topics/one-handed-daily.md`：✅ 已新增（上肢截肢支持）
-- `core/pacing.md`、`core/structure.md`、`core/scene.md`：✅ 已新增（通用写作技法，借鉴自 creative-writing-skills）
-- `core/opening.md`：✅ 已新增（开篇切入方式库 + 多样性约束，解决开篇套路化）
-- `core/*`、`topics/*`、`types/*`、`genre/*`、`templates/*`：✅ 已完善初版
+## 七、通用说明
 
-> **4.5.1 增补（补漏）**：`types/shoulder-disarticulation.md`「止点改变」→「止点失去」（与 hip 文件同类修正对齐）
-> **4.5.0 增补（剧情与大纲体系）**：新增 `core/worldbuilding.md`（世界观建立，
->   含无障碍水平/社会态度/器具可得性，锁定跨章一致性）与 `core/chapter-planning.md`
->   （章五要素/章末钩子类型库/功能配比/章间连接）；
->   扩充 `templates/outline.md`（世界观区块、弧线编排表、招牌元素全书分布计划表）
->   与 `templates/state-ledger.yaml`（时间线/关系状态/信息状态/角色弧状态）；
->   联动更新注入索引、`core/workflow.md` 大纲阶段（加大纲质量闸）、
->   `templates/chapter.md` 核查清单（加剧情项）、`core/cold-review.md`（加剧情结构稽查维度）；
->   修正「无障碍水平」相关表述——**受限来源是身体结构，环境只放大难度**
-> **4.4.2 增补（残留清理二）**：`body-details.md` 坐姿条加髋离断限定（写空椅面）；`hip-disarticulation.md` 服装节空行清理
-> **4.4.1 增补（残留清理）**：删除 `hip-disarticulation.md` 中与「三层模型」矛盾的「裤管扁瘪」残留
-> （日常动作表坐行、身体细节坐姿条）；坐姿改用已确立的「空椅面」意象；服装节空行清理
-> **4.4.0 增补（髋离断修订同步）**：髋离断形态改为「三层模型」（骨骼/外形/功能）；新增运动能力四级、
-> 体位与动态、颤动幅度上限；修正假肢节的主动控制表述；
-> 「蹲」改为分级——双腿蹲不可能、健腿单腿蹲可能（扶物半蹲/无支撑半蹲/全蹲上限），
-> 并在 `physio-audit.md` 补单腿蹲豁免；
-> 同步 `clothing.md` 与 `body-details.md` 的髋离断相关句
-> **4.3.0 增补（受众驱动校准）**：
-> ① `core/audience.md` 明确"本技能为受众驱动、不是写实记录"——当"医学上更常见"与"读者更爱看"冲突时取后者；
-> 确立 **devotee 默认为读者身份**（非角色），devotee/wannabe 可入戏但须从属主线、不得改变 central question；
-> 新增 **★招牌元素密度与疲劳控制**硬约束（同一元素不连续两章出现、每 2–3 章 1 个、全书在清单内轮转，
-> 不得只盯 2–3 个元素反复写）。
-> ② 新增 `topics/timeline.md`：**幻肢感频率与截肢时长匹配**（先天=默认不写／近期=每 1–2 章／多年=每 3–5 章），
-> 档位全书锁定并写入角色卡与 state-ledger；`character-setup.md` 的"截肢时间"改为"截肢时长档位"。
-> ③ 修正患侧**裁剪位置**：髋离断=**大腿根部（裆线/腹股沟）**（原写"裁剪至骨盆处"，骨盆非成衣基准线，且髋离断无空裤管）；
-> 膝上/膝下=残端下缘；肩离断上装=肩峰下缘。`topics/clothing.md` 新增"类型差异：裁剪位置"对照表与常见错误。
-> ④ 用户裁定记录：**轮椅不设为单腿截肢角色的常用辅具，维持拐杖为主**（受众偏好优先于写实常见度）；
-> **不设未成年人硬约束**（由 Agent 自行判断）。
-> ⑤ 顺带修正两处硬事实错误：`types/shoulder-disarticulation.md` 肩离断肌电假肢表述、
-> `topics/crutch-usage.md` 三点步态与摆至步重复。
-> **4.2.0 增补**：新增 `core/opening.md` 开篇切入方式库（10 维度）+ 多样性硬约束 + 烂开篇反例清单 + 题材→推荐开篇映射；`core/workflow.md` 加逐章创作硬性要求（禁止一次生成整篇）+ 大纲阶段选开篇 + 构思阶段询问用户是否开启冷读稽查；`core/scene.md` 例外条款加限制；`templates/outline.md` 第一章行改为分布池选 1–2 个 + 强制首章含钩子；`core/style.md` 重点内容降级为全书密度目标 + 新增声口多样性；`core/character-setup.md` 加多样性自检 + 设定摇号表；`genre/*.md` 各加推荐开篇类型；`templates/chapter.md` 核查清单加开篇雷同检查；`templates/state-ledger.yaml` 加 distribution 字段。
-> **4.1.1 增补**：髋离断假肢上下楼梯规则（`types/hip-disarticulation.md` + `topics/prosthesis.md`）；假肢为常用辅具时空裤腿默认折叠塞裤腰不裁剪（`topics/clothing.md`）。
-> 所有专项已完善初版内容，后续按实际创作反馈迭代。
-> **推荐流程**：状态核查流水账（章末自查，零成本）+ 冷读子代理稽查（创作前询问用户是否开启）。
+- 所有专项已完善初版内容，后续按实际创作反馈迭代。
+- **推荐流程**：状态核查流水账（章末自查，零成本）+ 冷读子代理稽查（收集流程末题询问是否开启，跳过收集时默认不开启）。
+- **版本变更一律记入 `CHANGELOG.md`**，本总纲不承载变更史（v4.8.0 迁出）；当前版本见 frontmatter `version`。
