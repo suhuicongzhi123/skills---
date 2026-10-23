@@ -6,30 +6,30 @@
 
 | 分支 | tag | 状态 |
 |------|-----|------|
-| `main` | `v4.5.1` | 稳定版（默认） |
-| `preview` | `v4.11.6` | 测试版 |
-| `develop` | — | **开发线（v4.12.1 冷读收口完成，领先测试版——验证后推 preview）** |
+| `main` | `v4.12.1` | **正式版（当前版本）** |
+| `preview` | `v4.12.1` | 测试版（与正式版同步） |
+| `develop` | `v4.12.1` | 开发线（三通道同步，下轮迭代从此推进） |
 
 ### 安装
 
-稳定版（默认）：
+正式版（默认，当前 v4.12.1）：
 ```bash
 git clone https://github.com/suhuicongzhi123/skills---.git
 ```
 
-测试版（当前 v4.11.6）：
+测试版（与正式版同步）：
 ```bash
 git clone -b preview https://github.com/suhuicongzhi123/skills---.git
 ```
 
-开发线分支（v4.12.1，含温度审计落地+冷读收口）：
+开发线分支（与正式版同步）：
 ```bash
 git clone -b develop https://github.com/suhuicongzhi123/skills---.git
 ```
 
 指定版本（clone 后）：
 ```bash
-git checkout v4.11.6   # 或 v4.11.5 / v4.11.4 / v4.11.3 / v4.11.2 / v4.11.1 / v4.11.0 / v4.10.1 / v4.10.0 / v4.9.1 / v4.9.0 / v4.8.4 / v4.5.1
+git checkout v4.12.1   # 或 v4.12.0 / v4.11.6 / v4.11.5 / v4.11.4 / v4.11.3 / v4.11.2 / v4.11.1 / v4.11.0 / v4.10.1 / v4.10.0 / v4.9.1 / v4.9.0 / v4.8.4 / v4.5.1
 ```
 
 ### 更新
