@@ -1,6 +1,6 @@
 ---
 name: novel-amputee-writing
-version: 4.12.1
+version: 4.14.0
 author: 溯洄从之
 description: 面向慕残者(devotee/wannabe)群体的截肢者题材小说写作技能。主角为截肢者，下肢截肢为主（髋离断为主）、上肢截肢为辅（肩离断，含肘离断/腕离断）。覆盖拐杖、假肢、日常动作、高频生活场景、身体细节、幻肢感、亲密关系、W视角等主要方面，含剧情节奏/弧线/场景结构/长篇连续性通用写作技法，支持现实向、幻想向、末世、古装四类题材。触发条件：用户要求写截肢者/残障者题材小说、续写、大纲、人物设定、章节，或提到"慕残""截肢""残肢""拐杖""假肢""髋离断""幻肢""独臂""肩离断""肘离断""腕离断""单臂"等；或明确要求本技能。不触发：非截肢题材普通小说、纯医学/康复专业内容、猎奇式苦难叙事。
 ---
@@ -84,9 +84,9 @@ injection:
     运行时: 开书时复制到小说项目工作区，称 state-ledger.yaml
     归档: state-ledger-archive.yaml 为运行时产物（滚动窗口归档），技能包内无此文件
   触发启动:
-    - core/workflow.md
-    - core/style.md                # 含★句法级对照（平庸vs生动——文笔本体示范）+破折号≤3频率闸门
-    - core/audience.md             # 含★目光的分层+★安全败退阀+通道库（9条可组合）
+    - core/workflow.md             # 含成文质量关（润色阶段必过）+大纲质量闸两项
+    - core/style.md                # 含★三阶示范（取象→句法→意象生成；原★句法级对照更名）/★中文质感六技/★声口对照示范/去AI化·改写对照+破折号≤3频率闸门
+    - core/audience.md             # 含★平庸 vs 心动对照范例（三禁一学横幅/公式+变量/优化候选/★正向情绪样本/四道闸门）+★目光的分层+★安全败退阀+通道库（9条可组合）+髋离断残端主动运动（肌肉隆起）心动例句
   角色设定阶段:
     - core/character-setup.md     # 含★性格生成轴+收集流程·逐题提问协议（一次一题、
                                    # 选项+效果、答后思考再问、可跳过；末题＝冷读稽查开关）
@@ -107,13 +107,13 @@ injection:
   ★上下肢复合注入规则:             # 截肢部位=上下肢复合 时必读
     - SKILL.md#★上下肢复合（并行注入 · 按域分工）
   大纲/弧线规划阶段:
-    - core/structure.md
+    - core/structure.md           # 含★全书级情感钩子（四线节奏锚点）+张力跨章持有（四法则.4）
     - core/worldbuilding.md       # 含缺失解释框架锁定（防雷同，神圣化须用户显式选定）
-    - core/chapter-planning.md    # 含 turn 的三条生成路径
-    - core/opening.md
+    - core/chapter-planning.md    # 含章六要素（第7项＝本章阅读承诺）+turn 的三条生成路径+章末钩子类型库（10 类 H/h + 卷末大钩）+中段疲劳预警（三信号）
+    - core/opening.md             # 含四-补2 开篇拉力坡度（前3章＝留存窗口）
   开篇阶段:
     - core/opening.md               # 含题材开篇约束（排除式——题材只声明禁什么，
-                                   # 无推荐维度，防推荐收敛形成新烂开篇）
+                                   # 无推荐维度，防推荐收敛形成新烂开篇）+四-补2 开篇拉力坡度
     - genre/{题材}.md
   上肢截肢分支(肩离断等):
     不注入: [topics/crutch-spec.yaml, topics/crutch-usage.md, topics/hands-occupied.md, topics/daily-actions.md]
@@ -146,7 +146,7 @@ injection:
                                       # （放拐是末端解，轻微占手放拐＝拐杖分离同族错误）
     - types/{type}.md#拐杖使用差异
   写到场景构建:
-    - core/scene.md
+    - core/scene.md              # 含对话双功能正例
   写到服装/衣装场景:
     - topics/clothing.md
     - types/{type}.md#服装
@@ -166,24 +166,24 @@ injection:
       # 受限的心动条件＝她在乎结果（四-补3：时间压力/尊严/为他人）；
       # 剥夺后可留辅具空白期（跨章无辅具状态，三出口：取回/重获/转入无辅具，见衍生类1）
   写到节奏/张力场景:
-    - core/pacing.md
+    - core/pacing.md             # 含全书节奏曲线（指针）+句子节奏正例（短句/长累积句/片段）
   题材适配:
-    现实向: genre/realistic.md
-    幻想向: genre/fantasy.md
-    末世/丧尸/生存: genre/postapocalyptic.md
-    古装向: genre/historical.md           # 含古代器具表（crutch-spec.yaml 仅覆盖现代，本题材不适用）
+    现实向: genre/realistic.md            # 含★文笔示范
+    幻想向: genre/fantasy.md              # 含★文笔示范
+    末世/丧尸/生存: genre/postapocalyptic.md  # 含★文笔示范
+    古装向: genre/historical.md           # 含★文笔示范+古代器具表（crutch-spec.yaml 仅覆盖现代，本题材不适用）
   产出模板:
-    大纲: templates/outline.md
+    大纲: templates/outline.md            # 含★体验强度曲线+弧线编排表（峰值张力级/节拍角色两列）+前3章拉力坡度
     人物卡: templates/character-card.md
-    章节: templates/chapter.md
-    状态账本: templates/state-ledger.yaml
+    章节: templates/chapter.md            # 含 4 新字段（本章阅读承诺/张力级+节拍角色/上章钩子接住/上章钩子回收）+★文学自评（合格锚+存档）+心动句非同源
+    状态账本: templates/state-ledger.yaml  # 含本章登记新字段（阅读承诺/张力级/节拍角色/上章钩子接住/上章钩子回收）+本章自评块+distribution.examples_used
   章末必过审查:                        # 本节 8 项为「必过子集」；完整勾选清单见 templates/chapter.md
     生理事实兜底: core/physio-audit.md
     类型不可能动作: types/{type}.md#不可能动作
     幻肢频率对档位: topics/timeline.md
     招牌元素未连续重复: core/audience.md#★招牌元素密度与疲劳控制（硬约束）
     setup/payoff跟踪: templates/state-ledger.yaml#open_setups
-    本章beat与钩子: core/chapter-planning.md#一、章六要素（每章开写前必须填）
+    本章beat与钩子: core/chapter-planning.md#一、章六要素（每章开写前必须填；第7项＝本章阅读承诺）
     受限识别优先且不重复: core/audience.md#★受限清单（识别优先，软下限连续3章≥2个核心受限；
     # 窗口不足时标记提示、后续章优先识别补足，不回改已定稿章、不强造；层级判定见 topics/limitation-scenes.md 四-补2）
     幻肢档位真实度: topics/timeline.md#幻肢档位总表（频率 × 触发 × 意图 × 残肢 × 后果）
@@ -192,9 +192,10 @@ injection:
       账本登记: templates/state-ledger.yaml#本章登记
       钩子不重复: templates/state-ledger.yaml#章末钩子类型
       密度可查: templates/state-ledger.yaml#distribution.元素上次出现章
+      本章自评存档: templates/state-ledger.yaml#本章自评
   推荐流程:
     状态核查流水账: core/workflow.md#6. 状态核查流水账
-    冷读稽查(收集流程末题询问): core/cold-review.md
+    冷读稽查(收集流程末题询问): core/cold-review.md   # 含维度17/18
 ```
 
 ## 五-补、★上下肢复合（并行注入 · 按域分工）
