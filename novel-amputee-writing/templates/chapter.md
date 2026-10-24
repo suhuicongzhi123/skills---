@@ -66,6 +66,7 @@
 - [ ] 不渲染苦难/猎奇/励志二元
 - [ ] 幻肢感未误写为幻肢痛
 - [ ] **幻肢感频率符合截肢时长档位**（先天档不得写、多年档须低频，见 `topics/timeline.md`）
+- [ ] **幻肢档位真实度**（B 档真用真摔/C 档仅肌肉反应无后果，见 `topics/timeline.md#幻肢档位总表`）
 - [ ] **招牌元素限频**：对照 `state-ledger.yaml` 的 `distribution.元素上次出现章`，
       本章所用常规型元素距上次出现 ≥2 章（限频非排班）
       （触发型①②不受此限，但无契机不硬写——见 `core/audience.md` 两档供给；
@@ -82,10 +83,10 @@
 - [ ] 章节结尾不升华（停在动作/画面/情绪/悬念）
 - [ ] setup/payoff 状态更新（`state-ledger.yaml` 的 open_setups）
 - [ ] 已更新 `state-ledger.yaml`
-- [ ] **心动句非同源**：本章若有心动/招牌 beat 句，与三处示范节（core/audience.md★平庸 vs 心动、core/style.md★三阶示范、topics/limitation-scenes.md 四-补3）逐句比对——**载体/动作/收尾 ≥2 项相同即判照抄**，命中即改写；并查账本 examples_used（近 5 章不得同载体）
+- [ ] **心动句非同源**：本章若有心动/招牌 beat 句，与五处示范节（core/audience.md★平庸 vs 心动、core/style.md★三阶示范、topics/limitation-scenes.md 四-补3、topics/wannabe.md 向往的具象素材、topics/intimacy.md 亲密场景库）逐句比对——**载体/动作/落点意象 ≥2 项相同即判照抄**，命中即改写；并查账本 examples_used（近 5 章不得同载体）
 - [ ] 冷读子代理稽查（可选，`core/cold-review.md`）
 
-**★文学自评（每章章末必答；答案写入 state-ledger.yaml#本章自评，供冷读抽查）**
+**★文学自评（每章章末必答；答案写入 templates/state-ledger.yaml#本章自评，供冷读抽查）**
 
 > 不是勾选，是填空；无合格锚的答案是无效答案（等于没答）。
 

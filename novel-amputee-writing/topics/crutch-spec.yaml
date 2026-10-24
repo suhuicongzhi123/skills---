@@ -10,7 +10,7 @@ crutch_types:
     alias: [腋杖, underarm crutch]
     common_use: 髋离断者常用；**本技能默认辅具**
     note: 受众偏好优先——腋拐是本受众最具标识度的外观，故设为默认。
-      可写腋下压痕/不适（属日常不便，不作苦难渲染）
+      可写腋下轻触压痕/不适（长期轻触+摩擦所致，非承重压痕；属日常不便，不作苦难渲染）
     structure:
       axillary_pad: {name: 腋托, material: 海绵/橡胶软垫, function: 抵腋窝}
       handgrip: {name: 手柄, material: 泡沫/橡胶/塑料, function: 握持, position: 中部}
@@ -25,8 +25,8 @@ crutch_types:
     alias: [Lofstrand, 洛氏拐, 肘拐, forearm crutch]
     common_use: 可选辅具（本技能默认腋拐；前臂拐为可替换选项，较轻便灵活）
     structure:
-      # 理由：近端固定才有效悬吊，前臂远端约2/3外露、手才能自由伸出做事（够门把/捡物/掏钥匙而拐仍挂臂）——这是 topics/hands-occupied.md「挂肘腾手」成立的物理前提；cuff 装远端则肘下无承托、易滑脱、手被锁死
-      cuff: {name: 前臂套, material: 金属/塑料, function: 固定前臂, position: 前臂近端1/3（肘下两三横指）}
+      # 理由：近端固定才有效悬吊，前臂远端约2/3外露、手才能自由伸出做事（够门把/捡物/掏钥匙而拐仍挂臂——挂臂期间该拐不撑地不承重，支撑减半、以原地作业为主）——这是 topics/hands-occupied.md「挂肘腾手」成立的物理前提；cuff 装远端则肘下无承托、易滑脱、手被锁死
+      cuff: {name: 前臂套, material: 金属/塑料, function: 固定前臂, position: 肘下约两三横指}
       handgrip: {name: 手柄, position: 与腕横纹齐}
       upright: {name: 单立杆, material: 铝/碳纤维}
       tip: {name: 拐头, material: 橡胶/聚氨酯}
@@ -42,7 +42,7 @@ crutch_types:
 
 sizing:
   axillary:
-    腋托高度: 站立腋下至地面减约5cm（约两横指）
+    腋托高度: 站立腋下至地面减约5cm（约三横指）
     注: ❌ 不平大转子——大转子在髋部，是肘拐/手杖的参考点，腋托在腋下
     手柄高度: 屈肘约30°、腕横纹处
     原理: 腋托过高压腋窝神经血管，过低肩带受力不当

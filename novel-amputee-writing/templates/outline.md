@@ -4,7 +4,7 @@
 - 题材：
 - 截肢类型：
 - 视角：
-- 受众取向（devotee/wannabe）：
+- 受众取向（devotee/wannabe/双取向）：
 
 ## 世界观
 > 字段见 `core/worldbuilding.md`；**建立后全书锁定**

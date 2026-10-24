@@ -20,6 +20,14 @@ v4.9.0 盲区修复（对照 v4.8.4 审查报告）：
   ⑥ [1] 与 [3] 统一跳过 CHANGELOG（历史记录不参与创作注入判定）；
      banned 白名单移除语义漂移的「追加」
 
+v4.17.0 修复：
+  ⑦ [1] 锚点检查盲区：引用正则反引号强制 → 反引号可选（裸引用如「见 core/chapter-planning.md#二」
+     首次受检）；裸引用必须带锚点、锚点字符集排除中英文标点与空白
+     （文件名的 .md/.yaml 后缀为强制特征），防普通文本误判为引用
+  ⑧ [1] .yaml 目标锚点判定：yaml 无 # 标题（# 是注释）→ 收集全部键名（任意缩进 key: 形式），
+     嵌套锚点（distribution.元素上次出现章）分段逐级匹配，兜底全键名子串匹配
+  ⑨ [4] 孤儿判定引用源剔除 CHANGELOG.md（与 [1]/[3] 跳过 CHANGELOG 的口径一致）
+
 退出码：0 通过 / 1 有问题
 """
 import re, glob, os, sys
@@ -42,10 +50,16 @@ for f in glob.glob("**/*", recursive=True):
         continue
     src = open(f, encoding="utf-8", errors="ignore").read()
     # v4.9.0: 字符类加 \u4e00-\u9fff，支持 {题材} 等中文占位符
-    for m in re.finditer(r"`([A-Za-z0-9_\-/\.\{\}\u4e00-\u9fff]+\.(?:md|yaml))(?:#([^`]+))?`", src):
-        if not m.group(2) or m.group(2) == "X":   # 无锚点 / 占位符，跳过
+    # v4.17.0: 兼容裸引用（反引号可选）——裸引用必须带锚点，锚点字符集排除
+    #          中英文标点与空白；文件名部分强制 .md/.yaml 后缀特征，防普通文本误判
+    for m in re.finditer(
+            r"`([A-Za-z0-9_\-/\.\{\}\u4e00-\u9fff]+\.(?:md|yaml))(?:#([^`]+))?`"
+            r"|([A-Za-z0-9_\-/\.\{\}\u4e00-\u9fff]+\.(?:md|yaml))"
+            r"#([^\s`，。；、：:（）()【】《》「」“”‘’\"'★—…！？!?]+)", src):
+        pat = m.group(1) or m.group(3)
+        anchor = m.group(2) if m.group(1) else m.group(4)
+        if not anchor or anchor in ("X", "小节"):  # 无锚点 / 占位符（「小节」为 types/{type}.md 泛称示例），跳过
             continue
-        pat = m.group(1)
         if os.path.basename(pat) in RUNTIME:      # 运行时产物，跳过
             continue
         expanded = glob.glob(pat.replace("{type}", "*").replace("{题材}", "*"))
@@ -54,9 +68,23 @@ for f in glob.glob("**/*", recursive=True):
                 dangling.add((f, pat))
             continue
         for tp in expanded:
-            hs = [l.lstrip("#").strip() for l in open(tp, encoding="utf-8", errors="ignore") if l.startswith("#")]
-            if not any(norm(m.group(2)) in norm(h) for h in hs):
-                bad.add((tp, m.group(2)))
+            if tp.endswith(".yaml"):
+                # v4.17.0: yaml 中 # 是注释、无标题——改为收集全部键名（任意缩进 key: 形式）；
+                # 嵌套锚点（如 distribution.元素上次出现章）分段逐级匹配，兜底全键名子串匹配
+                ykeys = []
+                for l in open(tp, encoding="utf-8", errors="ignore"):
+                    km = re.match(r"^\s*-?\s*([^\s#:]+)\s*:", l)
+                    if km:
+                        ykeys.append(km.group(1))
+                segs = anchor.split(".")
+                hit = (all(any(norm(seg) in norm(k) for k in ykeys) for seg in segs)
+                       or any(norm(anchor) in norm(k) for k in ykeys))
+                if not hit:
+                    bad.add((tp, anchor))
+            else:
+                hs = [l.lstrip("#").strip() for l in open(tp, encoding="utf-8", errors="ignore") if l.startswith("#")]
+                if not any(norm(anchor) in norm(h) for h in hs):
+                    bad.add((tp, anchor))
 print(f"[1] 锚点落空: {len(bad)}")
 for x in sorted(bad):
     print("     ", x)
@@ -160,7 +188,8 @@ print(f"[3] 废止表述: {len(hits)} 处（上方［］标记项请人工确认
 #      零引用文件是「受限定义分散」的复发根源 → 机检兜底
 all_files = [f for f in glob.glob("**/*", recursive=True)
              if os.path.isfile(f) and f.endswith((".md", ".yaml"))]
-texts = {f: open(f, encoding="utf-8", errors="ignore").read() for f in all_files}
+texts = {f: open(f, encoding="utf-8", errors="ignore").read() for f in all_files
+         if os.path.basename(f) != "CHANGELOG.md"}   # v4.17.0: 引用源剔除 CHANGELOG（与 [1]/[3] 口径一致）
 orphans = []
 for f in all_files:
     base = os.path.basename(f)
