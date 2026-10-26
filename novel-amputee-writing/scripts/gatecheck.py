@@ -10,7 +10,8 @@
   [3] 模式保真（降级禁止）：选定 == 实际，一律相等，任何不等 → FAIL
   [4] 调用代理凭证化：pro/max 须结构化 [{角色,凭证}]，必需角色凭证非空；
       同章各角色凭证两两互异（同凭证签多角色＝合并扮演）
-  [5] 产物三验：非空＋存在＋在项目目录内（realpath 防穿越）
+  [5] 产物三验：非空＋存在＋在项目目录内（realpath 防穿越）；章草稿为三模式
+      必需产物（交付正文绑定基准）
   [6] 产物生成指纹：每个产物文件末行「生成指纹: X」== 账本签发角色凭证
       （角色↔产物映射：max 章任务包→队长/章草稿+自查报告→写作员/审查报告→
       审查员；pro 章草稿+自查报告→本体/审查报告→冷读）；缺指纹/不同号 → FAIL
@@ -22,8 +23,10 @@
       零命中＝未读草稿的空报告
   [12] 主语污染：审查报告出现「我写/作为队长」类主上下文人称模式 → FAIL
   [13] 同源判定：审查与自查 22 维判定向量完全一致 → FAIL（同源伪装）
-  [14] PASS 印章：每章 gate-pass-第N章.txt，末行印章 =
-      sha256(章号+自查报告+审查报告)[:16] 重算比对；篡改/手写伪造 → FAIL
+  [14] 交付凭证（三模式）：gate-pass-第N章.txt，含正文SHA（sha256(章草稿)
+      [:16]）＋正文字数＋印章（sha256(章号+章草稿+自查+审查)[:16]）重算比对
+      ——交付正文被替换 → SHA/印章不符 FAIL；FAIL 运行不生成凭证；
+      交付正文须逐字节来自被检章草稿文件，交付时附凭证内 SHA 与字数
 
 边界：机检由 AI 自行执行，强制力＝验证网＋成本压制（过闸嵌入每章循环，
 伪造合规全套成本 ≥ 真实执行）；绝对强制需宿主级 hook，超出技能包能力。
@@ -37,12 +40,14 @@ except ImportError:
 
 MODE_AGENTS = {"flash": ["本体"], "pro": ["本体", "冷读"],
                "max": ["队长", "写作员", "审查员", "记账员"]}
-MODE_PRODUCTS = {"flash": ["自查报告"], "pro": ["章草稿", "审查报告", "自查报告"],
-                 "max": ["章任务包", "章草稿", "审查报告", "自查报告"]}
+MODE_PRODUCTS = {"flash": ["章草稿", "自查报告"], "pro": ["章草稿", "审查报告", "自查报告"],
+                 "max": ["章任务包", "章草稿", "审查报告", "自查报告", "记账摘要"]}
 ROLE_OF_PRODUCT = {"章任务包": "队长", "章草稿": "写作员", "自查报告": "写作员",
-                   "审查报告": "审查员"}
+                   "审查报告": "审查员", "记账摘要": "记账员"}
 ROLE_OF_PRODUCT_PRO = {"章草稿": "本体", "自查报告": "本体", "审查报告": "冷读"}
 DIM_SET = set(range(1, 23))
+VERDICT_SET = {"通过", "不通过", "不适用"}
+CHECKLIST_IDS = {f"S{i:02d}" for i in range(1, 48)}
 PERSONA_PAT = re.compile(r"我写|我设计|我编制|我自查|我刚才|作为队长|我画的大纲|上一轮我|我安排的剧情|我登记的账")
 QUOTE_PAT = re.compile(r"[「『“]([^」』”]{8,})[」』”]")
 errors, warns = [], []
@@ -64,9 +69,10 @@ def verdict_vector(text):
         out[int(m.group(1))] = m.group(2)
     return out
 
-def stamp_of(ch, sc_text, rp_text):
+def stamp_of(ch, draft_text, sc_text, rp_text):
     h = hashlib.sha256()
     h.update(str(ch).encode("utf-8"))
+    h.update((draft_text or "").encode("utf-8"))
     h.update((sc_text or "").encode("utf-8"))
     h.update((rp_text or "").encode("utf-8"))
     return h.hexdigest()[:16]
@@ -95,6 +101,9 @@ def main():
     if not logs:
         print("FAIL 工作流执行日志为空——无执行证据链（口头声明不作数）"); sys.exit(1)
     fixed_mode = (data.get("角色固定属性") or {}).get("工作流模式")
+    # [0] 模式空值闸：未选定模式（空值）＝未过第 13 题＝不得开写不得交付
+    if not fixed_mode:
+        errors.append("工作流模式未选定（空值＝未过收集第 13 题）——不得开写不得交付")
 
     chs = []
     for e in logs:
@@ -106,6 +115,23 @@ def main():
         errors.append(f"日志章号不连续（缺号漏登）: 现有 {sorted(chs)}")
 
     gen_stamps = []
+    # 首章前置：大纲须为第一章前置产物且契约块非空
+    ch_nums = [c for c in chs if c is not None]
+    if ch_nums and min(ch_nums) == 1:
+        first_e = next((e for e in logs if str(e.get("章")) == "1" or e.get("章") == 1), None)
+        outline = (first_e or {}).get("产物", {}).get("大纲") if first_e else None
+        if not outline:
+            errors.append("第1章｜产物缺登记: 大纲（首章交付前置——大纲为第一章必需产物）")
+        else:
+            ofp = os.path.realpath(os.path.join(root, outline))
+            if not os.path.isfile(ofp) or not ofp.startswith(root + os.sep):
+                errors.append(f"第1章｜大纲文件不存在或越出项目目录: {outline}")
+            else:
+                otext = open(ofp, encoding="utf-8").read()
+                for mark in ("★主题材契约", "基调核心循环", "主冲突线"):
+                    if mark not in otext:
+                        errors.append(f"第1章｜大纲契约块不完整（缺「{mark}」非空标记）")
+                        break
     for e in logs:
         try: ch = int(e.get("章"))
         except (TypeError, ValueError): ch = e.get("章", "?")
@@ -173,6 +199,19 @@ def main():
                     dims = set(int(x) for x in re.findall(r"维度\s*(\d+)", rp_text))
                     if dims != DIM_SET:
                         fail(ch, f"审查报告维度覆盖 {len(dims)}/22，缺: {sorted(DIM_SET - dims)}")
+                    # 判定值枚举（维度行判定域须为 通过/不通过/不适用）
+                    bad_v = []
+                    for m2 in re.finditer(r"维度\s*(\d+)\s*[｜|]\s*([^\s｜|，。]+)", rp_text):
+                        if m2.group(2) not in VERDICT_SET:
+                            bad_v.append(f"维度{m2.group(1)}:{m2.group(2)}")
+                    if bad_v:
+                        fail(ch, f"审查报告判定值非法（须 通过/不通过/不适用）: {'；'.join(bad_v[:3])}")
+                    # 输入清单段必须存在
+                    if "输入清单" not in rp_text:
+                        fail(ch, "审查报告缺「输入清单」段（须列收到的文件）")
+                    # 独立发现：≥1 条「不通过」或附反证段
+                    if ("不通过" not in rp_text) and ("反证" not in rp_text):
+                        fail(ch, "审查报告零独立发现（须 ≥1 条「不通过」或附反证段）")
                     scf = prods.get("自查报告")
                     if scf and scf in rp_text:
                         fail(ch, f"审查报告出现自查报告文件名（{scf}）——输入污染：冷读者不得看自查结论")
@@ -185,64 +224,82 @@ def main():
             fp = os.path.realpath(os.path.join(root, dp))
             if os.path.isfile(fp) and fp.startswith(root + os.sep):
                 draft_text = open(fp, encoding="utf-8").read()
-        # [9] 自查覆盖（倒数第二行锚）
+        # [9] 自查覆盖：47/47 硬校验＋ID 全集＋与自查报告倒数第二行一致
         sc = str(e.get("自查覆盖", ""))
         m = re.match(r"^(\d+)/(\d+)$", sc)
-        if not m or m.group(1) != m.group(2) or int(m.group(2)) < 1:
-            fail(ch, f"自查覆盖计数不自洽: {sc or '空'}（应 X/X 两数相等）")
+        if not m or m.group(1) != "47" or m.group(2) != "47":
+            fail(ch, f"自查覆盖应为 47/47，实为: {sc or '空'}")
         srp = prods.get("自查报告")
         if srp:
             fp = os.path.realpath(os.path.join(root, srp))
             if os.path.isfile(fp) and fp.startswith(root + os.sep):
                 sc_text = open(fp, encoding="utf-8").read()
+                ids = set(re.findall(r"\b(S\d\d)\b", sc_text))
+                if ids != CHECKLIST_IDS:
+                    miss = sorted(CHECKLIST_IDS - ids)[:4]
+                    extra = sorted(ids - CHECKLIST_IDS)[:3]
+                    fail(ch, f"自查报告 ID 集合不全（缺 {miss}{'；非法 ' + str(extra) if extra else ''}）——须逐条列 S01…S47 全集")
                 lines = [l for l in sc_text.splitlines() if l.strip()]
                 zone = lines[-3:] if lines else []
                 tm = None
                 for l in zone[:-1] if act in ("pro", "max") else zone:
                     tm = re.search(r"自查覆盖[:：]\s*(\d+)\s*/\s*(\d+)", l)
                     if tm: break
-                if not tm: fail(ch, f"自查报告缺『自查覆盖: X/X 全查』机检锚: {srp}")
-                elif m and (tm.group(1) != m.group(1) or tm.group(2) != m.group(2)):
-                    fail(ch, f"自查报告 {tm.group(1)}/{tm.group(2)} ≠ 账本 {sc}——自报与文件不符")
+                if not tm: fail(ch, f"自查报告缺『自查覆盖: 47/47 全查』机检锚: {srp}")
+                elif tm.group(1) != "47" or tm.group(2) != "47":
+                    fail(ch, f"自查报告 {tm.group(1)}/{tm.group(2)} ≠ 47/47")
         # [11] 冷读引文实证（pro/max）
         if act in ("pro", "max") and rp_text:
             quotes = QUOTE_PAT.findall(rp_text)
             hits = [q for q in quotes if q in draft_text]
             if len(hits) < 3:
                 fail(ch, f"审查报告命中草稿的原文引文仅 {len(hits)}/3——未真实读草稿的空报告（引文实证不过）")
-        # [13] 同源判定（pro/max）
+        # [13] 同源判定（pro/max）：相同判定比例 ≥95%（21/22）即 FAIL——
+        #     全同或仅 1 处差异＝同源伪装强信号（阈值避免误杀真实冷读）
         if act in ("pro", "max") and rp_text and sc_text:
             v1, v2 = verdict_vector(rp_text), verdict_vector(sc_text)
             common = set(v1) & set(v2)
-            if len(common) >= 20 and all(v1[k] == v2[k] for k in common):
-                fail(ch, f"审查报告与自查报告 {len(common)} 维判定完全一致——同源伪装强信号（独立视角必有权重差异）")
+            same = sum(1 for k in common if v1[k] == v2[k])
+            if len(common) >= 20 and same >= 21:
+                fail(ch, f"审查与自查 {same}/{len(common)} 维判定相同（≥95%）——同源伪装强信号（独立视角必有权重差异）")
         # [10] 闸判定
         if e.get("交付闸") != "通过":
             fail(ch, f"交付闸={e.get('交付闸')}——未过闸章不得交付")
-        # [14] PASS 印章
-        if act in ("pro", "max"):
-            try:
-                st = stamp_of(ch, sc_text, rp_text)
-            except Exception:
-                st = None
-            if st:
-                sf = os.path.join(root, f"gate-pass-第{ch}章.txt")
-                if os.path.isfile(sf):
-                    tail = [l for l in open(sf, encoding="utf-8").read().splitlines() if l.strip()]
-                    got = re.search(r"印章[:：]\s*(\S+)", tail[-1]) if tail else None
-                    if not got or got.group(1) != st:
-                        fail(ch, f"交付印章不符（gate-pass-第{ch}章.txt）——产物被篡改或印章伪造，须重跑 gatecheck 重新过闸")
-                else:
-                    gen_stamps.append((ch, sf, st))
-    for w in warns: print("WARN", w)
-    for ch, sf, st in gen_stamps:
+        # [14] 交付凭证（PASS 印章——哈希链含章草稿：交付正文被换→印章失效）
         try:
-            open(sf, "w", encoding="utf-8").write(f"交付印章（gatecheck.py 自动生成，勿手写）\n章: {ch}\n印章: {st}\n")
-            print(f"STAMP 已生成 gate-pass-第{ch}章.txt（首跑补章）")
-        except Exception as ex:
-            fail(ch, f"印章文件写入失败: {ex}")
+            st = stamp_of(ch, draft_text, sc_text, rp_text)
+        except Exception:
+            st = None
+        if st:
+            sf = os.path.join(root, f"gate-pass-第{ch}章.txt")
+            if os.path.isfile(sf):
+                ptext = open(sf, encoding="utf-8").read()
+                got = re.search(r"印章[:：]\s*(\S+)", ptext)
+                got_sha = re.search(r"正文SHA[:：]\s*(\S+)", ptext)
+                cur_sha = hashlib.sha256((draft_text or "").encode("utf-8")).hexdigest()[:16]
+                if got_sha and got_sha.group(1) != cur_sha:
+                    fail(ch, f"正文SHA不符（gate-pass 记录 {got_sha.group(1)} ≠ 当前 {cur_sha}）——交付正文已被替换，须重跑完整流程")
+                elif not got or got.group(1) != st:
+                    fail(ch, f"交付印章不符（gate-pass-第{ch}章.txt）——产物被篡改或印章伪造，须重跑 gatecheck 重新过闸")
+            elif not errors:
+                gen_stamps.append((ch, sf, st, draft_text))
     if errors:
         print(f"FAIL 交付闸机检未过（{len(errors)} 项）:")
+        for x in errors: print("  -", x)
+        print("FAIL 运行不生成交付凭证——修复后重跑")
+        sys.exit(1)
+    for w in warns: print("WARN", w)
+    for ch, sf, st, dtext in gen_stamps:
+        try:
+            dsha = hashlib.sha256((dtext or "").encode("utf-8")).hexdigest()[:16]
+            dchars = len(re.sub(r"\s", "", dtext or ""))
+            open(sf, "w", encoding="utf-8").write(
+                f"交付凭证（gatecheck.py PASS 时自动生成，勿手写）\n章: {ch}\n"
+                f"正文SHA: {dsha}\n正文字数: {dchars}\n印章: {st}\n")
+            print(f"STAMP 已生成 gate-pass-第{ch}章.txt（首跑补章）")
+        except Exception as ex:
+            fail(ch, f"凭证文件写入失败: {ex}")
+    if errors:
         for x in errors: print("  -", x)
         sys.exit(1)
     print("PASS 交付闸机检：模式保真(降级禁止)/代理凭证互异/产物三验/生成指纹/维度覆盖/输入隔离/引文实证/主语无污染/非同源/自查交叉/闸判定/印章 全过")
