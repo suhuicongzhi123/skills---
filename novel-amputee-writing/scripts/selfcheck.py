@@ -214,8 +214,11 @@ for f in orphans:
 fail += len(orphans)
 
 # [5] gatecheck.py 哈希基线（防篡改验证机制——SKILL 〇-补 第 6 类红线支撑）
-GATECHECK_SHA = "aa76bafbc70e1652"
-_cur = hashlib.sha256(open("scripts/gatecheck.py", "rb").read()).hexdigest()[:16]
+# 哈希前归一行尾（\r\n→\n）：git autocrlf 使磁盘行尾随克隆环境漂移（repo 存 LF，
+# Windows 检出 CRLF）——按原始字节哈希会跨环境误报；归一后基线跨 LF/CRLF 稳定
+GATECHECK_SHA = "533031bbba3319ab"
+_raw = open("scripts/gatecheck.py", "rb").read()
+_cur = hashlib.sha256(_raw.replace(b"\r\n", b"\n")).hexdigest()[:16]
 if _cur != GATECHECK_SHA:
     fail += 1
     print("[5] gatecheck.py 哈希基线不符（当前 " + _cur + " 不等于 基线 " + GATECHECK_SHA + "）——脚本被篡改，恢复后重跑")
