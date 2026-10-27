@@ -77,7 +77,8 @@
 
 - 回避清单全效：幻肢痛/伤口/苦难渲染/猎奇不因题材烈度豁免
 - 暴力写**后果与抉择**，不写施暴快感的凝视；性与暴力交叉处按亲密尺度档
-  （`topics/intimacy.md#二、尺度分档`），未声明 C 档不写到 C
+  （`topics/intimacy.md#二、尺度分档`），未声明 C 成人档不写到 C；
+  性暴力不按情色写，按伤害与后果写（见 `topics/intimacy-explicit.md#十三、同意与边界`）
 - 主角施暴时：动机须有前文 setup（`core/structure.md#setup/payoff`），
   叙事不替她辩护也不替她忏悔——判断留给读者（`core/style.md` 勿坍塌歧义）
 
