@@ -30,7 +30,7 @@ v4.17.0 修复：
 
 退出码：0 通过 / 1 有问题
 """
-import re, glob, os, sys
+import re, glob, os, sys, hashlib
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 os.chdir(ROOT)
@@ -212,6 +212,15 @@ print(f"[4] 孤儿文件: {len(orphans)}")
 for f in orphans:
     print(f"      {f}（全域零引用——确认是否为应删未删的残留）")
 fail += len(orphans)
+
+# [5] gatecheck.py 哈希基线（防篡改验证机制——SKILL 〇-补 第 6 类红线支撑）
+GATECHECK_SHA = "aa76bafbc70e1652"
+_cur = hashlib.sha256(open("scripts/gatecheck.py", "rb").read()).hexdigest()[:16]
+if _cur != GATECHECK_SHA:
+    fail += 1
+    print("[5] gatecheck.py 哈希基线不符（当前 " + _cur + " 不等于 基线 " + GATECHECK_SHA + "）——脚本被篡改，恢复后重跑")
+else:
+    print("[5] gatecheck.py 哈希基线一致: " + _cur)
 
 print("\n结果:", "PASS" if fail == 0 else f"FAIL ({fail})")
 sys.exit(0 if fail == 0 else 1)
