@@ -17,12 +17,16 @@
       审查员；pro 章草稿+自查报告→本体/审查报告→冷读）；缺指纹/不同号 → FAIL
   [7] 稽查全覆盖 22/22；审查报告「维度N」集合 == {1..22}
   [8] 输入隔离：审查报告出现自查报告文件名 → FAIL（冷读者不得看自查结论）
-  [9] 自查覆盖 X/X 自洽＋与自查报告倒数第二行一致
+  [9] 自查覆盖 49/49 自洽＋与自查报告倒数第二行一致；且自查报告须有 49 行
+      「Sxx｜判定」判定行（只列 ID 不写判定 → 判定向量为空，同源判定失效 → FAIL）
+  [9-b] 模板初值黑名单：待填/待运行/未过/待查 → FAIL（防"复制模板即合规"）
   [10] 交付闸字段 == 通过（唯一合法值；无 python＝无法过闸＝不得交付）
   [11] 冷读引文实证：审查报告命中草稿原文引文 ≥3 条（「」内 ≥8 字）——
       零命中＝未读草稿的空报告
   [12] 主语污染：审查报告出现「我写/作为队长」类主上下文人称模式 → FAIL
-  [13] 同源判定：审查与自查 22 维判定向量完全一致 → FAIL（同源伪装）
+  [13] 同源判定：审查 22 维判定向量与「自查 S 编号折算后的维度向量」高度一致
+      （≥21/22 且审查存在不通过项）→ FAIL（同源伪装）；「独立发现」按
+      维度判定=不通过 或 「## 反证轮」小节 ≥3 段核验计——裸子串不算
   [14] 交付凭证（三模式）：gate-pass-第N章.txt，含正文SHA（sha256(章草稿)
       [:16]）＋正文字数＋印章（sha256(章号+章草稿+自查+审查)[:16]）重算比对
       ——交付正文被替换 → SHA/印章不符 FAIL；FAIL 运行不生成凭证；
@@ -47,7 +51,8 @@ ROLE_OF_PRODUCT = {"章任务包": "队长", "章草稿": "写作员", "自查�
 ROLE_OF_PRODUCT_PRO = {"章草稿": "本体", "自查报告": "本体", "审查报告": "冷读"}
 DIM_SET = set(range(1, 23))
 VERDICT_SET = {"通过", "不通过", "不适用"}
-CHECKLIST_IDS = {f"S{i:02d}" for i in range(1, 48)}
+SELF_MARK = {"✓": "通过", "√": "通过", "✗": "不通过", "×": "不通过"}
+CHECKLIST_IDS = {f"S{i:02d}" for i in range(1, 50)}
 PERSONA_PAT = re.compile(r"我写|我设计|我编制|我自查|我刚才|作为队长|我画的大纲|上一轮我|我安排的剧情|我登记的账")
 QUOTE_PAT = re.compile(r"[「『“]([^」』”]{8,})[」』”]")
 errors, warns = [], []
@@ -63,10 +68,45 @@ def parse_agents(raw):
         return names, creds, True
     return list(raw), None, False
 
+# 自查 S 编号 → 稽查维度（映射表权威源：core/cold-review.md#四-补）
+S2D = {
+    "S01": [10], "S02": [10], "S03": [10], "S04": [10], "S05": [10],
+    "S06": [18, 19], "S07": [19], "S08": [18], "S09": [18], "S10": [18],
+    "S11": [18], "S12": [18], "S13": [10], "S14": [13], "S15": [13],
+    "S16": [13], "S17": [6], "S18": [1, 2, 3], "S19": [9], "S20": [16],
+    "S21": [19, 20], "S22": [21], "S23": [22], "S24": [], "S25": [2],
+    "S26": [3], "S27": [9], "S28": [9], "S29": [16], "S30": [4],
+    "S31": [5], "S32": [6, 8], "S33": [6], "S34": [8], "S35": [12],
+    "S36": [14], "S37": [12], "S38": [12], "S39": [], "S40": [7],
+    "S41": [15], "S42": [15], "S43": [15], "S44": [10], "S45": [11],
+    "S46": [17], "S47": [], "S48": [9], "S49": [9],
+}
+
 def verdict_vector(text):
     out = {}
     for m in re.finditer(r"维度\s*(\d+)\s*[｜|]\s*([^\s｜|，。]+)", text):
         out[int(m.group(1))] = m.group(2)
+    return out
+
+def selfcheck_dim_vector(text):
+    """自查报告按 S 编号落盘 → 依 S2D 折算成维度级判定（任一 S 不通过即该维不通过）"""
+    per = {}
+    for m in re.finditer(r"\bS(\d\d)\s*[｜|]\s*([^\s｜|，。]+)", text):
+        per[f"S{m.group(1)}"] = SELF_MARK.get(m.group(2), m.group(2))
+    dims = {}
+    for sid, v in per.items():
+        for d in S2D.get(sid, []):
+            docs = dims.setdefault(d, [])
+            docs.append(v)
+    out = {}
+    for d, vs in dims.items():
+        eff = [x for x in vs if x != "不适用"]      # 不适用不参与聚合（防"一条不适用被其余通过吞掉"）
+        if not eff:
+            out[d] = "不适用"
+        elif any(x == "不通过" for x in eff):
+            out[d] = "不通过"
+        else:
+            out[d] = "通过"
     return out
 
 def stamp_of(ch, draft_text, sc_text, rp_text):
@@ -137,6 +177,11 @@ def main():
         except (TypeError, ValueError): ch = e.get("章", "?")
         if a.chapter is not None and ch != a.chapter:
             pass  # 关注章外仍全量检查（历史章 FAIL 一并报）
+        # [0-b] 模板初值黑名单：占位值出现＝未真实执行（防"复制模板即合规"）
+        for _k in ("选定模式", "实际执行模式", "审查深度", "机检运行", "交付闸", "自查覆盖"):
+            _v = str(e.get(_k, "") or "").strip()
+            if _v in ("待填", "待运行", "未过", "待查"):
+                fail(ch, f"字段「{_k}」仍为模板占位值「{_v}」——未真实执行，须实跑后回填")
         sel, act = e.get("选定模式"), e.get("实际执行模式")
         if sel not in MODE_AGENTS: fail(ch, f"选定模式非法: {sel}"); continue
         if fixed_mode and fixed_mode != sel:
@@ -209,9 +254,20 @@ def main():
                     # 输入清单段必须存在
                     if "输入清单" not in rp_text:
                         fail(ch, "审查报告缺「输入清单」段（须列收到的文件）")
-                    # 独立发现：≥1 条「不通过」或附反证段
-                    if ("不通过" not in rp_text) and ("反证" not in rp_text):
-                        fail(ch, "审查报告零独立发现（须 ≥1 条「不通过」或附反证段）")
+                    # 独立发现：≥1 条维度判定为「不通过」，或「## 反证轮」小节含 ≥3 段实质核验
+                    # （旧口径只看"不通过"三字是否出现——写"本轮无一项不通过"即可绕过，已废）
+                    rp_fails = [k for k, v in verdict_vector(rp_text).items() if v == "不通过"]
+                    rebut_ok = False
+                    rb = re.search(r"^#{1,4}\s*反证轮.*$", rp_text, re.M)
+                    if rb:
+                        seg = rp_text[rb.end():]
+                        nx = re.search(r"^#{1,4}\s", seg, re.M)
+                        body = seg[:nx.start()] if nx else seg
+                        paras = [x for x in re.split(r"\n\s*\n", body) if len(x.strip()) >= 20]
+                        rebut_ok = len(paras) >= 3
+                    if not rp_fails and not rebut_ok:
+                        fail(ch, "审查报告零独立发现（须 ≥1 条维度判定「不通过」，"
+                                 "或「## 反证轮」小节含 ≥3 段实质核验——只写「无问题」不算）")
                     scf = prods.get("自查报告")
                     if scf and scf in rp_text:
                         fail(ch, f"审查报告出现自查报告文件名（{scf}）——输入污染：冷读者不得看自查结论")
@@ -224,11 +280,11 @@ def main():
             fp = os.path.realpath(os.path.join(root, dp))
             if os.path.isfile(fp) and fp.startswith(root + os.sep):
                 draft_text = open(fp, encoding="utf-8").read()
-        # [9] 自查覆盖：47/47 硬校验＋ID 全集＋与自查报告倒数第二行一致
+        # [9] 自查覆盖：49/49 硬校验＋ID 全集＋49 行判定断言＋与自查报告倒数第二行一致
         sc = str(e.get("自查覆盖", ""))
         m = re.match(r"^(\d+)/(\d+)$", sc)
-        if not m or m.group(1) != "47" or m.group(2) != "47":
-            fail(ch, f"自查覆盖应为 47/47，实为: {sc or '空'}")
+        if not m or m.group(1) != "49" or m.group(2) != "49":
+            fail(ch, f"自查覆盖应为 49/49，实为: {sc or '空'}")
         srp = prods.get("自查报告")
         if srp:
             fp = os.path.realpath(os.path.join(root, srp))
@@ -238,16 +294,37 @@ def main():
                 if ids != CHECKLIST_IDS:
                     miss = sorted(CHECKLIST_IDS - ids)[:4]
                     extra = sorted(ids - CHECKLIST_IDS)[:3]
-                    fail(ch, f"自查报告 ID 集合不全（缺 {miss}{'；非法 ' + str(extra) if extra else ''}）——须逐条列 S01…S47 全集")
+                    fail(ch, f"自查报告 ID 集合不全（缺 {miss}{'；非法 ' + str(extra) if extra else ''}）——须逐条列 S01…S49 全集")
+                # [9-b] 判定行断言：须 49 行「Sxx｜判定」，判定值合法
+                srows = []
+                for _ln in sc_text.splitlines():
+                    _m = re.match(r"^\s*S(\d\d)\s*[｜|]\s*([^\s｜|，。\n]+)", _ln)
+                    if _m:
+                        srows.append((_m.group(1), _m.group(2)))
+                if len(srows) != 49:
+                    fail(ch, f"自查报告判定行 {len(srows)}/49——每条须写成「Sxx｜判定｜项名｜证据」；"
+                             f"只列 ID 不写判定＝判定向量为空，同源判定会静默失效")
+                bad_sv = [f"S{n}:{v}" for n, v in srows
+                          if SELF_MARK.get(v, v) not in VERDICT_SET]
+                if bad_sv:
+                    fail(ch, f"自查判定值非法（须 通过/不通过/不适用，或 ✓/✗）: {'；'.join(bad_sv[:3])}")
+                # 不适用白名单：只有"本条法定不适用"的 5 项可填不适用，防用不适用稀释同源判定
+                NA_ALLOWED = {"24", "39", "47", "48", "49"}
+                bad_na = sorted({f"S{n}" for n, v in srows
+                                 if SELF_MARK.get(v, v) == "不适用" and n not in NA_ALLOWED})
+                if bad_na:
+                    fail(ch, f"这些自查项不成立「不适用」: {bad_na[:4]}——"
+                             f"不适用只允许 S24（仅首章）/S39（无 devotee 角色）/S47（flash）/S48·S49（flash）；"
+                             f"其余须判 通过 或 不通过")
                 lines = [l for l in sc_text.splitlines() if l.strip()]
                 zone = lines[-3:] if lines else []
                 tm = None
                 for l in zone[:-1] if act in ("pro", "max") else zone:
                     tm = re.search(r"自查覆盖[:：]\s*(\d+)\s*/\s*(\d+)", l)
                     if tm: break
-                if not tm: fail(ch, f"自查报告缺『自查覆盖: 47/47 全查』机检锚: {srp}")
-                elif tm.group(1) != "47" or tm.group(2) != "47":
-                    fail(ch, f"自查报告 {tm.group(1)}/{tm.group(2)} ≠ 47/47")
+                if not tm: fail(ch, f"自查报告缺『自查覆盖: 49/49 全查』机检锚: {srp}")
+                elif tm.group(1) != "49" or tm.group(2) != "49":
+                    fail(ch, f"自查报告 {tm.group(1)}/{tm.group(2)} ≠ 49/49")
         # [11] 冷读引文实证（pro/max）
         if act in ("pro", "max") and rp_text:
             quotes = QUOTE_PAT.findall(rp_text)
@@ -257,11 +334,19 @@ def main():
         # [13] 同源判定（pro/max）：相同判定比例 ≥95%（21/22）即 FAIL——
         #     全同或仅 1 处差异＝同源伪装强信号（阈值避免误杀真实冷读）
         if act in ("pro", "max") and rp_text and sc_text:
-            v1, v2 = verdict_vector(rp_text), verdict_vector(sc_text)
+            v1 = verdict_vector(rp_text)
+            v2 = selfcheck_dim_vector(sc_text)   # 自查按 S 编号落盘，先折算成维度
             common = set(v1) & set(v2)
             same = sum(1 for k in common if v1[k] == v2[k])
-            if len(common) >= 20 and same >= 21:
-                fail(ch, f"审查与自查 {same}/{len(common)} 维判定相同（≥95%）——同源伪装强信号（独立视角必有权重差异）")
+            bad1 = {k for k in v1 if v1[k] == "不通过"}
+            bad2 = {k for k in v2 if v2[k] == "不通过"}
+            # 豁免：审查无「不通过」项时无差异空间，本项不成立（防误杀干净章）
+            if bad1:
+                if len(common) >= 20 and same >= 21:
+                    fail(ch, f"审查与自查 {same}/{len(common)} 维判定相同（≥95%）——同源伪装强信号（独立视角必有权重差异）")
+                elif bad2 == bad1:
+                    fail(ch, f"自查的不通过维度与审查完全相同（{sorted(bad1)}）——无独立发现，"
+                              f"判同源照抄；自查须有自己的命中项或明确反证")
         # [10] 闸判定＋机检运行
         if e.get("机检运行") != "是":
             fail(ch, f"机检运行={e.get('机检运行') or '未登记'}——脚本漏跑＝严重制度失败，须实际运行 gatecheck 并取得 PASS 后交付")
@@ -285,6 +370,14 @@ def main():
                     fail(ch, f"交付印章不符（gate-pass-第{ch}章.txt）——产物被篡改或印章伪造，须重跑 gatecheck 重新过闸")
             elif not errors:
                 gen_stamps.append((ch, sf, st, draft_text))
+    # [0-c] 核查记录占位值：任一项仍为「待查」＝未实查（与日志初值黑名单同源）
+    for rec in (data.get("核查记录") or []):
+        if not isinstance(rec, dict):
+            continue
+        todo = [k for k, v in rec.items() if str(v).strip() == "待查"]
+        if todo:
+            fail(rec.get("章", "?"), f"核查记录仍有「待查」项 {todo[:4]}——未实查，须逐项改为 ✓/✗＋说明")
+
     if errors:
         print(f"FAIL 交付闸机检未过（{len(errors)} 项）:")
         for x in errors: print("  -", x)
