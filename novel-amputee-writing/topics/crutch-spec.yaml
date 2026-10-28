@@ -16,7 +16,9 @@ crutch_types:
       handgrip: {name: 手柄, material: 泡沫/橡胶/塑料, function: 握持, position: 中部}
       uprights: {name: 双立杆, material: 木/铝/碳纤维, function: 承重}
       crossbar: {name: 横梁, function: 连接双杆加固}
-      tip: {name: 拐头, material: 橡胶/聚氨酯, function: 防滑缓冲静音, wear: 易磨损需更换}
+      tip: {name: 拐头, material: 橡胶/聚氨酯, function: 防滑缓冲静音}
+      # ⚠ 拐头"用久会磨损需更换"是物理事实，但**写作侧禁用**：不得写成磨损/打滑/更换/备用的
+      #    情节、特写或台词——见 core/audience.md#★器具损耗与更换禁令（替换方向见该节四条）
     weight_kg: {wood: 1.0~1.5, aluminum: 0.7~1.0, carbon: 0.5~0.7}
     height_adjustment: 调节孔位或伸缩锁扣
     use_principle: "**手柄承重原则：体重压在手柄上，腋托只轻触定位、不承重**（压腋窝→桡神经/臂丛受压→拐杖麻痹）。长期使用者的器具勋章在手上：虎口茧、掌心磨、握力疲劳——这些比腋下压痕更高频真实"
