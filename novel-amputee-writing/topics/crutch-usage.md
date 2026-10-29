@@ -62,7 +62,7 @@
 > 本文件只讲拐杖本身；无辅具角色的移动规则不在本文件内。
 >
 > - 移动方式分层（辅具移动为全局默认 / 单腿跳的四种适用情形）→ `topics/mobility-modes.md#一、移动方式分层`
-> - 单腿跳体力节奏与连跳上限 → `topics/mobility-modes.md#二、体力节奏`
+> - 单腿跳的体力节奏（连跳可行、长距离分段）→ `topics/mobility-modes.md#二、体力节奏`
 > - 爬行门槛 → `topics/mobility-modes.md#三、爬行的门槛`
 > - 无辅具角色的位移学（转向慢 / 不能追 / 不能跨 / 阵地依赖）→ `topics/mobility-modes.md#四、无辅具角色的位移学`
 >
