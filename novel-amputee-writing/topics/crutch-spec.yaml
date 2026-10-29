@@ -19,7 +19,7 @@ crutch_types:
       tip: {name: 拐头, material: 橡胶/聚氨酯, function: 防滑缓冲静音}
       # ⚠ 拐头"用久会磨损需更换"是物理事实，但**写作侧禁用**：不得写成磨损/打滑/更换/备用的
       #    情节、特写或台词——见 core/audience.md#★器具损耗与更换禁令（替换方向见该节四条）
-    weight_kg: {wood: 1.0~1.5, aluminum: 0.7~1.0, carbon: 0.5~0.7}
+    weight_kg: {wood: "1.0~1.5", aluminum: "0.7~1.0", carbon: "0.5~0.7"}  # 区间加引号：~ 在 YAML 是 null 记号，裸写跨解析器结果不一致
     height_adjustment: 调节孔位或伸缩锁扣
     use_principle: "**手柄承重原则：体重压在手柄上，腋托只轻触定位、不承重**（压腋窝→桡神经/臂丛受压→拐杖麻痹）。长期使用者的器具勋章在手上：虎口茧、掌心磨、握力疲劳——这些比腋下压痕更高频真实"
   forearm:
@@ -32,7 +32,7 @@ crutch_types:
       handgrip: {name: 手柄, position: 与腕横纹齐}
       upright: {name: 单立杆, material: 铝/碳纤维}
       tip: {name: 拐头, material: 橡胶/聚氨酯}
-    weight_kg: {aluminum: 0.5~0.8, carbon: 0.4~0.6}
+    weight_kg: {aluminum: "0.5~0.8", carbon: "0.4~0.6"}
   platform:
     name: 平台拐
     alias: [平台式前臂拐]
@@ -65,7 +65,8 @@ gait_patterns:
     特点: 快、步幅大、**耗力**（熟练者的快走方式，代价是手酸），平地常用
   四点步态:
     顺序: 右拐→左腿→左拐→右腿
-    适用: 双腿均有部分负重（截肢者较少用）
+    适用: 双腿均有部分负重
+    本技能: 不适用，勿写——单腿截肢无第二下肢，四点交替无第四点可言（与三点步态同理，见 topics/crutch-usage.md#一、步态）
 
 stairs:
   上楼: 健腿先上→拐杖跟上

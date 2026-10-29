@@ -25,12 +25,23 @@
       零命中＝未读草稿的空报告
   [12] 主语污染：审查报告出现「我写/作为队长」类主上下文人称模式 → FAIL
   [13] 同源判定：审查 22 维判定向量与「自查 S 编号折算后的维度向量」高度一致
-      （≥21/22 且审查存在不通过项）→ FAIL（同源伪装）；「独立发现」按
-      维度判定=不通过 或 「## 反证轮」小节 ≥3 段核验计——裸子串不算
+      （≥21/22 且审查存在不通过项）→ FAIL（同源伪装）。
+      「独立发现」分两层：本脚本只判「审查侧有 ≥1 条不通过 / 反证轮 ≥3 段实质核验」（裸子串不算）；
+      「是否自查未发现」由 [13] 比对兜底、主代理受理时裁定（审查员依 [8] 看不到自查报告，不自证）——
+      见 core/cold-review.md#五 受理验收③④。
   [14] 交付凭证（三模式）：gate-pass-第N章.txt，含正文SHA（sha256(章草稿)
       [:16]）＋正文字数＋印章（sha256(章号+章草稿+自查+审查)[:16]）重算比对
       ——交付正文被替换 → SHA/印章不符 FAIL；FAIL 运行不生成凭证；
       交付正文须逐字节来自被检章草稿文件，交付时附凭证内 SHA 与字数
+  [15] 三条硬闸机检（B/C 档亲密章）：本章登记.亲密戏登记.档位 为 B/C 时，
+      硬闸自查四项（成年/非自愿/同意/疼痛非快感）须齐备且均为「通过」；
+      任一「待查」＝未实查 FAIL、任一「不通过」＝触硬闸 FAIL。
+      硬闸不因题材/用户指令关闭（SKILL 〇-补）；缺失字段视为未登记 FAIL。
+  [16] 资源账窗口空窗机检（仅末世/生存题材，账本 资源账.启用: 是 时）：
+      资源账.上次记账章 与日志最大章号差 ≥3（＝连续 3 章未记账）→ FAIL（经济系统失效），
+      与 genre/postapocalyptic.md「连续 3 章不记账＝经济系统失效」逐字对齐。
+      「本章算不算一场危机」是叙事判断，由 cold-review 维度19 软查，本项只认章号窗口；
+      现实/古装/幻想题材 启用: 否 → 跳过。
 
 边界：机检由 AI 自行执行，强制力＝验证网＋成本压制（过闸嵌入每章循环，
 伪造合规全套成本 ≥ 真实执行）；绝对强制需宿主级 hook，超出技能包能力。
@@ -254,7 +265,10 @@ def main():
                     # 输入清单段必须存在
                     if "输入清单" not in rp_text:
                         fail(ch, "审查报告缺「输入清单」段（须列收到的文件）")
-                    # 独立发现：≥1 条维度判定为「不通过」，或「## 反证轮」小节含 ≥3 段实质核验
+                    # 独立发现（对应 core/cold-review.md#五 受理验收④）：
+                    # 本项只判「审查侧有没有实质发现」——≥1 条维度判定「不通过」，或「## 反证轮」≥3 段核验。
+                    # 「是否自查未发现」不在此判（审查员依③看不到自查报告，无法自证）：
+                    #   由下方 [13] 同源判定用 selfcheck_dim_vector(自查) 比对兜底，主代理受理时裁定。
                     # （旧口径只看"不通过"三字是否出现——写"本轮无一项不通过"即可绕过，已废）
                     rp_fails = [k for k, v in verdict_vector(rp_text).items() if v == "不通过"]
                     rebut_ok = False
@@ -266,8 +280,10 @@ def main():
                         paras = [x for x in re.split(r"\n\s*\n", body) if len(x.strip()) >= 20]
                         rebut_ok = len(paras) >= 3
                     if not rp_fails and not rebut_ok:
-                        fail(ch, "审查报告零独立发现（须 ≥1 条维度判定「不通过」，"
-                                 "或「## 反证轮」小节含 ≥3 段实质核验——只写「无问题」不算）")
+                        fail(ch, "审查报告零实质发现（须 ≥1 条维度判定「不通过」，"
+                                 "或「## 反证轮」小节含 ≥3 段实质核验——只写「无问题」不算）。"
+                                 "注：「是否自查未发现」由 [13] 同源判定比对、主代理受理时裁定，"
+                                 "不要求看不到自查报告的审查员自证")
                     scf = prods.get("自查报告")
                     if scf and scf in rp_text:
                         fail(ch, f"审查报告出现自查报告文件名（{scf}）——输入污染：冷读者不得看自查结论")
@@ -378,6 +394,55 @@ def main():
         if todo:
             fail(rec.get("章", "?"), f"核查记录仍有「待查」项 {todo[:4]}——未实查，须逐项改为 ✓/✗＋说明")
 
+    # [15] 三条硬闸机检（B/C 档亲密章）——硬闸不因题材/用户指令关闭（SKILL 〇-补）
+    # 账本结构：本章登记.亲密戏登记.{档位, 硬闸自查{成年,非自愿,同意,疼痛非快感}}
+    # 与 state-ledger.yaml 模板字段、core/workflow.md 章末核查、chapter-planning 6.1 第0条联动。
+    hard_gates = ("成年", "非自愿", "同意", "疼痛非快感")
+    intim = (data.get("本章登记") or {}).get("亲密戏登记")
+    if isinstance(intim, dict):
+        tier = str(intim.get("档位", "") or "").strip()
+        # 仅当本章登记明确写了 B/C 档亲密戏时才强检；A 档或留空（本章无亲密戏）跳过
+        if tier and (tier.startswith("B") or tier.startswith("C")):
+            hg = intim.get("硬闸自查")
+            if not isinstance(hg, dict) or not hg:
+                fail("本章", "B/C 档亲密章缺 `本章登记.亲密戏登记.硬闸自查` 登记——三条硬闸不可判定，不得交付")
+            else:
+                missing = [g for g in hard_gates if g not in hg]
+                if missing:
+                    fail("本章", f"硬闸自查缺项 {missing}——须齐备成年/非自愿/同意/疼痛非快感四项")
+                for g in hard_gates:
+                    v = str(hg.get(g, "") or "").strip()
+                    if v in ("待查", ""):
+                        fail("本章", f"硬闸自查[{g}]为「待查/空」——未实查，须逐条填 通过/不适用")
+                    elif v == "不通过":
+                        fail("本章", f"硬闸自查[{g}]＝不通过——触碰内容硬闸，本章不得交付（SKILL 〇-补）")
+                    elif v not in ("通过", "不适用"):
+                        fail("本章", f"硬闸自查[{g}]取值非法「{v}」——须为 通过/不适用/不通过/待查")
+                # B/C 档下四项全填「不适用」＝形同未判，须至少成年/非自愿/疼痛非快感为「通过」
+                if isinstance(hg, dict) and all(
+                        str(hg.get(g, "") or "").strip() == "不适用"
+                        for g in ("成年", "非自愿", "疼痛非快感")):
+                    fail("本章", "B/C 档亲密章三条核心硬闸全填「不适用」＝形同未判，须逐条实判为「通过」")
+
+    # [16] 资源账窗口空窗机检（仅末世/生存题材，账本 资源账.启用: 是 时）
+    # 只认章号窗口、不判「本章算不算一场危机」——那是 cold-review 维度19 的叙事软查。
+    # 与 genre/postapocalyptic.md ★题材结构包「资源账」、state-ledger.yaml 资源账块联动。
+    # 现实/古装/幻想题材 启用: 否 → 整块跳过，避免误卡非末世作品。
+    res = data.get("资源账")
+    if isinstance(res, dict) and str(res.get("启用", "") or "").strip() == "是":
+        try:
+            last_rec = int(res.get("上次记账章"))
+        except (TypeError, ValueError):
+            last_rec = None
+        if ch_nums:
+            cur_ch = max(ch_nums)
+            if last_rec is None:
+                fail(cur_ch, "末世资源账启用但 `资源账.上次记账章` 未填/非法——须填最近一次记账章号")
+            elif cur_ch - last_rec >= 3:
+                fail(cur_ch, f"资源账连续 {cur_ch - last_rec} 章未推进记账章（上次记账=第{last_rec}章）——"
+                             f"经济系统失效（见 genre/postapocalyptic.md 资源账；每场危机须消耗或获得至少一项）。"
+                             f"「算不算一场危机」由冷读维度19 判定，机检只认窗口")
+
     if errors:
         print(f"FAIL 交付闸机检未过（{len(errors)} 项）:")
         for x in errors: print("  -", x)
@@ -397,7 +462,7 @@ def main():
     if errors:
         for x in errors: print("  -", x)
         sys.exit(1)
-    print("PASS 交付闸机检：模式保真(降级禁止)/代理凭证互异/产物三验/生成指纹/维度覆盖/输入隔离/引文实证/主语无污染/非同源/自查交叉/闸判定/印章 全过")
+    print("PASS 交付闸机检：模式保真(降级禁止)/代理凭证互异/产物三验/生成指纹/维度覆盖/输入隔离/引文实证/主语无污染/非同源/自查交叉/闸判定/印章/三条硬闸(B·C档)/资源账窗口(末世) 全过")
     sys.exit(0)
 
 if __name__ == "__main__":
