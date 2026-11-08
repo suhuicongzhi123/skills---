@@ -8,7 +8,7 @@
 |------|-----|------|
 | `main` | `v4.12.1` | 正式版 |
 | `preview` | `v5.23.0` | **测试版（当前最新 tag）** |
-| `develop` | `v6.0.0` | 开发线（宿主接入层已完成，验证后推 preview） |
+| `develop` | `v6.1.0` | 开发线（宿主接入层＋hook 平台兼容层，验证后推 preview） |
 
 ### 安装
 
@@ -22,7 +22,7 @@ git clone https://github.com/suhuicongzhi123/skills---.git
 git clone -b preview https://github.com/suhuicongzhi123/skills---.git
 ```
 
-开发线分支（当前 v6.0.0）：
+开发线分支（当前 v6.1.0）：
 ```bash
 git clone -b develop https://github.com/suhuicongzhi123/skills---.git
 ```
@@ -75,9 +75,25 @@ git checkout v5.23.0   # 或 v5.21.3 / v5.21.2 / v5.21.1 / v5.21.0 / v5.20.0 / v
 > 全域审查整改：生理事实/硬闸补落点/命名编号统一/脚本机检纵深（v5.22.0）、
 > 待观察项落地：贴身层/角色弧/资源账强机检/张力仲裁/验收澄清（v5.23.0）、
 > 宿主级接入层：Claude Code 参照实现（hook 强制注入+fork 红队+verify 交付闸）
-> ＋三处实测 bug 修复（v6.0.0，仅 develop）。
+> ＋三处实测 bug 修复（v6.0.0，仅 develop）、
+> 宿主 hook 平台兼容层：host-hooks 平台中立规范＋安装转变器
+> （国内平台安装时自动转变 hook 形态，v6.1.0，仅 develop）。
 
 ## 版本说明
+
+### v6.1.0 · 宿主 hook 平台兼容层（开发线）
+
+- **解决的问题**：`.claude/` 只被 Claude Code 识别，国内 agent 平台安装技能时会
+  自动忽略该目录——宿主 hook 需要兼容性处理
+- **方案：hook 语义与平台形态分离**——`host-hooks.yaml`（平台中立规范，单一事实源：
+  四条 hook 语义＋转变规则三分＋平台注册表）＋ `scripts/install-host-hooks.py`
+  （安装转变器：--list/--detect/--platform/--yes/--remove）
+- **转变规则三分**：事件钩子型→等价注册（宿主强制，claude-code 生成物与仓库根
+  JSON 深比较等价实测 True）；规则常驻型（多数国内平台）→平台规则目录生成规则文件
+  ＋**强制力降级显式声明**；未核实平台→不猜测写入（exit 3＋人工注册指引）
+- 联动：SKILL 新增「〇-宿、安装后注册」节；PLATFORM-CN/platform-capabilities/
+  workflow 同步；哈希基线不变（`ee2713cfb978e7d5`）
+- 本版仅在 develop 分支，验证通过后推送 preview 测试通道
 
 ### v6.0.0 · 宿主级接入层（Claude Code 参照实现）＋三处实测 bug 修复（开发线）
 
