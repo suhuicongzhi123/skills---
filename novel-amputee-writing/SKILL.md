@@ -1,6 +1,6 @@
 ---
 name: novel-amputee-writing
-version: 5.23.0
+version: 6.0.0
 author: 溯洄从之
 description: 面向慕残者(devotee/wannabe)群体的截肢者题材小说写作技能。主角为截肢者，下肢截肢为主（髋离断为主）、上肢截肢为辅（肩离断，含肘离断/腕离断）。覆盖拐杖、假肢、日常动作、高频生活场景、身体细节、幻肢感、亲密关系、W视角等主要方面，含剧情节奏/弧线/场景结构/长篇连续性通用写作技法，支持现实向、幻想向、末世、古装四类题材。触发条件：用户要求写截肢者/残障者题材小说、续写、大纲、人物设定、章节，或提到"慕残""截肢""残肢""拐杖""假肢""髋离断""幻肢""独臂""肩离断""肘离断""腕离断""单臂"等；或明确要求本技能。不触发：非截肢题材普通小说、纯医学/康复专业内容、猎奇式苦难叙事。
 ---
@@ -233,7 +233,8 @@ description: 面向慕残者(devotee/wannabe)群体的截肢者题材小说写�
 ## 二、文件结构与格式
 
 > **改完必跑自检**：`python scripts/selfcheck.py` —— 查注入锚点落空 / 悬空引用 /
-> 类型必填节 / 已废止表述复发 / 孤儿文件五项。跨版本残留与孤儿文件是本包历史上所有冲突的来源，改口径后务必跑。
+> 类型必填节 / 已废止表述复发 / 孤儿文件五项；**再跑** `python scripts/compile_rules.py` ——
+> 查枚举冲突 / 编号重复 / 边界差一档 / 状态表双副本一致性。跨版本残留与孤儿文件是本包历史上所有冲突的来源，改口径后务必两条都跑。
 
 | 目录 | 格式 | 职责 |
 |------|------|------|
@@ -241,7 +242,12 @@ description: 面向慕残者(devotee/wannabe)群体的截肢者题材小说写�
 | `types/` | md | 截肢生理事实，按类型隔离（易扩展） |
 | `topics/` | md + yaml | 主题域专项（跨类型） |
 | `genre/` | md | 题材适配 |
-| `templates/` | md | 产出模板 |
+| `templates/` | md + yaml + json | 产出模板与结构化契约 |
+| `rules/` | yaml + md | **规则 IR 单一事实源**（`rules/rules.yaml`）＋硬约束常驻层（`rules/hard-layer.md`） |
+| `eval/` | yaml | 离线回归评测集（`eval/eval-set.yaml`），不进创作上下文 |
+| `scripts/` | py | 机检 / 编译检查 / 规则展开 / 状态机 / 校验回路 / 离线优化 |
+| 根 | md | `PLATFORM-CN.md` 平台适配与降级声明 |
+| 仓库根 `.claude/` | json + md | 宿主接入层（Claude Code 参照实现，v6.0.0 起）：SessionStart 硬层注入 hook＋verify/redteam-review/chapter-rules 三 skill，见 `PLATFORM-CN.md` |
 
 ## 三、拆分原理
 
@@ -249,6 +255,15 @@ description: 面向慕残者(devotee/wannabe)群体的截肢者题材小说写�
 2. **主题域解耦类型差异**：`topics/` 下各主题文件写通用规则，类型特有差异在 `types/{type}.md` 对应小节。
 3. **按需注入**：本总纲放注入索引，Agent 按需读取专项，省上下文与创作成本。
 4. **单一权威源**：同一规则只在一处立权威（如内容偏好/回避清单在 `core/audience.md`、幻肢机制在 `topics/timeline.md`、蹲豁免在各类型文件），其余位置一律指针引用。
+5. **口径与解释分离**（v5.24.0）：可判定的取值、枚举、边界、编号、状态转移收进 `rules/rules.yaml`
+   作为**机器可读事实源**；散文解释与示例仍留在各专项文件。改口径先改 IR → 跑编译检查 → 再改下游，
+   不得靠 AI 临场仲裁两份副本。
+6. **内核与增强层分离**：`PLATFORM-CN.md` 定义平台能力位与分层开关，
+   纯数据内核全平台可跑，脚本/hooks/子代理/logits 属可选增强层；**任何降级必须显式声明**。
+7. **宿主接入层随仓库分发**（v6.0.0）：仓库根 `.claude/` 提供 Claude Code 参照实现
+   （SessionStart 硬层强制注入＋chapter-rules/redteam-review/verify 三 skill），
+   L0–L5+L6 全开；hook 事件集与 fork 语义为 Claude Code 专有扩展，
+   其他平台按 `PLATFORM-CN.md` 适配自检重建、不可直接搬配置。
 
 ## 四、创作工作流
 
@@ -416,6 +431,23 @@ injection:
     人物卡: templates/character-card.md
     章节: templates/chapter.md            # 含字段（本章阅读承诺/张力级+节拍角色/上章钩子接住/上章钩子回收/主冲突线beat）+★文学自评（合格锚+存档）+心动句非同源
     状态账本: templates/state-ledger.yaml  # 含题材契约块（含基调）+本章登记字段（阅读承诺/张力级/节拍角色/上章钩子接住/上章钩子回收/主冲突线beat+主冲突线近五章）+情节事件登记（查重）+本章自评块+distribution.examples_used
+    章节状态: templates/state-ledger.yaml#章节状态  # 状态机层（当前态/轨迹）；gatecheck [17] 校验，缺块则跳过以兼容旧账本
+    账本契约: templates/ledger-schema.json  # 结构化字段契约；格式合法 ≠ 内容合规
+    本章规则包: templates/chapter-contract.md  # 由 scripts/query_rules.py 展开；单份文本，不依赖注入索引命中
+    红队简报: templates/redteam-brief.md  # 仅真独立上下文子代理可启用；无子代理须显式声明独立性作废
+    平台能力: templates/platform-capabilities.yaml  # 能力矩阵与分层开关（机器可读）
+  架构层(任何阶段可查):
+    - rules/rules.yaml                # ★规则 IR 单一事实源：枚举/不变量/规则/状态机/编译检查清单
+    - rules/hard-layer.md             # ★硬约束常驻层：整段注入，❌ 不参与检索、不参与相似度裁剪
+    - PLATFORM-CN.md                  # 平台适配与降级声明；第 0 步＝国内平台合规前置验证
+    - scripts/compile_rules.py        # 编译期一致性检查（离线，可挂 CI）
+    - scripts/query_rules.py          # 按 scope 展开本章规则包（CLI / text / json / markdown）
+    - scripts/state_machine.py        # 章循环状态机（转移由代码判定）
+    - scripts/validate_output.py      # 生成后校验＋修复回路（结构化违规清单＋回炉指令）
+    - scripts/optimize_prompts.py     # 离线回归评估／DSPy adapter 预留接口（当前输出静态报告）
+    - eval/eval-set.yaml              # 历史真实问题回归集（不进创作上下文）
+  # ⚠ 硬层注入优先于任何按需注入：它体量约 4 KB，丢了会写出机检查不出的严重错误。
+  # ⚠ 机检全绿 ≠ 内容无误：生理事实语义、文笔、心动句非同源仍须硬层常驻＋冷读＋人工校对。
   章末必过审查:                        # 本节 18 项为「必过子集」（含严重错误五类合一闸＋交付闸硬卡口）；完整勾选清单见 templates/chapter.md（S01–S49）
     严重错误五类(合一闸): SKILL.md#〇-补、严重错误分级（截肢事实偏移/生理动作违规/辅具连续性偏移/基调偏移/情节重复——任一命中即严重失败，先改后交）
     回避清单(含器具损耗禁令): core/audience.md#回避清单（幻肢痛/劳损/伤口处理/猎奇/励志二元/补偿叙事；

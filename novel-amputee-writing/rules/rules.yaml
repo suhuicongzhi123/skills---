@@ -1,0 +1,305 @@
+# 规则 IR（单一事实源 · v5.24.0）
+#
+# 定位：本文件是**口径与规则约束的机器可读事实源**，不是给 AI 读的散文。
+#       散文解释仍在 core/ topics/ types/ genre/ 各文件；本文件只存「可判定的那部分」，
+#       并由 scripts/compile_rules.py 做编译期一致性检查。
+# 权威关系：本文件的 enumerations / invariants / gate_ids 是**编译期校验基准**；
+#       写作时的解释与示例仍以各专项文件为准。两者冲突时，以 scripts/compile_rules.py
+#       的编译结果为准暴露冲突，由维护者改齐，**不得靠 AI 临场仲裁**。
+# 更新纪律：改任何枚举、编号、边界值，先改本文件 → 跑 compile_rules.py → 再改下游文件。
+#       本文件不参与 RAG / 语义检索（见 rules/hard-layer.md 与 PLATFORM-CN.md）。
+# scope 约定：query_rules.py 的 matches() **只消费 scope**（dict，省略某维＝全适用）；
+#       R-006/R-012/R-017 的 scope_key 是**预留维度标注**，当前不参与过滤，
+#       ❌ 不得据它推断「已支持按该维展开」（见 core/workflow.md 第 8 节）。
+
+schema_version: 1
+skill_version: 6.0.0
+
+# ── 一、枚举（唯一定义；下游文件不得另立取值）──────────────────
+enumerations:
+  题材大类: [现实向, 幻想向, 末世生存, 古装向]     # 与 core/character-setup.md 账本字段权威定义逐字一致
+  冲突强度档: [烈, 高, 中, 低]                     # 默认 中
+  截肢时长档位: [先天档, 近期档, 多年档]           # 一律中文带「档」，禁用字母
+  亲密尺度档: [A 含蓄, B 情色（半程）, C 成人（全程）]  # 默认 A；B/C 须用户显式确认
+  工作流模式: [flash, pro, max]                    # 全书锁定
+  审查深度: [全审, 简审]                           # 简审有禁区，见 core/workflow.md
+  篇幅档: [单章, 短篇, 中篇, 长篇, 长篇·超长]
+  辅具四类: [腋拐, 肘拐(前臂拐), 平台拐, 假肢]     # 及其组合；「无」＝单腿跳；轮椅是双侧截肢唯一例外
+  侧别: [左, 右, 双]
+  受限识别层: [核心受限, 弱受限, 点缀]
+  受限让路补位层: [受限在场, 受限余波]             # 不占配额；与识别层合称「五层」
+  招牌元素: [①残肢/剩余部分细节, ②颤动, ③幻肢感, ④空, ⑤辅助器具特写, ⑥被看见, ⑦亲密中的身体]
+  触发型元素: [①残肢/剩余部分细节, ②颤动]          # 无契机不硬写、豁免限频
+  常规型元素: [③幻肢感, ④空, ⑤辅助器具特写, ⑥被看见, ⑦亲密中的身体]
+  资源账物资: [水, 食物, 药, 燃料, 子弹, 电池]     # 与 genre/postapocalyptic.md 逐字一致
+  硬闸四项: [成年, 非自愿, 同意, 疼痛非快感]       # gatecheck [15] 读取字段
+  硬闸三条核心: [成年, 非自愿, 疼痛非快感]
+  交付闸机检编号: ['[15]', '[16]', '[17]']        # [15] 硬闸 / [16] 资源账 / [17] 章循环状态机
+  # 题材别名：历史/自然语言写法 → 唯一枚举值；query_rules.py 匹配前归一化，
+  # 防止账本、genre 文件、口语简称与 IR 枚举漂移导致专属规则漏展开（第三轮冷读实证）。
+  题材别名:
+    末世: 末世生存
+    末世向: 末世生存
+    末世·丧尸·生存: 末世生存
+    末世/丧尸/生存: 末世生存
+
+# ── 二、跨字段不变量（编译期可判）────────────────────────────
+invariants:
+  - id: INV-01
+    assertion: 亲密尺度档为 B 或 C 时，硬闸四项须齐备且实判为「通过」
+    enforced_by: gatecheck [15]
+    scope: 所有题材、所有模式
+  - id: INV-02
+    assertion: 三条硬闸不因题材、世界观、用户指令关闭
+    refs: SKILL.md 〇-补 严重错误分级
+    severity: hard
+  - id: INV-03
+    assertion: 资源账.启用 为「是」时，上次记账章与日志最大章号差 >= 3 即不得交付
+    enforced_by: gatecheck [16]
+    boundary_note: 规则文字「连续 3 章未记账」＝代码 `>= 3`；❌ 不得写成 `> 3`（差一档）
+    scope: 末世生存
+  - id: INV-04
+    assertion: 时长档位只用中文；A/B/C 专指亲密尺度档
+    severity: hard
+  - id: INV-05
+    assertion: 常规型元素限频＝两次出现之间至少隔 1 章（第 N 章后最早 N+2 章再现）；
+               ③幻肢感豁免本限频，频率只由 topics/timeline.md 幻肢档位总表决定
+    severity: hard
+  - id: INV-06
+    assertion: 受限层级共五层＝识别层三项＋让路补位层两项；「供给三层」是配额切面，不是识别层
+    severity: hard
+  - id: INV-07
+    assertion: 示范节清单为八处，唯一清单在 core/audience.md#四道闸门
+    severity: hard
+  - id: INV-08
+    assertion: 冷读 22 维、章末自查 S01–S49、必过子集 18 项，三处计数不得漂移
+    severity: hard
+  - id: INV-09
+    assertion: 交付闸脚本 gatecheck.py 的 sha256(CRLF→LF) 前 16 位须等于 selfcheck.py 的 GATECHECK_SHA
+    enforced_by: selfcheck [5]
+    severity: hard
+  - id: INV-10
+    assertion: 新增题材包时，须在 genre/ 补该题材文件、并在本文件补一条带 scope.题材大类 的专属规则
+               （现有四条：R-013 末世 / R-014 幻想 / R-015 古装 / R-016 现实向），
+               否则 query_rules.py 展开该题材时无专属规则可命中
+    severity: soft
+
+# ── 三、规则（按 scope 展开；供 scripts/query_rules.py 消费）────
+# scope 字段取值来自 enumerations；省略某维＝该维全适用。
+# layer: hard=硬约束常驻（不参与检索） / standard=按 scope 展开 / soft=体检提示
+rules:
+  - id: R-001
+    layer: hard
+    title: 三条硬闸
+    assertion: 成年 ≥18 / 非自愿 / 疼痛非快感；B/C 档另需在场同意（含酒精·半醉不算）
+    source: core/chapter-planning.md
+    severity: hard
+  - id: R-002
+    layer: hard
+    title: 回避清单
+    assertion: 幻肢痛 / 健腿劳损 / 伤口处理 / 苦难渲染 / 猎奇；受伤本身不回避
+    source: core/audience.md
+    severity: hard
+  - id: R-003
+    layer: hard
+    title: 器具损耗与更换禁令
+    assertion: 拐头·杖尖磨损、换新、送修、备用及相关台词，命中即改（不是限频）
+    source: core/audience.md
+    severity: hard
+  - id: R-004
+    layer: hard
+    title: 类型生理红线
+    assertion: 按 types/{type}.md 摘本类型禁止项与可做项；❌ 不跨类型套用
+    source: types/{type}.md
+    severity: hard
+    scope_note: 动态填充，不在本文件写死生理内容（生理事实的唯一权威仍是 types/ 各文件）
+  - id: R-005
+    layer: hard
+    title: 辅具四类限定
+    assertion: 辅具仅腋拐/肘拐(前臂拐)/平台拐/假肢及组合；轮椅仅双侧截肢例外
+    source: SKILL.md
+    severity: hard
+  - id: R-006
+    layer: standard
+    title: 限频与契机
+    assertion: 常规型至少隔 1 章；触发型①②无契机不硬写；③幻肢感豁免限频
+    source: core/audience.md
+    severity: hard
+    scope_key: 招牌元素
+  - id: R-007
+    layer: standard
+    title: 跨障分级
+    assertion: 低矮障碍可单腿一跃而过；膝盖以上高度或落点须精准的障碍须绕
+    source: topics/mobility-modes.md
+    severity: hard
+    note: ❌ 已废止「凡需抬腿越过的都过不去」的绝对化口径
+  - id: R-008
+    layer: standard
+    title: 站定稳·位移弱
+    assertion: 稳的是单脚＋第二支点三角支撑；截断整腿后重心上移偏健侧，❌ 不写「重心低」
+    source: topics/mobility-modes.md
+    severity: hard
+  - id: R-009
+    layer: standard
+    title: 承重部位
+    assertion: 体重压手柄、腋托只轻触定位；疲劳顺序是手掌/虎口先，其次健腿
+    source: topics/daily-scenes.md
+    severity: hard
+  - id: R-010
+    layer: standard
+    title: 受限归因
+    assertion: 环境只放大难度、不作受限来源；体力代价归弱受限层，不当成因、不占核心配额
+    source: topics/limitation-scenes.md
+    severity: hard
+  - id: R-011
+    layer: standard
+    title: 受限五层与让路
+    assertion: 识别层三项＋补位层两项；让路须登记且补法不为「无」；破窗＝窗口内核心全 0 且无在场/余波
+    source: core/chapter-planning.md
+    severity: hard
+  - id: R-012
+    layer: standard
+    title: 开篇留存窗口
+    assertion: 前 3 章张力级 ≥3、不得回落至 1、每章强钩 H；低冲突档或温馨日常放宽至 ≥2（两条不豁免）
+    source: core/opening.md
+    severity: hard
+    scope_key: 冲突强度档
+  - id: R-013
+    layer: standard
+    title: 资源账
+    assertion: 每场危机须消耗或获得至少一项并推进上次记账章；连续 3 章未推进＝经济系统失效
+    source: genre/postapocalyptic.md
+    severity: hard
+    scope:
+      题材大类: [末世生存]
+    enforced_by: gatecheck [16]
+  - id: R-014
+    layer: standard
+    title: 特殊移动登记
+    assertion: 特殊移动须登记形态/代价/失效/当前可用；落地回落辅具四类；不得代偿掉身体事实
+    source: genre/fantasy.md
+    source_note: 登记规则见 genre/fantasy.md（该处用「能力形态/代价/限制条件」措辞）；
+                 assertion 里的「形态/代价/失效/当前可用」是 templates/state-ledger.yaml 特殊移动块的字段名
+    severity: hard
+    scope:
+      题材大类: [幻想向]
+  - id: R-015
+    layer: standard
+    title: 古装未成年防线
+    assertion: 及笄/弱冠不等于成年线；议亲/婚配/过夜/侍妾场次须写明具体岁数 ≥18，未写明不得排 B/C
+    source: genre/historical.md
+    severity: hard
+    scope:
+      题材大类: [古装向]
+  - id: R-016
+    layer: standard
+    title: 现实向题材红线
+    assertion: 器具、动作、身体细节严格符合现实截肢事实；无高科技/魔法元素；
+               两条题材红线＝不写超自然（出现任何即非现实向）、不写治愈（截肢不可逆）；
+               日常质感优先，不写成不便清单；制度与流程是天然冲突源，但受限来源恒为身体结构、不写环境控诉
+    source: genre/realistic.md
+    severity: hard
+    scope:
+      题材大类: [现实向]
+    source_note: 尺度档默认 A 见 core/character-setup.md 收集流程第 11 题「亲密尺度档」；目击者只写成年见 topics/intimacy-genre.md（硬闸延伸，见 rules/hard-layer.md）；
+                 标签锁定见 topics/clothing.md#四-补、标签锁定（跨题材通用，非现实向专属）
+  - id: R-017
+    layer: standard
+    title: 亲密尺度分档
+    assertion: A 含蓄默认；B 情色（半程）与 C 成人（全程）须显式确认；B/C 走 gatecheck [15]
+    source: topics/intimacy.md
+    severity: hard
+    scope_key: 亲密尺度档
+  - id: R-018
+    layer: standard
+    title: 示范句非同源
+    assertion: 章末心动句与八处示范节清单比对，载体/动作/落点意象 ≥2 项相同＝复写，必改
+    source: core/audience.md
+    severity: hard
+  - id: R-019
+    layer: standard
+    title: 章循环手续
+    assertion: 章末自查 → 冷读稽查(pro/max) → 修正 → 更新账本 → gatecheck PASS → 才交付
+    source: core/workflow.md
+    severity: hard
+    enforced_by: gatecheck [17]
+  - id: R-020
+    layer: soft
+    title: 素材面健康度
+    assertion: 任意连续 8 章常规型覆盖 <4 类时提示检查契机标注；体检提示，不是补写凑数
+    source: core/audience.md
+    severity: soft
+  - id: R-021
+    layer: soft
+    title: 功能配比与基调漂移
+    assertion: 章节功能配比每 10 章窗口偏离基准 ≥2 章触发调整（前/后各 5 章分别校验）；
+               本章须在基调核心循环内（严重错误第 4 类）
+    source: core/chapter-planning.md
+    severity: soft
+    source_note: 基调漂移的检测判据与稽查挂在 core/cold-review.md 维度 20（对照 templates/outline.md#★主题材契约）
+  - id: R-022
+    layer: soft
+    title: 去 AI 化
+    assertion: 无套话词、无升华尾、无连续 3 段以上等长段；破折号 ≤3/章
+    source: core/style.md
+    severity: soft
+
+# ── 四、章循环状态机（供 scripts/state_machine.py 与 gatecheck [17] 消费）──
+chapter_states:
+  allowed: [待规划, 已规划, 写作中, 已自查, 已冷读, 已修正, 已过闸, 已交付]
+  transitions:
+    待规划: [已规划]
+    已规划: [写作中]
+    写作中: [已自查]
+    已自查: [已冷读, 已修正]        # flash 直接到已修正；pro/max 过已冷读
+    已冷读: [已修正]
+    已修正: [已过闸]
+    已过闸: [已交付]
+    已交付: [待规划]                # 下一章
+  mode_exceptions:
+    flash: 已自查 → 已修正（跳过已冷读，且不得伪填冷读凭证）
+    pro: 已自查 → 已冷读 → 已修正
+    max: 已自查 → 已冷读 → 已修正
+  forbidden_jumps:
+    - 写作中 → 已交付
+    - 已规划 → 已过闸
+    - 已自查 → 已交付
+
+# ── 五、编译期一致性检查清单（scripts/compile_rules.py 消费）────
+consistency_checks:
+  boundary_pairs:
+    - rule_text: 连续 3 章未记账
+      code_expr: 'cur_ch - last_rec >= 3'
+      file: scripts/gatecheck.py
+      note: 规则文字与代码边界必须同档（历史上曾误写 > 3）；破窗窗口按篇幅分档，超长篇（≥61）为连续 4 章 0 条，见 core/chapter-planning.md 篇幅表
+    - rule_text: 连续 3 章 0 条
+      code_expr: 破窗
+      file: core/chapter-planning.md
+      note: 软硬分开；窗口内核心全 0 且无在场/余波才算
+  enum_sources:
+    - enum: 截肢时长档位
+      files: [core/character-setup.md, topics/timeline.md, templates/character-card.md, topics/wannabe.md]
+      forbidden_literals: [近期 B, 多年 C, 时长档位（B/C）]   # 已废止表述，仅登记为编译期禁用字面量；❌ 不得在正文出现
+    - enum: 资源账物资
+      files: [templates/state-ledger.yaml, genre/postapocalyptic.md]
+      forbidden_literals: [弹药]                          # 已废止表述，仅登记为编译期禁用字面量；❌ 不得在正文出现
+    - enum: 交付闸机检编号
+      files: [scripts/gatecheck.py, scripts/selfcheck.py, core/workflow.md, core/chapter-planning.md, core/cold-review.md, templates/state-ledger.yaml]
+      note: 同一编号只能指向一个机检项
+  anchor_sources:
+    - file: core/audience.md
+      anchors: [★招牌元素密度与疲劳控制, ★器具损耗与更换禁令, 四道闸门, ★安全败退阀]
+    - file: topics/limitation-scenes.md
+      anchors: [衍生类 1, 衍生类 2, 衍生类 4, 四-补、受限归因判据]
+    - file: core/chapter-planning.md
+      anchors: [一-补1, 一-补2, 二、章末钩子类型库, 6.1 六条硬规则]
+  count_checks:
+    - what: 示范节清单
+      expected: 八处
+      files: [core/audience.md, templates/chapter.md]
+    - what: 受限层级
+      expected: 五层
+      files: [topics/limitation-scenes.md, core/audience.md, core/cold-review.md]
+    - what: 冷读维度
+      expected: 22
+      files: [core/cold-review.md, core/workflow.md]

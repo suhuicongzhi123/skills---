@@ -330,6 +330,65 @@ FAIL 运行不生成凭证）；任何产物事后篡改或手写伪造 → 下�
 - max 模式：审查员稽查、队长裁定、记账员落账（分工见 `#〇、工作流模式` max 细则）
 - 子代理调用失败 → 重新调用直至成功（降级禁止，见 cold-review 六）
 
+## 8. 架构层接口（v6.0.0 · 四方向落地＋宿主接入层）
+
+> 本节只给**接口与执行顺序**，规则本体在 `rules/rules.yaml`、解释与示例仍在各专项文件。
+> 平台能力差异与降级声明见 `PLATFORM-CN.md`；**任何一层降级必须写进账本 `工作流执行日志`**，
+> 不得静默。以下默认按能力较全的平台描述，无 shell / 无 hooks / 无子代理时按适配层降级。
+
+### 开写前（每章）
+
+1. **合规前置验证**（国内平台第 0 步，见 `PLATFORM-CN.md`）——未通过不得开写。
+2. **注入硬层**：整段读 `rules/hard-layer.md`，❌ 不摘要、不参与语义检索。
+3. **编译检查**：`python scripts/compile_rules.py` → 非 PASS 先改齐口径（可离线跑、可挂 CI）。
+4. **展开本章规则包**：`python scripts/query_rules.py --genre <题材> --type <类型> --tier <尺度档> --mode <模式> --chapter-kind <章型> --conflict <冲突强度档> --chapter <N>`
+   → 产出规则包文本：**按 `scope` 展开，当前以题材大类为主**；类型 / 尺度档 / 模式 / 冲突强度档 / 章型 / 章号
+   仅作坐标标注，不参与过滤（`scope_key` 是预留维度，见 `rules/rules.yaml` 头部 scope 约定）。
+   → 据此填写 `templates/chapter-contract.md`。参数取自账本，结果确定，不靠 AI 判断读哪些文件。
+   ⚠ `--out` 须指向**项目目录**，❌ 不得覆盖技能目录内的模板骨架。
+5. **状态推进**：`python scripts/state_machine.py --ledger <账本> --advance 已规划`
+   → 合法转移由代码判定；跳步直接报错。
+   落盘为**文本级推进**（只改写账本「章节状态」块内 当前态/轨迹 两行，
+   注释与手写格式逐字保留——v6.0.0 修复）；轨迹为跨章累计（「已交付 → 待规划」回卷即设计）。
+
+### 写作与交付（顺序不可跳）
+
+章末自查 → 冷读稽查（pro/max，**真独立上下文**）→ 红队验证（`templates/redteam-brief.md`，
+与 22 维冷读分工）→ 修正 → 更新账本（含 `章节状态.轨迹`）→
+`python scripts/validate_output.py --project <项目> --chapter N --repair-hint` →
+不 PASS 则按回炉指令修复后重跑 → `python scripts/gatecheck.py <项目> --chapter N` PASS → 才交付。
+（`validate_output.py` 自 v6.0.0 起子进程管道两侧统一 UTF-8，Windows GBK locale 不再崩溃；
+gatecheck [17] 闭环判定看**当前章段**＝轨迹中最后一次「已交付 → 待规划」回卷点之后的段。）
+
+> ⚠ 冷读独立性：无真子代理的平台**不得**用同会话角色扮演顶替后仍称「独立冷读」；
+> 须在日志写明「独立性声明作废，质量等级降为自审」（见 `PLATFORM-CN.md`）。
+> 状态机映射：红队验证归入「已冷读」态，**不单独设态**；8 态定义见 `rules/rules.yaml chapter_states`。
+
+### 离线（不进创作上下文）
+
+- `eval/eval-set.yaml` 收录历史上机检全绿时仍真实发生过的 18 条回归用例；
+  `python scripts/optimize_prompts.py --report` 输出分层加权风险概览与逐条回归清单；
+  **评测用例 L3（语义/人工层）须由人工逐字校对裁决**，静态评分不得代替、也不产出「命中率」结论。
+  优化产物是普通文本，可喂给任意平台。
+- `scripts/compile_rules.py` 与 `optimize_prompts.py` 均可离线运行；
+  **编译检查是全平台最硬的保证**（不依赖 agent 愿不愿意执行），离线优化器只是辅助评估工具。
+
+### 边界（务必读）
+
+机检、编译检查、Schema、状态机只保证**可形式化**的项。
+生理事实语义、文笔、心动句非同源仍须靠硬层常驻＋冷读＋人工逐字校对。
+**机检全绿 ≠ 内容无误。**
+
+### Claude Code 会话（宿主接入层 · 参照实现）
+
+Claude Code 中本仓库 clone 即得仓库根 `.claude/` 接入层（详见 `PLATFORM-CN.md` 参照实现节）：
+
+- **SessionStart 自动注入硬层**（settings.json hook，无需 AI 自觉）；
+- `/chapter-rules`——开写前规则包展开（skill 激活即 `!` 动态注入硬层）；
+- `/redteam-review`——章末红队验证（`context: fork` 独立子代理上下文）；
+- `/verify`——交付闸四链（selfcheck → compile_rules → state_machine → gatecheck），
+  且 commit 前会被自动指示运行（verify 命名约定）。
+
 ## 注入原则
 - 不主动全量加载专项，写到哪读到哪
 - 类型差异小节用 `types/{type}.md#X` 叠加

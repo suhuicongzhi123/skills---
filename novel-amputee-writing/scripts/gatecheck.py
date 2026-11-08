@@ -42,6 +42,12 @@
       与 genre/postapocalyptic.md「连续 3 章不记账＝经济系统失效」逐字对齐。
       「本章算不算一场危机」是叙事判断，由 cold-review 维度19 软查，本项只认章号窗口；
       现实/古装/幻想题材 启用: 否 → 跳过。
+  [17] 章循环状态机（启用状态机层时；账本有 章节状态 块才校验，缺失则跳过以兼容旧账本）：
+      状态轨迹须为合法转移、不得跳步；当前章段（轨迹中最后一次「已交付 → 待规划」回卷点
+      之后的段——轨迹为跨章累计，回卷即 state_machine 的推进设计）出现「已过闸」或末态
+      「已交付」时须闭合到「已过闸 → 已交付」；flash 不得伪填「已冷读」，pro/max 交付
+      轨迹必须过「已冷读」。状态表内嵌于本脚本（自包含，运行时不依赖技能目录），
+      与 rules/rules.yaml chapter_states 由 scripts/compile_rules.py 校验一致。
 
 边界：机检由 AI 自行执行，强制力＝验证网＋成本压制（过闸嵌入每章循环，
 伪造合规全套成本 ≥ 真实执行）；绝对强制需宿主级 hook，超出技能包能力。
@@ -443,6 +449,57 @@ def main():
                              f"经济系统失效（见 genre/postapocalyptic.md 资源账；每场危机须消耗或获得至少一项）。"
                              f"「算不算一场危机」由冷读维度19 判定，机检只认窗口")
 
+    # [17] 章循环状态机——自包含状态表（运行时不依赖技能目录）。
+    # ⚠ 本表与 rules/rules.yaml 的 chapter_states 是同一份口径的两个副本，
+    #   由 scripts/compile_rules.py [FSM-*] 校验一致；改一处必须两处同步。
+    # 账本缺 章节状态 块时整块跳过——兼容未启用状态机层的旧账本，不误卡。
+    FSM_ALLOWED = ["待规划", "已规划", "写作中", "已自查", "已冷读", "已修正", "已过闸", "已交付"]
+    FSM_TRANS = {
+        "待规划": ["已规划"],
+        "已规划": ["写作中"],
+        "写作中": ["已自查"],
+        "已自查": ["已冷读", "已修正"],   # flash 直接到已修正
+        "已冷读": ["已修正"],
+        "已修正": ["已过闸"],
+        "已过闸": ["已交付"],
+        "已交付": ["待规划"],             # 下一章
+    }
+    FSM_FORBIDDEN = [("写作中", "已交付"), ("已规划", "已过闸"), ("已自查", "已交付")]
+    st = data.get("章节状态")
+    if isinstance(st, dict) and st:
+        cur_state = str(st.get("当前态", "") or "").strip()
+        trail = st.get("轨迹") or []
+        if isinstance(trail, str):
+            trail = [x.strip() for x in re.split(r"[→,，、\s]+", trail) if x.strip()]
+        trail = [str(x).strip() for x in trail if str(x).strip()]
+        if cur_state and cur_state not in FSM_ALLOWED:
+            fail("本章", f"章节状态.当前态「{cur_state}」非法——须为 {FSM_ALLOWED}")
+        bad_states = [x for x in trail if x not in FSM_ALLOWED]
+        if bad_states:
+            fail("本章", f"章节状态.轨迹含非法态 {sorted(set(bad_states))}")
+        for i in range(len(trail) - 1):
+            a, b = trail[i], trail[i + 1]
+            if a in FSM_TRANS and b not in FSM_TRANS[a]:
+                fail("本章", f"章节状态非法转移 {a} → {b}（合法后继：{FSM_TRANS[a]}）")
+            if (a, b) in FSM_FORBIDDEN:
+                fail("本章", f"章节状态跳步 {a} → {b}——不得跳过中间手续")
+        # 闭环判定只看**当前章段**，不看全局日志、也不看历史章段：
+        # ① 日志里前 N-1 章都标了「交付闸: 通过」，用全局日志触发会把本章误卡；
+        # ② 轨迹是**跨章累计**的（「已交付 → 待规划」回卷即 state_machine 的推进设计），
+        #    历史章的「已过闸」不构成当前章的闭环义务——当前章段＝最后一次回卷点之后的段。
+        mode = str((data.get("角色固定属性") or {}).get("工作流模式", "") or "").strip()
+        if mode == "flash" and "已冷读" in trail:
+            fail("本章", "flash 模式轨迹出现「已冷读」——不得伪填冷读凭证（降级禁止）")
+        seg = trail
+        for i in range(len(trail) - 1):
+            if trail[i] == "已交付" and trail[i + 1] == "待规划":
+                seg = trail[i + 1:]
+        if "已过闸" in seg or seg[-1:] == ["已交付"]:
+            if seg[-1] != "已交付" or "已过闸" not in seg:
+                fail("本章", "章节状态当前章段已过闸却未闭合到「已过闸 → 已交付」——不得跳步交付")
+            if mode in ("pro", "max") and "已冷读" not in seg:
+                fail("本章", f"{mode} 模式交付轨迹缺「已冷读」——冷读稽查不可跳过")
+
     if errors:
         print(f"FAIL 交付闸机检未过（{len(errors)} 项）:")
         for x in errors: print("  -", x)
@@ -462,7 +519,7 @@ def main():
     if errors:
         for x in errors: print("  -", x)
         sys.exit(1)
-    print("PASS 交付闸机检：模式保真(降级禁止)/代理凭证互异/产物三验/生成指纹/维度覆盖/输入隔离/引文实证/主语无污染/非同源/自查交叉/闸判定/印章/三条硬闸(B·C档)/资源账窗口(末世) 全过")
+    print("PASS 交付闸机检：模式保真(降级禁止)/代理凭证互异/产物三验/生成指纹/维度覆盖/输入隔离/引文实证/主语无污染/非同源/自查交叉/闸判定/印章/三条硬闸(B·C档)/资源账窗口(末世)/章节状态机 全过")
     sys.exit(0)
 
 if __name__ == "__main__":

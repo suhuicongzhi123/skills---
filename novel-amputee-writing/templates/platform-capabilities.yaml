@@ -1,0 +1,136 @@
+# 平台能力矩阵与分层开关（兼容性适配层）
+#
+# 定位：把「四个方向」拆成**平台无关内核 + 按能力开启的增强层**。
+#       任何一层降级都必须**显式声明**，不得静默（静默降级比明确不支持更危险）。
+# 用法：宿主或 AI 在会话开始时按本表探测能力 → 决定开哪几层 →
+#       把降级声明写进本章规则包与账本 工作流执行日志。
+# ⚠ 本表是**能力描述**，不是平台背书；各平台版本迭代快，须按实际环境复测。
+
+schema_version: 1
+skill_version: 6.0.0
+
+# ── 能力位定义 ──────────────────────────────────────────
+capabilities:
+  file_read:       能读技能包内文件（最低要求）
+  shell:           能执行本地脚本（python）
+  hooks:           有生命周期钩子，可在每轮/每章强制注入或拦截
+  subagents:       有**独立上下文**子代理（非同会话角色扮演）
+  mcp:             支持 MCP 或等价工具调用
+  skills_progressive: 支持 Agent Skills 式渐进披露（按需读文件）
+  structured_output: 原生 JSON Schema 严格输出
+  logits:          可访问 logits / 自建推理栈（受限解码）
+  system_prompt_inject: 宿主可把固定文本拼进 system prompt
+
+# ── 分层（核心原则：能力越强，可开层越多；内核永远可开）──
+layers:
+  L0_内核:
+    always: true
+    requires: [file_read]
+    provides:
+      - rules/rules.yaml（规则 IR 单一事实源）
+      - rules/hard-layer.md（硬约束常驻层，纯文本）
+      - scripts/compile_rules.py 的**离线结果**（可由 CI / 外部预先生成）
+      - templates/chapter-contract.md（本章规则包骨架）
+    guarantee: 规则口径唯一、硬层文本可读、编译期冲突已排除
+    note: 纯对话平台若连文件都读不了，须由宿主把 rules.yaml + hard-layer.md 直接贴入对话。
+
+  L1_规则展开:
+    requires_any: [shell, mcp, system_prompt_inject]
+    provides:
+      - scripts/query_rules.py（按 scope 展开本章规则包）
+      - 上下文从「注入索引判断读 20 个文件」变为「取一份约 8 KB 规则包」
+    degrade_to: 纯文本规则包由宿主拼进 prompt（--format text）
+    degrade_notice: 规则包未由脚本生成 ⇒ 展开完整性不保证，须人工核对 scope 是否漏项
+
+  L2_编译检查:
+    requires: [shell]
+    provides:
+      - scripts/compile_rules.py（枚举冲突/编号重复/边界差一档/状态表一致性）
+      - 可挂 pre-commit / CI，完全不依赖 agent 意愿
+    degrade_to: 在外部 CI 跑，把 PASS/FAIL 结果贴入对话
+    degrade_notice: 未在写前跑编译检查 ⇒ 口径冲突只能靠人工逐字校对发现
+
+  L3_状态机与校验回路:
+    requires: [shell]
+    provides:
+      - scripts/state_machine.py（转移由代码判定，跳不了步）
+      - scripts/validate_output.py（生成→校验→修复回路）
+      - templates/ledger-schema.json（结构化契约）
+      - gatecheck [17] 章节状态机机检
+    degrade_to: advisory 模式——把 --show 输出贴给 AI 自行核对
+    degrade_notice: 状态机为 advisory ⇒ 跳步不再被强制拦截，仅靠提示
+
+  L3b_hook强制:
+    requires: [hooks, shell]
+    provides:
+      - 会话开始 / 每章开写前 **强制重注入** rules/hard-layer.md
+      - PreToolUse 拦截跳步、PostToolUse 触发校验回路
+    degrade_to: 宿主 system prompt 注入 或 每章开写前人工重读
+    degrade_notice: 硬层无常驻保证 ⇒ 压缩/长会话后可能被驱逐（历史上真实发生过）
+
+  L4_结构化保证:
+    requires: [structured_output]
+    provides:
+      - 账本按 templates/ledger-schema.json 生成；**保证强度按平台实现而定**：
+        OpenAI strict / Gemini 等服务端约束解码为 token 级硬保证，
+        部分平台（含 Anthropic tool-use 与多数国内 API）仅为强提示，仍须二次校验
+    degrade_to: Pydantic / Instructor 式「生成→校验→带错误重试」
+    degrade_notice: 无原生严格模式 ⇒ 格式为软保证；且**格式合法 ≠ 内容合规**
+    scope_limit: 只覆盖结构化字段，约束不了自由文本正文；管不了生理事实语义与文笔。
+    note: 各厂商 JSON Schema 子集不同（oneOf / format / 递归 $ref / 思考模式兼容性等），
+          同一 schema 须在每个目标平台各跑一遍；❌ 不得假设「字段名相同＝支持程度相同」。
+
+  L4b_受限解码:
+    requires: [logits]
+    provides: 自建推理栈上的语法级约束（Outlines / XGrammar / LLGuidance）
+    degrade_to: L4_结构化保证
+    degrade_notice: 国内托管 API 基本不可得；本层在多数国内平台**默认关闭**
+
+  L5_独立红队:
+    requires: [subagents]
+    provides:
+      - templates/redteam-brief.md（独立上下文、输入隔离、找禁令复发）
+      - 与常规冷读 22 维分工，不重复
+    degrade_to: 常规冷读按 core/cold-review.md 执行
+    degrade_notice: "★无真子代理 ⇒ **独立性声明作废**，质量等级降为「自审」；
+                     ❌ 不得用同会话角色扮演顶替后仍称『独立冷读』"
+
+  L6_离线优化:
+    always: true
+    requires: []
+    provides:
+      - eval/eval-set.yaml（历史真实问题回归集）
+      - scripts/optimize_prompts.py（产物是普通文本/示例，可喂给任意平台）
+    note: 离线运行，不进 agent 运行时，故跨平台兼容性最好。
+    degrade_notice: DSPy 自动优化为预留接口（未接线）；当前只输出分层加权风险概览与逐条回归清单，并显式声明降级，不假装优化。
+
+# ── 国内平台档位（公开资料整理，非实测；须按实际版本复测）──
+platform_tiers:
+  tier_reference:
+    desc: Claude Code——宿主接入层参照实现（v6.0.0 起随仓库根 .claude/ 分发：SessionStart 硬层注入 hook＋chapter-rules/redteam-review/verify 三 skill）
+    examples: [Claude Code]
+    note: 可开 L0–L5 与 L6（L4 视 API 实现、L4b 除外）。hook 事件集与 context:fork 语义为
+          Claude Code 专有扩展（非 Agent Skills 开放标准部分），❌ 其他平台不可直接搬 .claude/ 配置。
+  tier_full:
+    desc: 有 shell / hooks / 独立子代理 / MCP，可开 L0–L3b、L5 与常驻的 L6（L4 视厂商实现、L4b 的 logits 仍多为不可得）
+    examples: [WorkBuddy, CodeBuddy, Kimi Code, Qoder CN]
+    note: 各自 hook 事件集合与子代理隔离语义**不互通**，配置不可直接搬。
+  tier_partial:
+    desc: 有 shell、hooks 不完整或无真子代理
+    examples: [TRAE, 文心快码 Comate, CodeGeeX 本地部署]
+    note: CodeGeeX 私有化场景是少数可能自建推理栈、拿到 logits 的形态。
+  tier_kernel_only:
+    desc: 纯对话 / 云智能体平台，无本地文件与脚本
+    examples: [网页版对话助手, 通用智能体编排平台]
+    note: 只能跑 L0 内核（须由宿主贴文本）+ L6 离线结果；其余层全部显式降级。
+
+# ── 第 0 步：合规前置验证（国内平台必做，优先于任何架构优化）──
+compliance_gate:
+  priority: 0
+  why: 本技能含成人向题材与 B/C 档亲密尺度编排；国内平台普遍有前置/后置内容审核。
+       轻则拒答，重则让模型自我审查后**悄悄改写法**——后者是静默降级，机检查不出。
+  required_checks:
+    - 用一章典型设定在目标平台实跑，确认不拒答
+    - 确认输出未被静默改写（生理事实、尺度档、硬闸相关表述是否被调整）
+    - 确认硬层文本 rules/hard-layer.md 本身可正常注入
+  on_failure: 该平台不进入后续架构评估；❌ 不得把被改写的正文当作合规交付。

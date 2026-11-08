@@ -1,0 +1,173 @@
+# 回归评测集（方向④ · 离线优化用）
+#
+# 定位：把历史上**人工逐字校对才抓到、机检全 PASS 时照样存在**的真实问题沉淀成用例，
+#       供 scripts/optimize_prompts.py 评估注入顺序 / 自查提示 / 红队视图的有效性。
+# 用法：改注入顺序或自查提示后，用本集逐条人工核对（尤其评测用例 L3）；本集不产出命中率结论。
+# ⚠ 本集**不进入创作上下文**（不在按需注入索引里），只在离线优化与红队演练时读取。
+# ⚠ 平台兼容：本文件是纯数据，任何平台可解析；optimize_prompts.py 当前输出静态评分（DSPy 自动优化为预留接口）。
+# ⚠ 逐字校对须知：E-011 / E-014 的 wrong 字段**刻意保留英文直引号**——
+#   它们是黑名单字面量，用于匹配真实错误写法；改成「」会让黑名单失效，不是笔误。
+
+schema_version: 1
+skill_version: 6.0.0
+
+# 每条用例：历史上真实发生过的问题 + 期望被哪一层拦住
+# level: L0=纯数据/离线可判 · L1=编译期可判 · L2=生成期可判 · L3=仅语义/人工可判
+cases:
+  - id: E-001
+    title: 代码边界差一档
+    history: 规则文字「连续 3 章未记账」，代码初版写成 `差 > 3`（＝连续 4 章才报）；
+             五分支测试因只取差 2 与差 5 而未暴露。
+    wrong: 'cur_ch - last_rec > 3'
+    right: 'cur_ch - last_rec >= 3'
+    catch_by: scripts/compile_rules.py BND-03
+    level: L1
+
+  - id: E-002
+    title: 机检编号引用错
+    history: 三处文档把硬闸机检写成 [16]（实为 [15]，[16] 是资源账），自检不校验文档里的编号引用。
+    wrong: gatecheck [16] 机检读取硬闸自查
+    right: gatecheck [15] 机检读取硬闸自查
+    catch_by: scripts/compile_rules.py NUM-02 / 人工校对
+    level: L1
+
+  - id: E-003
+    title: 跨文件术语不一致
+    history: 账本写「弹药」、题材包写「子弹」；自检查不出（都是合法文本）。
+    wrong: 燃料 / 弹药 / 电池
+    right: 燃料 / 子弹 / 电池
+    catch_by: scripts/compile_rules.py ENUM-01
+    level: L1
+
+  - id: E-004
+    title: 限频旧措辞残留
+    history: 主文改了 N+2 口径，另六处仍写「间隔 ≥2 章」（字面算成 N+3）。
+    wrong: 同一元素出现间隔 ≥2 章
+    right: 同一元素两次出现之间至少隔 1 章（第 N 章后最早 N+2 章再现）
+    catch_by: 人工校对 + compile_rules.py count_checks
+    level: L2
+
+  - id: E-005
+    title: 口径未同步（绝对化跨障）
+    history: 权威源改为「低障可跃、高障须绕」，四个下游文件仍写「不能跨」。
+    wrong: 不能追/不能跨
+    right: 跨障受限（低障可跃、高障须绕）
+    catch_by: 人工校对 + rules.yaml R-007
+    level: L2
+
+  - id: E-006
+    title: 锚点标点不一致
+    history: 小节标题用英文句点（如 core/workflow.md 的 8. 架构层接口），
+             引用若写成顿号（8、架构层接口）即落空；norm() 剥「、（）」但不剥英文句点。
+    wrong: 标题写 8. 却引用成 8、（顿号与句点混用）
+    right: 引用须与标题逐字一致，含标点；core/workflow.md 的第 8 节用英文句点
+    catch_by: scripts/selfcheck.py [1]
+    level: L0
+
+  - id: E-007
+    title: 引用了不存在的裸文件名
+    history: 模板里把账本写成裸文件名后接键名，包内路径须带 templates/ 目录前缀。
+    wrong: 裸文件名加锚点（写作 state-ledger.yaml 后接键名，未带 templates/ 前缀）
+    right: 用带目录的完整路径 templates/state-ledger.yaml 再接键名
+    catch_by: scripts/selfcheck.py [1b]
+    level: L0
+
+  - id: E-008
+    title: 新增文件零引用
+    history: 孤儿文件判定只看 .md/.yaml 的 basename 是否在其他文件出现。
+    wrong: 新增模板未被 SKILL.md 注入索引登记
+    right: 每个新增 .md/.yaml 都在 SKILL.md / workflow.md / PLATFORM-CN.md 中出现
+    catch_by: scripts/selfcheck.py [4]
+    level: L0
+
+  - id: E-009
+    title: 口径冲突（环境与受限归因）
+    history: 曾写「环境即受限来源」，与全库「环境只放大、不作受限来源」矛盾。
+    wrong: 环境即受限来源
+    right: 环境只放大、不作受限来源
+    catch_by: 人工校对 + rules.yaml R-010
+    level: L3
+
+  - id: E-010
+    title: 中文句混入英文词
+    history: 古装题材必带项里写了「household 结构」。
+    wrong: 目击者身份须符合该时代 household 结构
+    right: 目击者身份须符合该时代的家庭与宅院结构
+    catch_by: 人工逐字校对
+    level: L3
+
+  - id: E-011
+    title: 引号风格不统一
+    history: 新增段落用英文直引号，库内一律「」。
+    wrong: 摘要只写"接下来要写什么"
+    right: 摘要只写「接下来要写什么」
+    catch_by: 人工逐字校对
+    level: L3
+
+  - id: E-012
+    title: 伪规则（AI 无能力/权限执行）
+    history: 曾写「才允许发生压缩」「压缩触发时四步」，但 AI 控制不了、也察觉不到压缩。
+    wrong: 全部落盘后，才允许发生压缩
+    right: 落盘是每章章末的例行动作；恢复绑定「下一章开写前」这个无条件时点
+    catch_by: 人工校对（能力/权限审查）
+    level: L3
+
+  - id: E-013
+    title: 冷读独立性静默降级
+    history: 平台不支持真子代理时，用同会话角色扮演顶替，报告外观不变但独立性已失效。
+    wrong: 声称「独立冷读」但审查员与主代理共享上下文
+    right: 显式声明「无独立上下文 ⇒ 独立性作废」，见 PLATFORM-CN.md
+    catch_by: 平台能力探测 + 显式降级声明
+    level: L3
+
+  - id: E-014
+    title: 硬约束被压缩驱逐
+    history: 自动压缩后只重挂最近一次 Skill 调用的前 5000 tokens，早先调用被整个丢弃。
+    wrong: 把禁令层交给语义检索 / 依赖"还在上下文里"
+    right: 硬层常驻 + 每章开写前重注入（hook 或宿主 system prompt）
+    catch_by: rules/hard-layer.md 常驻声明
+    level: L3
+
+  - id: E-015
+    title: 未成年硬闸被世界观绕过
+    history: 古装「及笄＝可婚」被当作成年线。
+    wrong: 及笄即成年，可排 B/C 档
+    right: 及笄/弱冠不等于本技能成年线，须写具体岁数 ≥18
+    catch_by: gatecheck [15] + rules.yaml INV-02
+    level: L1
+
+  - id: E-016
+    title: 状态机接口段语义不一致
+    history: state_machine --advance 产生跨章累计轨迹（已交付→待规划 回卷即其设计），
+             gatecheck [17] 闭环判定却假设轨迹是本章的——第 2 章起必含历史「已过闸」，中间态过闸必误报；
+             v5.24.0 六分支回归用例为单章轨迹，未覆盖累计场景。
+    wrong: 闭环判定读全轨迹（历史章已过闸污染当前章义务）
+    right: 闭环判定读当前章段＝最后一次「已交付 → 待规划」回卷点之后的段
+    catch_by: gatecheck [17] 修复＋六分支回归（含跨章累计轨迹用例）
+    level: L1
+
+  - id: E-017
+    title: 子进程管道编码随平台漂移
+    history: validate_output.py 的 subprocess.run(text=True) 未指定 encoding，
+             Windows GBK locale 解码子进程 UTF-8 输出抛 UnicodeDecodeError——
+             读线程崩溃、四项子检查结果全丢、--json 输出损坏；测试环境非 Windows 未暴露。
+    wrong: subprocess.run(..., text=True) 裸用（编码继承宿主 locale）
+    right: encoding="utf-8" + errors="replace" + env PYTHONIOENCODING=utf-8 两侧对齐
+    catch_by: Windows 实测 + 跨平台回归
+    level: L1
+
+  - id: E-018
+    title: 结构化重写抹掉注释数据
+    history: state_machine --advance 落盘用 yaml.safe_dump 全量重写账本，
+             行内注释与手写格式全部丢失（实测顶部注释被删）、缩进漂移。
+    wrong: 读入-改字段-safe_dump 全量回写
+    right: 文本级推进（patch_ledger）——只替换当前态/轨迹两行值，其余逐字保留
+    catch_by: 推进前后文件 diff 对比（注释保留断言）
+    level: L2
+
+# 优化目标（供 optimize_prompts.py 计算分层加权风险概览）
+scoring:
+  weights: {L0: 1.0, L1: 1.2, L2: 1.5, L3: 2.0}
+  note: L3（语义/人工层）权重最高——它们是机检盲区，也是本技能读者最敏感的部分。
+  baseline: 以 6.0.0 为基线；任何注入顺序调整后，**评测用例 L3 须由人工逐字校对裁决**。
+            静态评分只给风险概览，❌ 不得代替人工、也不产出「命中率」结论。
