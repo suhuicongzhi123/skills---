@@ -8,7 +8,7 @@
 |------|-----|------|
 | `main` | `v4.12.1` | 正式版 |
 | `preview` | `v5.23.0` | **测试版（当前最新 tag）** |
-| `develop` | `v6.1.0` | 开发线（宿主接入层＋hook 平台兼容层，验证后推 preview） |
+| `develop` | `v6.2.0` | 开发线（宿主接入层＋hook 兼容层＋小上下文适配，验证后推 preview） |
 
 ### 安装
 
@@ -22,7 +22,7 @@ git clone https://github.com/suhuicongzhi123/skills---.git
 git clone -b preview https://github.com/suhuicongzhi123/skills---.git
 ```
 
-开发线分支（当前 v6.1.0）：
+开发线分支（当前 v6.2.0）：
 ```bash
 git clone -b develop https://github.com/suhuicongzhi123/skills---.git
 ```
@@ -77,9 +77,29 @@ git checkout v5.23.0   # 或 v5.21.3 / v5.21.2 / v5.21.1 / v5.21.0 / v5.20.0 / v
 > 宿主级接入层：Claude Code 参照实现（hook 强制注入+fork 红队+verify 交付闸）
 > ＋三处实测 bug 修复（v6.0.0，仅 develop）、
 > 宿主 hook 平台兼容层：host-hooks 平台中立规范＋安装转变器
-> （国内平台安装时自动转变 hook 形态，v6.1.0，仅 develop）。
+> （国内平台安装时自动转变 hook 形态，v6.1.0，仅 develop）、
+> 小上下文适配：压缩恢复协议＋自查分级 38语义项＋gatecheck[18] 机检代判＋
+> lite 短篇档＋compact 规则包＋flash 单轮直出（v6.2.0，仅 develop）。
 
 ## 版本说明
+
+### v6.2.0 · 小上下文适配（开发线）
+
+- **解决的问题**：技能体量大——小上下文模型**第一章成文前很可能压缩一次甚至多次**，
+  压缩丢的不是状态（账本/草稿已落盘）而是注入（硬层/规则包/章契约活在上下文里）
+- **压缩恢复协议**：触发自检（「能引用硬层禁令原文吗」）→**最小恢复集 5 件**
+  （硬层＋规则包＋章契约＋账本坐标＋上章末 500 字，约 16 KB 按序重读）→恢复留痕
+  （压缩发生＝可审计事件）；host-hooks 增 `pre_compact` 事件（Claude Code PreCompact）；
+  **章契约落盘＋正文增量落盘**（每场景追加进草稿文件，压缩最多丢当前片段尾部）
+- **自查分级 49→38 语义项**：11 项形式化项（登记枚举/账本算术/破折号文本模式/
+  附页结构）由 **gatecheck 新增 [18] 机检代判**——代码判了就不让 AI 再自查一遍，
+  审查 token 预计降约四成；S01–S49 编号体系不变
+- **lite 档**：短篇 ≤10 章/番外/试笔（须用户确认）→5 题收集＋10 项核心自查；
+  机检/三硬闸/文学自评不降级。**flash 单轮直出**：章契约确认后单次生成整章
+- **compact 规则包**（`--format compact`，实测总体约缩 13%）＋写作时点不回读
+  SKILL.md＋上下文预算表（32K/64K/128K+ 三档，见 PLATFORM-CN 第 6 节）
+- [18] 端到端实测：基线 PASS＋五组反例全拦截；哈希基线 `182bbd8191aa0e5e`
+- 本版仅在 develop 分支，验证通过后推送 preview 测试通道
 
 ### v6.1.0 · 宿主 hook 平台兼容层（开发线）
 
