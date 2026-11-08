@@ -13,7 +13,7 @@
 #       ❌ 不得据它推断「已支持按该维展开」（见 core/workflow.md 第 8 节）。
 
 schema_version: 1
-skill_version: 6.2.1
+skill_version: 6.2.2
 
 # ── 一、枚举（唯一定义；下游文件不得另立取值）──────────────────
 enumerations:
@@ -240,8 +240,26 @@ rules:
   - id: R-022
     layer: soft
     title: 去 AI 化
-    assertion: 无套话词、无升华尾、无连续 3 段以上等长段；破折号 ≤3/章
+    assertion: 无套话词、无升华尾、无连续 3 段以上等长段；破折号 ≤3/章；
+               并覆盖 core/style.md#★AI 高频句式家族 六族（泛化顿悟 / 时间命运金句 /
+               定义式反转 / 得失对仗宣言 / 空泛并列感悟 / 万能沉默占位）；
+               ⚠ 合法边界优先——带具体缘由的人物判断、真实对话、情绪留白不受限；
+               并覆盖 core/style.md#★伪活性判定（改写产物不得成为新模板）
     source: core/style.md
+    severity: soft
+  - id: R-023
+    layer: standard
+    title: 人物活性
+    assertion: 每章至少 1 处**可验证的立场**（遮住对话标签仍认得出声口 / 台词在得到·隐藏·
+               改变关系平衡 / 有代价且最违背自我形象的选择 / 每个给镜头的人答得出此刻在争取什么）；
+               潜台词最上一层交给读者，❌ 不写「她记着」「这说明」类点破与括号技法自评；
+               **去AI化 ≠ 去人性化，也 ≠ 去台词**；上下文已成立时允许直写情绪；
+               ❌ 不以精巧小动作 + 注解代替立场（见 core/style.md#★伪活性判定）
+    source: core/style.md
+    source_note: >-
+      权威节见 core/style.md#★人物活性；反向判据见同文件 #★伪活性判定；
+      配套 core/character-setup.md#★性格生成轴、core/audience.md 的「★目光的分层」段；
+      账本字段见 templates/state-ledger.yaml 角色固定属性.人物活性锚
     severity: soft
 
 # ── 四、章循环状态机（供 scripts/state_machine.py 与 gatecheck [17] 消费）──
