@@ -7,7 +7,7 @@
 # ⚠ 本表是**能力描述**，不是平台背书；各平台版本迭代快，须按实际环境复测。
 
 schema_version: 1
-skill_version: 6.0.0
+skill_version: 6.1.0
 
 # ── 能力位定义 ──────────────────────────────────────────
 capabilities:
@@ -110,7 +110,10 @@ platform_tiers:
     desc: Claude Code——宿主接入层参照实现（v6.0.0 起随仓库根 .claude/ 分发：SessionStart 硬层注入 hook＋chapter-rules/redteam-review/verify 三 skill）
     examples: [Claude Code]
     note: 可开 L0–L5 与 L6（L4 视 API 实现、L4b 除外）。hook 事件集与 context:fork 语义为
-          Claude Code 专有扩展（非 Agent Skills 开放标准部分），❌ 其他平台不可直接搬 .claude/ 配置。
+          Claude Code 专有扩展（非 Agent Skills 开放标准部分），❌ 其他平台不可直接搬 .claude/ 配置——
+          国内平台安装器会忽略 .claude/ 目录，用 host-hooks.yaml（v6.1.0 平台中立规范）＋
+          scripts/install-host-hooks.py 转变：事件钩子型→等价注册；规则常驻型→规则文件＋
+          强制力降级显式声明；未核实→不猜测写入（防伪实现）。
   tier_full:
     desc: 有 shell / hooks / 独立子代理 / MCP，可开 L0–L3b、L5 与常驻的 L6（L4 视厂商实现、L4b 的 logits 仍多为不可得）
     examples: [WorkBuddy, CodeBuddy, Kimi Code, Qoder CN]

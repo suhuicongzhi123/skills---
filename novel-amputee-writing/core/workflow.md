@@ -330,7 +330,7 @@ FAIL 运行不生成凭证）；任何产物事后篡改或手写伪造 → 下�
 - max 模式：审查员稽查、队长裁定、记账员落账（分工见 `#〇、工作流模式` max 细则）
 - 子代理调用失败 → 重新调用直至成功（降级禁止，见 cold-review 六）
 
-## 8. 架构层接口（v6.0.0 · 四方向落地＋宿主接入层）
+## 8. 架构层接口（v6.1.0 · 四方向落地＋宿主接入层＋hook 平台转变）
 
 > 本节只给**接口与执行顺序**，规则本体在 `rules/rules.yaml`、解释与示例仍在各专项文件。
 > 平台能力差异与降级声明见 `PLATFORM-CN.md`；**任何一层降级必须写进账本 `工作流执行日志`**，
@@ -388,6 +388,16 @@ Claude Code 中本仓库 clone 即得仓库根 `.claude/` 接入层（详见 `PL
 - `/redteam-review`——章末红队验证（`context: fork` 独立子代理上下文）；
 - `/verify`——交付闸四链（selfcheck → compile_rules → state_machine → gatecheck），
   且 commit 前会被自动指示运行（verify 命名约定）。
+
+### 其他平台安装后注册（hook 兼容层 · v6.1.0）
+
+`.claude/` 会被国内平台安装器忽略——hook 语义的单一事实源是 `host-hooks.yaml`，
+安装到其他平台后转变注册（详见 `SKILL.md#〇-宿`）：
+
+- `python scripts/install-host-hooks.py --platform <平台> --project-dir <小说项目目录> --yes`
+- 事件钩子型→等价注册（宿主强制）；规则常驻型→平台规则目录生成规则文件
+  （强制力降级显式声明）；未核实平台→不猜测写入（exit 3＋人工注册指引）
+- 无 shell 平台按 `host-hooks.yaml` 人工注册，降级声明写进账本「工作流执行日志」。
 
 ## 注入原则
 - 不主动全量加载专项，写到哪读到哪

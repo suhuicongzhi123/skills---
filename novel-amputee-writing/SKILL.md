@@ -1,6 +1,6 @@
 ---
 name: novel-amputee-writing
-version: 6.0.0
+version: 6.1.0
 author: 溯洄从之
 description: 面向慕残者(devotee/wannabe)群体的截肢者题材小说写作技能。主角为截肢者，下肢截肢为主（髋离断为主）、上肢截肢为辅（肩离断，含肘离断/腕离断）。覆盖拐杖、假肢、日常动作、高频生活场景、身体细节、幻肢感、亲密关系、W视角等主要方面，含剧情节奏/弧线/场景结构/长篇连续性通用写作技法，支持现实向、幻想向、末世、古装四类题材。触发条件：用户要求写截肢者/残障者题材小说、续写、大纲、人物设定、章节，或提到"慕残""截肢""残肢""拐杖""假肢""髋离断""幻肢""独臂""肩离断""肘离断""腕离断""单臂"等；或明确要求本技能。不触发：非截肢题材普通小说、纯医学/康复专业内容、猎奇式苦难叙事。
 ---
@@ -156,6 +156,23 @@ description: 面向慕残者(devotee/wannabe)群体的截肢者题材小说写�
   不出现在逐题提问环节中（见 `core/character-setup.md` 收集流程）
 - 本地修改过技能文件的场合，`git pull` 前提示用户自行处理冲突
 
+## 〇-宿、安装后注册（宿主 hook 兼容层，非 Claude Code 平台必读）
+
+> 仓库根 `.claude/` 只被 Claude Code 识别；**国内 agent 平台安装技能时会忽略该目录**。
+> hook 语义的单一事实源是 `host-hooks.yaml`（平台中立规范），按下述注册：
+
+- **有 shell 的平台**：`python scripts/install-host-hooks.py --platform <平台> --project-dir <小说项目目录> --yes`
+  ——事件钩子型平台（claude-code）生成等价 `.claude/settings.json`（宿主强制）；
+  规则常驻型平台（trae/qoder/codebuddy/kimi-code）在平台规则目录生成规则文件
+  （**强制力降级：宿主强制 → 规则常驻＋AI 自律，生成物内显式声明**）；
+  未核实平台不猜测写入（exit 3，输出人工注册指引＋降级声明）
+- **无 shell 的平台**：按 `host-hooks.yaml` 的 `hooks`（四条语义）与 `platform_registry`
+  人工注册，并在账本「工作流执行日志」写明注册形式与降级声明
+- **首次对话自检**：AI 首次被调用时检查本技能所在宿主是否已注册 hook
+  （`.claude/` 存在或平台规则目录有生成标记）；未注册则提示用户按上述方式注册一次
+- ⚠ 注册失败/未注册 ≠ 静默跳过：降级声明必须写进账本；硬层最低补偿＝每章开写前重读
+  `rules/hard-layer.md` 全文
+
 ---
 
 ## 〇-补、严重错误分级（五类内容失败＋一类制度失败，共六类，执行层红线）
@@ -244,8 +261,9 @@ description: 面向慕残者(devotee/wannabe)群体的截肢者题材小说写�
 | `genre/` | md | 题材适配 |
 | `templates/` | md + yaml + json | 产出模板与结构化契约 |
 | `rules/` | yaml + md | **规则 IR 单一事实源**（`rules/rules.yaml`）＋硬约束常驻层（`rules/hard-layer.md`） |
+| `host-hooks.yaml` | yaml | 宿主 hook 平台中立规范（安装时转变的单一事实源，见 `#〇-宿`） |
 | `eval/` | yaml | 离线回归评测集（`eval/eval-set.yaml`），不进创作上下文 |
-| `scripts/` | py | 机检 / 编译检查 / 规则展开 / 状态机 / 校验回路 / 离线优化 |
+| `scripts/` | py | 机检 / 编译检查 / 规则展开 / 状态机 / 校验回路 / 离线优化 / 宿主 hook 平台转变 |
 | 根 | md | `PLATFORM-CN.md` 平台适配与降级声明 |
 | 仓库根 `.claude/` | json + md | 宿主接入层（Claude Code 参照实现，v6.0.0 起）：SessionStart 硬层注入 hook＋verify/redteam-review/chapter-rules 三 skill，见 `PLATFORM-CN.md` |
 
@@ -264,6 +282,10 @@ description: 面向慕残者(devotee/wannabe)群体的截肢者题材小说写�
    （SessionStart 硬层强制注入＋chapter-rules/redteam-review/verify 三 skill），
    L0–L5+L6 全开；hook 事件集与 fork 语义为 Claude Code 专有扩展，
    其他平台按 `PLATFORM-CN.md` 适配自检重建、不可直接搬配置。
+8. **hook 语义与平台形态分离**（v6.1.0）：hook 单一事实源是 `host-hooks.yaml`
+   （平台中立规范）；`.claude/` 只是它在 Claude Code 上的原生形态，安装到其他平台
+   由 `scripts/install-host-hooks.py` 转变（事件钩子型→等价注册；规则常驻型→规则文件
+   ＋强制力降级显式声明；未核实→不猜测写入）。
 
 ## 四、创作工作流
 

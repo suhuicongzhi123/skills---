@@ -1,6 +1,9 @@
 # 平台适配与降级声明（国内 agent 平台）
 
-> 本文件说明 v5.24.0 四个方向落地的分层架构**在不同平台能开哪几层、哪层退化、退化后哪些保证作废**。
+> 本文件说明本技能分层架构**在不同平台能开哪几层、哪层退化、退化后哪些保证作废**
+> （v5.24.0 立分层架构；v6.0.0 增 Claude Code 接入层；v6.1.0 增宿主 hook 平台转变）。
+> 宿主 hook 的平台中立规范在 `host-hooks.yaml`，转变工具 `scripts/install-host-hooks.py`
+> ——国内平台安装技能后**须先注册 hook**（`.claude/` 会被安装器忽略），见「Claude Code（参照实现）」节。
 > 能力矩阵与分层开关的机器可读版本在 `templates/platform-capabilities.yaml`。
 > 原则：**任何降级都必须显式声明**。静默降级比明确不支持更危险——
 > 报告外观不变、机检照样 PASS，但保证已经没了。
@@ -74,7 +77,9 @@
   commit 前自动运行约定）。
 - 可开层：L0–L5 与 L6 全开（L4 视 API 侧实现，L4b 无 logits 访问除外）。
 - ⚠ hook 事件集与 fork 语义是 Claude Code 专有扩展（非 Agent Skills 开放标准部分），
-  **其他平台不可直接搬 `.claude/` 配置**——各平台按本文件第 4 节适配自检逐项重建。
+  **其他平台不可直接搬 `.claude/` 配置**——用 `scripts/install-host-hooks.py` 转变
+  （事件钩子型→等价注册；规则常驻型→规则文件＋强制力降级显式声明；未核实→不猜测写入，
+  见 `host-hooks.yaml`），或按本文件第 4 节适配自检逐项重建。
 - 写作项目独立建仓时：复制 `.claude/` 与 `novel-amputee-writing/` 到项目根，
   `${CLAUDE_PROJECT_DIR}` 相对路径即成立。
 
