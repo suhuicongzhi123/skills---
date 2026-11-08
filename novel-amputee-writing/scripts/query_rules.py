@@ -101,6 +101,34 @@ def render_text(ctx, pack, hard_layer_path):
     return "\n".join(lines)
 
 
+def render_compact(ctx, pack, hard_layer_path):
+    """紧凑档（v6.2.0 小上下文适配）：规则 ID＋title＋一句话断言（截 60 字）＋硬层全文。
+
+    实测：规则区缩至 text 档约 2/3，总体约 13%（硬层 4.3 KB 全文永远附带不可减）；
+    代价：规则细节不在场——文末固定声明「compact 档只作索引，
+    涉动作/生理/辅具写法须回读源文件」。
+    """
+    lines = []
+    lines.append("=== 本章规则包·compact（小上下文档）===")
+    lines.append(f"题材={ctx.get('题材大类') or '未指定'} | 类型={ctx.get('截肢类型') or '未指定'} | "
+                 f"尺度档={ctx.get('亲密尺度档') or '未指定'} | 模式={ctx.get('工作流模式') or '未指定'} | "
+                 f"章号={ctx.get('chapter') or '未指定'}")
+    lines.append("")
+    lines.append("【硬约束常驻层】（全文，❌ 不裁剪）")
+    if os.path.isfile(hard_layer_path):
+        lines.append(read(hard_layer_path).rstrip())
+    for key in ("hard", "standard", "soft"):
+        if pack[key]:
+            lines.append("")
+            lines.append(f"【{key}】{len(pack[key])} 条")
+            for r in pack[key]:
+                a1 = str(r.get("assertion", "") or "")[:60]
+                lines.append(f"  - {r.get('id')} {r.get('title', '')}｜{a1}")
+    lines.append("")
+    lines.append("=== compact 档只作索引：规则细节不在场，凡涉动作/生理/辅具写法须回读源文件（权限威源见 rules.yaml）===")
+    return "\n".join(lines)
+
+
 def render_markdown(ctx, pack, hard_layer_path):
     t = render_text(ctx, pack, hard_layer_path)
     return "# 本章规则包\n\n```text\n" + t + "\n```\n"
@@ -116,7 +144,7 @@ def main():
     ap.add_argument("--chapter-kind", default=None, help="章型：日常/战斗/亲密/开篇/收束")
     ap.add_argument("--conflict", default=None, help="冲突强度档（烈/高/中/低）；仅作坐标标注，当前不参与过滤")
     ap.add_argument("--chapter", type=int, default=None)
-    ap.add_argument("--format", default="text", choices=["text", "json", "markdown"])
+    ap.add_argument("--format", default="text", choices=["text", "json", "markdown", "compact"])
     ap.add_argument("--out", default=None)
     a = ap.parse_args()
 
@@ -143,6 +171,8 @@ def main():
         text = json.dumps(out, ensure_ascii=False, indent=2)
     elif a.format == "markdown":
         text = render_markdown(ctx, pack, hard_path)
+    elif a.format == "compact":
+        text = render_compact(ctx, pack, hard_path)
     else:
         text = render_text(ctx, pack, hard_path)
 

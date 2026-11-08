@@ -52,14 +52,26 @@ v5.24.0 修订（四方向架构落地）：
   ⑯ 新增 rules/、eval/、PLATFORM-CN.md 与四个脚本；本脚本检查逻辑未变，
      仅因 gatecheck.py 改动而更新 [5] 基线常量。
 
-v6.0.0 修订（宿主接入层＋三处 bug 修复）：
-  ⑰ gatecheck.py [17] 闭环判定改**当前章段**（轨迹中最后一次「已交付 → 待规划」
-     回卷点之后的段）——修跨章累计轨迹误卡（长篇第 2 章起无法过闸的 P0）；
-     [17] docstring 口径同步；哈希基线 3f49885a61255832 → ee2713cfb978e7d5；
-  ⑱ 本脚本检查逻辑未变，仅因 gatecheck.py 改动而更新 [5] 基线常量；
-     仓库根新增 .claude/ 宿主接入层（SessionStart 硬层注入 hook ＋ verify /
-     redteam-review / chapter-rules 三 skill）——位于技能目录之外，不在本脚本
-     扫描范围内，其正确性由人工逐字校对覆盖（见 CHANGELOG 6.0.0 第五节）。
+ v6.0.0 修订（宿主接入层＋三处 bug 修复）：
+   ⑰ gatecheck.py [17] 闭环判定改**当前章段**（轨迹中最后一次「已交付 → 待规划」
+      回卷点之后的段）——修跨章累计轨迹误卡（长篇第 2 章起无法过闸的 P0）；
+      [17] docstring 口径同步；哈希基线 3f49885a61255832 → ee2713cfb978e7d5；
+   ⑱ 本脚本检查逻辑未变，仅因 gatecheck.py 改动而更新 [5] 基线常量；
+      仓库根新增 .claude/ 宿主接入层（SessionStart 硬层注入 hook ＋ verify /
+      redteam-review / chapter-rules 三 skill）——位于技能目录之外，不在本脚本
+      扫描范围内，其正确性由人工逐字校对覆盖（见 CHANGELOG 6.0.0 第五节）。
+
+ v6.2.0 修订（小上下文适配＋自查分级）：
+   ⑲ gatecheck.py 新增 [18] 形式化项机检：自查 49 项分级为**语义项 38**（AI 自查
+      留痕）＋**机检项 11**（S05/S06/S07/S09/S11/S12/S14/S38/S42/S48/S49——
+      登记枚举/算术/正文文本模式/附页结构，gatecheck 代判）＋**lite 10 项**（短篇
+      核心自查）；[9] 按账本 当前状态.自查档 取期望全集（标准 38/38、lite 10/10）；
+      哈希基线 ee2713cfb978e7d5 → 182bbd8191aa0e5e（含 [18] 实测中发现的
+      fail()「第本章章」显示瑕疵修复；中间值 55fc74e749ae888c 已作废）；
+   ⑳ 本脚本检查逻辑未变，仅因 gatecheck.py 改动而更新 [5] 基线常量；
+      新增 host-hooks pre_compact 事件、query_rules --format compact、
+      压缩恢复协议（SKILL#〇-压＋workflow）、章契约/正文增量落盘、flash 单轮直出、
+      lite 收集（character-setup）——规则文本与脚本均在扫描范围内，正常受检。
 
 退出码：0 通过 / 1 有问题
 """
@@ -267,7 +279,7 @@ fail += len(orphans)
 # [5] gatecheck.py 哈希基线（防篡改验证机制——SKILL 〇-补 第 6 类红线支撑）
 # 哈希前归一行尾（\r\n→\n）：git autocrlf 使磁盘行尾随克隆环境漂移（repo 存 LF，
 # Windows 检出 CRLF）——按原始字节哈希会跨环境误报；归一后基线跨 LF/CRLF 稳定
-GATECHECK_SHA = "ee2713cfb978e7d5"   # v6.0.0：gatecheck.py 修 [17] 跨章轨迹误卡（闭环判定改当前章段，含 [17] docstring 同步）后重算（原 3f49885a61255832）
+GATECHECK_SHA = "182bbd8191aa0e5e"   # v6.2.0：gatecheck.py 新增 [18] 形式化项机检（自查分级 49→38 语义项＋11 机检项＋lite 10 项，[9] 按自查档取全集）＋fail() 本章显示修复后重算（原 ee2713cfb978e7d5；中间值 55fc74e749ae888c 为 fail 修复前，已作废）
 _raw = open("scripts/gatecheck.py", "rb").read()
 _cur = hashlib.sha256(_raw.replace(b"\r\n", b"\n")).hexdigest()[:16]
 if _cur != GATECHECK_SHA:

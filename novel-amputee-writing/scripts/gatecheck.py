@@ -17,8 +17,10 @@
       审查员；pro 章草稿+自查报告→本体/审查报告→冷读）；缺指纹/不同号 → FAIL
   [7] 稽查全覆盖 22/22；审查报告「维度N」集合 == {1..22}
   [8] 输入隔离：审查报告出现自查报告文件名 → FAIL（冷读者不得看自查结论）
-  [9] 自查覆盖 49/49 自洽＋与自查报告倒数第二行一致；且自查报告须有 49 行
-      「Sxx｜判定」判定行（只列 ID 不写判定 → 判定向量为空，同源判定失效 → FAIL）
+  [9] 自查覆盖（v6.2.0 分级）：按账本 自查档 取期望全集——标准 38/38（语义项）、lite 10/10
+      （短篇核心项）；报告 ID 集合==本档语义项全集、判定行数==全集数、与「自查覆盖: N/N」
+      机检锚一致（只列 ID 不写判定 → 判定向量为空，同源判定失效 → FAIL）；
+      机检 11 项（MACHINE_IDS）混入自查报告 → FAIL（[18] 代判项不占自查行）
   [9-b] 模板初值黑名单：待填/待运行/未过/待查 → FAIL（防"复制模板即合规"）
   [10] 交付闸字段 == 通过（唯一合法值；无 python＝无法过闸＝不得交付）
   [11] 冷读引文实证：审查报告命中草稿原文引文 ≥3 条（「」内 ≥8 字）——
@@ -48,6 +50,18 @@
       「已交付」时须闭合到「已过闸 → 已交付」；flash 不得伪填「已冷读」，pro/max 交付
       轨迹必须过「已冷读」。状态表内嵌于本脚本（自包含，运行时不依赖技能目录），
       与 rules/rules.yaml chapter_states 由 scripts/compile_rules.py 校验一致。
+  [18] 自查形式化项机检（v6.2.0 分级——11 项代判，AI 不再逐项自查；编号体系不变，
+      权威清单见 templates/chapter.md 分级标注）：
+      登记类（全局段）：S05/S09 钩子类型枚举 H1–H7/h8–h10（首字符即强度标定）；
+      S06 章节功能五枚举；S07 主冲突线beat三态；S12 张力级 1–5；
+      S11 弱钩不连续（近五章窗口末 3 项全 h* → FAIL）；S14 受限beat层级枚举＋
+      受限让路补法=无 → 破窗 FAIL；S38 首章beat数 ≤2（distribution 块，仅第 1 章）。
+      正文类（章循环内）：S42 结构性破折号 ≤3/叙述层（对话引号内白名单先剥离）＋
+      注释式纠错变体家族＝0＋分句式对比句 ≤1。
+      结构类（[9] 报告块内）：S48/S49 附页 A/B 行数证据 A:≥8 / B:≥6（pro/max 必填，
+      flash 建议填缺则 WARN）。
+      边界如实声明：只判枚举合法性与可算术性，不判登记与正文语义一致性
+      （钩子兑现句是否真在末段等语义半区仍由冷读把关）。
 
 边界：机检由 AI 自行执行，强制力＝验证网＋成本压制（过闸嵌入每章循环，
 伪造合规全套成本 ≥ 真实执行）；绝对强制需宿主级 hook，超出技能包能力。
@@ -70,11 +84,23 @@ DIM_SET = set(range(1, 23))
 VERDICT_SET = {"通过", "不通过", "不适用"}
 SELF_MARK = {"✓": "通过", "√": "通过", "✗": "不通过", "×": "不通过"}
 CHECKLIST_IDS = {f"S{i:02d}" for i in range(1, 50)}
+# v6.2.0 自查分级（templates/chapter.md 权威清单）：编号体系 S01–S49 不变，仅执行分工变化——
+# MACHINE_IDS 11 项由 [18] 机检代判（AI 不再逐项自查，写作时仍须遵守规则本身）；
+# SEMANTIC_IDS 38 项为 AI 自查语义项；LITE_IDS 10 项为短篇 lite 档核心自查（账本 自查档: lite 时）。
+MACHINE_IDS = {"S05", "S06", "S07", "S09", "S11", "S12", "S14", "S38", "S42", "S48", "S49"}
+SEMANTIC_IDS = CHECKLIST_IDS - MACHINE_IDS
+LITE_IDS = {"S18", "S19", "S20", "S21", "S22", "S23", "S27", "S28", "S29", "S46"}
+HOOK_ENUM = {f"H{i}" for i in range(1, 8)} | {f"h{i}" for i in range(8, 11)}
+FUNC_ENUM = {"主线推进", "关系深化", "日常样态", "对抗危机", "生存危机"}
+BEAT_ENUM = {"推进", "蓄势", "留白"}
+LIMIT_ENUM = {"核心", "在场", "余波"}
 PERSONA_PAT = re.compile(r"我写|我设计|我编制|我自查|我刚才|作为队长|我画的大纲|上一轮我|我安排的剧情|我登记的账")
 QUOTE_PAT = re.compile(r"[「『“]([^」』”]{8,})[」』”]")
 errors, warns = [], []
 
-def fail(ch, msg): errors.append(f"第{ch}章｜{msg}")
+def fail(ch, msg):
+    # ch 为章号或 "本章"（全局登记类检查）——后者直接输出「本章｜」不套「第N章」壳
+    errors.append(f"本章｜{msg}" if ch == "本章" else f"第{ch}章｜{msg}")
 
 def parse_agents(raw):
     if not isinstance(raw, list) or not raw:
@@ -302,41 +328,51 @@ def main():
             fp = os.path.realpath(os.path.join(root, dp))
             if os.path.isfile(fp) and fp.startswith(root + os.sep):
                 draft_text = open(fp, encoding="utf-8").read()
-        # [9] 自查覆盖：49/49 硬校验＋ID 全集＋49 行判定断言＋与自查报告倒数第二行一致
+        # [9] 自查覆盖（v6.2.0 分级）：按账本 自查档 取期望全集——标准 38/38（语义项；
+        #     机检 11 项由 [18] 代判不占自查行）、lite 10/10（短篇核心项）＋ID 全集＋行数断言
+        self_tier = str(((data.get("当前状态") or {}).get("自查档")) or "标准").strip()
+        if self_tier not in ("标准", "lite"):
+            fail("本章", f"自查档取值非法: {self_tier or '空'}（须 标准 | lite，短篇 lite 见 templates/chapter.md lite 节）")
+            self_tier = "标准"
+        expect_ids = LITE_IDS if self_tier == "lite" else SEMANTIC_IDS
+        n_exp = len(expect_ids)
         sc = str(e.get("自查覆盖", ""))
         m = re.match(r"^(\d+)/(\d+)$", sc)
-        if not m or m.group(1) != "49" or m.group(2) != "49":
-            fail(ch, f"自查覆盖应为 49/49，实为: {sc or '空'}")
+        if not m or m.group(1) != str(n_exp) or m.group(2) != str(n_exp):
+            fail(ch, f"自查覆盖应为 {n_exp}/{n_exp}（{'lite 核心项' if self_tier == 'lite' else '语义项；机检 11 项由 gatecheck [18] 代判'}），实为: {sc or '空'}")
         srp = prods.get("自查报告")
         if srp:
             fp = os.path.realpath(os.path.join(root, srp))
             if os.path.isfile(fp) and fp.startswith(root + os.sep):
                 sc_text = open(fp, encoding="utf-8").read()
                 ids = set(re.findall(r"\b(S\d\d)\b", sc_text))
-                if ids != CHECKLIST_IDS:
-                    miss = sorted(CHECKLIST_IDS - ids)[:4]
-                    extra = sorted(ids - CHECKLIST_IDS)[:3]
-                    fail(ch, f"自查报告 ID 集合不全（缺 {miss}{'；非法 ' + str(extra) if extra else ''}）——须逐条列 S01…S49 全集")
-                # [9-b] 判定行断言：须 49 行「Sxx｜判定」，判定值合法
+                if ids != expect_ids:
+                    miss = sorted(expect_ids - ids)[:4]
+                    extra = sorted(ids - expect_ids)[:3]
+                    if extra and all(x in MACHINE_IDS for x in extra):
+                        fail(ch, f"自查报告混入机检项 {extra}——[18] 代判项不再写自查行（编号体系见 templates/chapter.md 分级标注）")
+                    elif miss or extra:
+                        fail(ch, f"自查报告 ID 集合不全（缺 {miss}{'；多余 ' + str(extra) if extra else ''}）——须逐条列本档全部语义项（{'lite 10 项' if self_tier == 'lite' else '标准 38 项'}）")
+                # [9-b] 判定行断言：须与全集等行数「Sxx｜判定」，判定值合法
                 srows = []
                 for _ln in sc_text.splitlines():
                     _m = re.match(r"^\s*S(\d\d)\s*[｜|]\s*([^\s｜|，。\n]+)", _ln)
                     if _m:
                         srows.append((_m.group(1), _m.group(2)))
-                if len(srows) != 49:
-                    fail(ch, f"自查报告判定行 {len(srows)}/49——每条须写成「Sxx｜判定｜项名｜证据」；"
+                if len(srows) != n_exp:
+                    fail(ch, f"自查报告判定行 {len(srows)}/{n_exp}——每条须写成「Sxx｜判定｜项名｜证据」；"
                              f"只列 ID 不写判定＝判定向量为空，同源判定会静默失效")
                 bad_sv = [f"S{n}:{v}" for n, v in srows
                           if SELF_MARK.get(v, v) not in VERDICT_SET]
                 if bad_sv:
                     fail(ch, f"自查判定值非法（须 通过/不通过/不适用，或 ✓/✗）: {'；'.join(bad_sv[:3])}")
-                # 不适用白名单：只有"本条法定不适用"的 5 项可填不适用，防用不适用稀释同源判定
-                NA_ALLOWED = {"24", "39", "47", "48", "49"}
+                # 不适用白名单（v6.2.0 调整：S48/S49 转机检后移出；lite 档 10 项均须实判）
+                NA_ALLOWED = set() if self_tier == "lite" else {"24", "39", "47"}
                 bad_na = sorted({f"S{n}" for n, v in srows
                                  if SELF_MARK.get(v, v) == "不适用" and n not in NA_ALLOWED})
                 if bad_na:
                     fail(ch, f"这些自查项不成立「不适用」: {bad_na[:4]}——"
-                             f"不适用只允许 S24（仅首章）/S39（无 devotee 角色）/S47（flash）/S48·S49（flash）；"
+                             f"不适用只允许 S24（仅首章）/S39（无 devotee 角色）/S47（flash）；"
                              f"其余须判 通过 或 不通过")
                 lines = [l for l in sc_text.splitlines() if l.strip()]
                 zone = lines[-3:] if lines else []
@@ -344,9 +380,33 @@ def main():
                 for l in zone[:-1] if act in ("pro", "max") else zone:
                     tm = re.search(r"自查覆盖[:：]\s*(\d+)\s*/\s*(\d+)", l)
                     if tm: break
-                if not tm: fail(ch, f"自查报告缺『自查覆盖: 49/49 全查』机检锚: {srp}")
-                elif tm.group(1) != "49" or tm.group(2) != "49":
-                    fail(ch, f"自查报告 {tm.group(1)}/{tm.group(2)} ≠ 49/49")
+                if not tm: fail(ch, f"自查报告缺『自查覆盖: {n_exp}/{n_exp} 全查』机检锚: {srp}")
+                elif tm.group(1) != str(n_exp) or tm.group(2) != str(n_exp):
+                    fail(ch, f"自查报告 {tm.group(1)}/{tm.group(2)} ≠ {n_exp}/{n_exp}")
+                # [18-S48/S49] 附页 A/B 结构机检（pro/max 必填 ≥8/≥6 行；flash 建议填——缺则 WARN）
+                if self_tier == "标准":
+                    ma = re.search(r"\bA[:：]\s*(\d+)", sc_text)
+                    mb = re.search(r"\bB[:：]\s*(\d+)", sc_text)
+                    if act in ("pro", "max"):
+                        if not ma or int(ma.group(1)) < 8:
+                            fail(ch, "S48 附页A支点三问不足——须「A:≥8」行数证据（pro/max 必填，逐句 ≥8 行）")
+                        if not mb or int(mb.group(1)) < 6:
+                            fail(ch, "S49 附页B示范比对不足——须「B:≥6」行数证据（pro/max 必填，逐句 ≥6 行）")
+                    elif not (ma and mb):
+                        warns.append(f"第{ch}章｜S48/S49 附页 flash 为建议项（未填不阻断），pro/max 升级后必填")
+        # [18-S42] 正文文本模式机检：结构性破折号≤3/注释式纠错变体＝0/分句对比句≤1
+        # （对话白名单：先剥离「」『』“” 引号内文本再计数——对话内中断/呼喊/拟声延长不受限）
+        if draft_text:
+            plain = re.sub(r"[「『“][^」』”]*[」』”]", "", draft_text)
+            ndash = plain.count("——")
+            if ndash > 3:
+                fail(ch, f"S42 结构性破折号 {ndash}/3 超限（叙述层；对话内白名单已剥离）——见 core/style.md 闸门")
+            fixes = re.findall(r"——(不对|不，)|不是[^。\n]{1,12}——是|——[^。\n]{1,6}——", plain)
+            if fixes:
+                fail(ch, f"S42 注释式纠错变体 {len(fixes)} 处（正文零容忍，变体家族见 core/style.md#★禁止注释式纠错）")
+            ncon = len(re.findall(r"不是[^。\n]{1,12}。是[^。\n]{1,12}。", plain))
+            if ncon > 1:
+                fail(ch, f"S42 分句式对比句 {ncon}/1 超限（「不是X。是Y。」≤1/章）")
         # [11] 冷读引文实证（pro/max）
         if act in ("pro", "max") and rp_text:
             quotes = QUOTE_PAT.findall(rp_text)
@@ -500,6 +560,65 @@ def main():
             if mode in ("pro", "max") and "已冷读" not in seg:
                 fail("本章", f"{mode} 模式交付轨迹缺「已冷读」——冷读稽查不可跳过")
 
+    # [18] 自查形式化项机检（v6.2.0 分级剥离的 11 项之登记类——S05/S06/S07/S09/S11/S12/S14/S38；
+    #      S42 正文文本模式在章循环内逐章判，S48/S49 附页结构在 [9] 报告块内判）。
+    # 输入＝账本「本章登记」块（章末登记，跨章可查）；AI 不再逐项自查，本节代判。
+    # 边界如实声明：本节只判**登记的枚举合法性与可算术性**，不判登记与正文内容的一致
+    # （如钩子兑现句是否真在末段＝S05 的语义半区，仍由冷读维度 2/10 把关）。
+    reg = data.get("本章登记") if isinstance(data.get("本章登记"), dict) else {}
+    cur_ch_int = None
+    try:
+        cur_ch_int = int(str(((data.get("当前状态") or {}).get("章")) or "").strip())
+    except (ValueError, TypeError):
+        pass
+    # S05/S09 章末钩子类型枚举（H1–H7/h8–h10）＋强度标定（类型首字符即 H/h）
+    hook = str(reg.get("章末钩子类型", "") or "").strip()
+    if not hook:
+        fail("本章", "S05 章末钩子类型未登记——每章必有章末钩子（追读线设计）")
+    elif hook not in HOOK_ENUM:
+        fail("本章", f"S05 章末钩子类型「{hook}」非法——须为 H1–H7 / h8–h10 枚举（H/h 首字符即强度标定，S09 一并代判）")
+    # S06 章节功能枚举
+    func = str(reg.get("章节功能", "") or "").strip()
+    if not func:
+        fail("本章", "S06 章节功能未登记——须为 主线推进/关系深化/日常样态/对抗危机/生存危机 之一")
+    elif func not in FUNC_ENUM:
+        fail("本章", f"S06 章节功能「{func}」非法——须为 {sorted(FUNC_ENUM)} 之一")
+    # S07 主冲突线 beat 三态枚举
+    lbeat = str(reg.get("主冲突线beat", "") or "").strip()
+    if not lbeat:
+        fail("本章", "S07 主冲突线beat未登记——须为 推进/蓄势/留白 之一（呼吸章计蓄势；crisis 章必为推进）")
+    elif lbeat not in BEAT_ENUM:
+        fail("本章", f"S07 主冲突线beat「{lbeat}」非法——须为 {sorted(BEAT_ENUM)} 之一")
+    # S12 张力级 1–5
+    tens = str(reg.get("张力级", "") or "").strip()
+    if not tens:
+        fail("本章", "S12 张力级未登记——须为 1–5（对照体验强度曲线设计值 ±1）")
+    elif tens not in {"1", "2", "3", "4", "5"}:
+        fail("本章", f"S12 张力级「{tens}」非法——须为 1–5 整数")
+    # S11 弱钩不连续：近五章钩子类型窗口末 3 项不得全为 h*
+    win = reg.get("近五章钩子类型") or []
+    if isinstance(win, list) and len(win) >= 3:
+        tail3 = [str(x).strip() for x in win[-3:]]
+        if all(x.startswith("h") for x in tail3 if x):
+            fail("本章", f"S11 弱钩连续 3 章 {tail3}——弱钩（h8–h10）不得连续出现 3 章，须改强钩或调整")
+    # S14 受限beat层级枚举＋受限让路补法（破窗口径：补法=无 即报）
+    lb = reg.get("受限beat")
+    if isinstance(lb, dict):
+        lvl = str(lb.get("层级", "") or "").strip()
+        if lvl and lvl not in LIMIT_ENUM:
+            fail("本章", f"S14 受限beat.层级「{lvl}」非法——须为 核心/在场/余波 之一（弱受限/点缀不计入）")
+    detour = reg.get("受限让路") or {}
+    if isinstance(detour, dict) and str(detour.get("补法", "") or "").strip() == "无":
+        fail("本章", "S14 受限让路.补法＝「无」——破窗（无核心受限且无在场/余波补偿），不得交付；补法须为 在场/余波 并填补偿章")
+    # S38 首章 beat 数 ≤2 类（仅第 1 章；字段在 distribution 块）
+    if cur_ch_int == 1:
+        fb = ((data.get("distribution") or {}).get("首章beat数"))
+        try:
+            if fb is not None and int(fb) > 2:
+                fail("第1章", f"S38 首章beat数 {fb} >2 类——首章信息量过载（查账本 distribution.首章beat数）")
+        except (ValueError, TypeError):
+            pass
+
     if errors:
         print(f"FAIL 交付闸机检未过（{len(errors)} 项）:")
         for x in errors: print("  -", x)
@@ -519,7 +638,7 @@ def main():
     if errors:
         for x in errors: print("  -", x)
         sys.exit(1)
-    print("PASS 交付闸机检：模式保真(降级禁止)/代理凭证互异/产物三验/生成指纹/维度覆盖/输入隔离/引文实证/主语无污染/非同源/自查交叉/闸判定/印章/三条硬闸(B·C档)/资源账窗口(末世)/章节状态机 全过")
+    print("PASS 交付闸机检：模式保真(降级禁止)/代理凭证互异/产物三验/生成指纹/维度覆盖/输入隔离/引文实证/主语无污染/非同源/自查交叉(分级38|10)/闸判定/印章/三条硬闸(B·C档)/资源账窗口(末世)/章节状态机/形式化项[18] 全过")
     sys.exit(0)
 
 if __name__ == "__main__":
