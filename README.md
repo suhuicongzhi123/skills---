@@ -7,8 +7,8 @@
 | 分支 | tag | 状态 |
 |------|-----|------|
 | `main` | `v4.12.1` | 正式版 |
-| `preview` | `v5.23.0` | **测试版（当前最新）** |
-| `develop` | `v5.23.0` | 开发线（下轮迭代从此推进） |
+| `preview` | `v5.23.0` | **测试版（当前最新 tag）** |
+| `develop` | `v6.0.0` | 开发线（宿主接入层已完成，验证后推 preview） |
 
 ### 安装
 
@@ -22,7 +22,7 @@ git clone https://github.com/suhuicongzhi123/skills---.git
 git clone -b preview https://github.com/suhuicongzhi123/skills---.git
 ```
 
-开发线分支（当前 v5.23.0）：
+开发线分支（当前 v6.0.0）：
 ```bash
 git clone -b develop https://github.com/suhuicongzhi123/skills---.git
 ```
@@ -73,9 +73,29 @@ git checkout v5.23.0   # 或 v5.21.3 / v5.21.2 / v5.21.1 / v5.21.0 / v5.20.0 / v
 > 战力学补齐：种族与身体部位豁免/机动型映射/档位适用（v5.21.2）、
 > 单腿跳连跳口径修正：废止「三步一停」（v5.21.3）、
 > 全域审查整改：生理事实/硬闸补落点/命名编号统一/脚本机检纵深（v5.22.0）、
-> 待观察项落地：贴身层/角色弧/资源账强机检/张力仲裁/验收澄清（v5.23.0）。
+> 待观察项落地：贴身层/角色弧/资源账强机检/张力仲裁/验收澄清（v5.23.0）、
+> 宿主级接入层：Claude Code 参照实现（hook 强制注入+fork 红队+verify 交付闸）
+> ＋三处实测 bug 修复（v6.0.0，仅 develop）。
 
 ## 版本说明
+
+### v6.0.0 · 宿主级接入层（Claude Code 参照实现）＋三处实测 bug 修复（开发线）
+
+- **主版本号升级动因**：v5.6.1 回退时的结论「绝对强制需宿主级 hook，超出技能包
+  能力」首次落地为**随仓库分发的接入层**（仓库根 `.claude/`）；创作规则一条未改
+- **接入层四件**：SessionStart hook 强制注入硬层全文（L3b 从 AI 自觉变宿主强制）＋
+  `/verify`（交付闸四链，commit 前自动运行约定）＋ `/redteam-review`
+  （`context: fork` 独立子代理红队）＋ `/chapter-rules`（`!` 动态注入硬层＋
+  规则包展开）；hook/fork 为 Claude Code 专有扩展，其他平台按 PLATFORM-CN
+  适配自检重建
+- **三处 bug 修复（实测实证）**：gatecheck [17] 跨章轨迹误卡（闭环判定改
+  当前章段——长篇第 2 章起无法过闸的 P0）／validate_output.py Windows GBK
+  崩溃（subprocess 两侧统一 UTF-8）／state_machine 重写账本丢注释
+  （patch_ledger 文本级推进）
+- 评测集补 E-016/017/018（15→18 例）；两轮人工逐字交叉校对抓 4 项并修复
+  （含 state_machine 与 [17] 口径相反的语义分叉）；哈希基线重算
+  `ee2713cfb978e7d5`
+- 本版仅在 develop 分支，验证通过后推送 preview 测试通道
 
 ### v5.23.0 · 待观察项 3/5/6/7/8 落地（测试通道）
 
