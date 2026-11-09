@@ -1,6 +1,6 @@
 ---
 name: novel-amputee-writing
-version: 7.0.0
+version: 7.1.0
 author: 溯洄从之
 description: 面向慕残者(devotee/wannabe)群体的截肢者题材小说写作技能。主角为截肢者，下肢截肢为主（髋离断为主）、上肢截肢为辅（肩离断，含肘离断/腕离断）。覆盖拐杖、假肢、日常动作、高频生活场景、身体细节、幻肢感、亲密关系、W视角等主要方面，含剧情节奏/弧线/场景结构/章节因果链/文风与叙事距离/写作氛围/长篇文风一致性等通用写作技法，支持现实向、幻想向、末世、古装四类题材。本技能应在用户要求写截肢者/残障者题材小说、续写、大纲、人物设定、章节，或提到"慕残""截肢""残肢""拐杖""假肢""髋离断""幻肢""独臂""肩离断""肘离断""腕离断""单臂"等时使用；明确要求本技能时同样触发。不触发：非截肢题材普通小说、纯医学/康复专业内容、猎奇式苦难叙事。
 ---
@@ -18,7 +18,7 @@ description: 面向慕残者(devotee/wannabe)群体的截肢者题材小说写�
 |---|---|
 | 元数据 | frontmatter 只留 `name`（小写连字符、与目录名一致）、`description`（第三人称、含何时使用/不触发、无尖括号）、`version`、`author` |
 | 三层披露 | ① name＋description 常驻；② 本文件只放行为契约、最高优先级指令规则、工作流骨架、注入索引、严重错误分级；③ 详细规则进 `core/` `types/` `topics/` `genre/` `templates/` `rules/` `eval/`，**保持一级深引用** |
-| 单一权威 | 同一规则只在一处立定义；索引注释是导航摘要，不是规则权威；新增方法论一律进专项文件（`core/prose-craft.md`） |
+| 单一权威 | 同一规则只在一处立定义；索引注释是导航摘要，不是规则权威；新增方法论进 `core/prose-craft.md`，短篇缩放进 `core/short-form.md`，❌ 不复述数字 |
 | 写法 | 规则正文用祈使/不定式。⚠ 例外：`## ★执行者身份` 的第二人称是行为契约（角色锚），非教学语气 |
 | 自包含 | 包内资源自足；仓库根 `.claude/` 属可选增强层，缺失时按 `PLATFORM-CN.md` 显式声明降级，不得当作运行前提 |
 | 校验 | 改完跑 `python scripts/verify.py`（内含编译检查＋库内自检），再跑宿主 `quick_validate.py` 验 frontmatter；**两个校验器都 PASS 才算改完**。改 `scripts/gatecheck.py` 后须先 `python scripts/selfcheck.py --update-baseline` 重算基线（`rules/rules.yaml#script_baselines`） |
@@ -159,7 +159,7 @@ description: 面向慕残者(devotee/wannabe)群体的截肢者题材小说写�
 > **第 4/5 类惩罚**：命中即**整章回炉重写**（非修补交差）；暗线跨章滋生＝回滚至滋生章；
 > 同书第二次＝**停书**，全书大纲对照复查并报用户确认处置后方可继续。
 > **第 6 类**：当章不得交付，恢复/补跑后重跑完整流程。
-> ⚠ **维护期例外（v7.0.0）**：技能库维护由**用户/维护者显式授权**，脚本可改、哈希可重算；
+> ⚠ **维护期例外**：技能库维护由**用户/维护者显式授权**，脚本可改、哈希可重算；
 > 改 `scripts/gatecheck.py` 后执行 `python scripts/selfcheck.py --update-baseline` 把新哈希
 > 写回 `rules/rules.yaml#script_baselines`，再跑 `python scripts/verify.py`。
 > 创作执行期间的 AI 代理 ❌ 不得据此自行改脚本或绕过交付闸。
@@ -300,6 +300,7 @@ injection:
   写到受限场景: [topics/limitation-scenes.md]
   写到节奏/张力场景: [core/pacing.md]
   写到文风/氛围/跨章一致性: [core/prose-craft.md, core/style.md]
+  短篇/单章(计划章数≤10): [core/short-form.md]    # 配额/钩子窗口/首次C仲裁/四节缩放唯一权威页
   题材适配: [genre/realistic.md, genre/fantasy.md, genre/postapocalyptic.md, genre/historical.md]
     # 四个题材文件均含 ★题材结构包；题材是故事引擎，不只是场景库
   产出模板:
@@ -347,7 +348,8 @@ injection:
     17_幻肢档位真实度: topics/timeline.md#幻肢档位总表
     18_交付闸硬卡口: core/workflow.md#〇-补、执行完整性硬卡口
     章级质量落点:
-      - 成文工艺: core/prose-craft.md（链检挂 S01/S02/S04；七族＋三遍编辑挂 S41；文风指纹/意象母题挂 S46；冷读挂维度 10/15/17/20/22——均不新增编号）
+      - 成文工艺: core/prose-craft.md（链检挂 S01/S02/S04；八族＋权重审计/链压缩挂 S41；叙述层声口挂文学自评第 2 问；文风指纹/意象母题挂 S46；冷读挂维度 10/15/16/17/20/22——均不新增编号）
+      - 短篇/单章: core/short-form.md（篇幅缩放唯一权威页）
       - 章八要素勾选/六条铁则: templates/chapter.md#章末核查清单（必过 + 文学自评）
       - 账本登记/钩子不重复/密度可查/本章自评: templates/state-ledger.yaml
   推荐流程:

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""统一校验入口（v7.0.0）
+"""统一校验入口
 
 用法：python scripts/verify.py [--update-baseline] [--verbose]
 
@@ -11,7 +11,7 @@
 取代「改完要记着跑两条命令」的口头约定（漏跑是历史最贵的制度失败）。
 ⚠ 本入口只校验**技能库自身**；章节交付仍须单独跑
    `python scripts/gatecheck.py <小说项目目录> --chapter N`。
-⚠ 子进程管道两侧统一 UTF-8（v6.0.0 E-017 教训：Windows GBK locale 会崩）。
+⚠ 子进程管道两侧统一 UTF-8（E-017 教训：Windows GBK locale 会崩）。
 """
 import os
 import subprocess

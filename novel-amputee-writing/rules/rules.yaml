@@ -13,14 +13,14 @@
 #       ❌ 不得据它推断「已支持按该维展开」（见 core/workflow.md 第 8 节）。
 
 schema_version: 1
-skill_version: 7.0.0
+skill_version: 7.1.0
 
-# ── 校验基线（v7.0.0 · 单一事实源）──────────────────────────
+# ── 校验基线（单一事实源）──────────────────────────
 # gatecheck.py 改动后执行 `python scripts/selfcheck.py --update-baseline` 重算并回写；
 # 自检读取本值，❌ 不在 selfcheck.py 再存一份常量（双副本漂移是历史故障源）。
 # 口径：sha256(CRLF→LF 归一后的文件字节)[:16]。
 script_baselines:
-  gatecheck_py: 182bbd8191aa0e5e
+  gatecheck_py: ae522a975b3c9c35
 
 # ── 一、枚举（唯一定义；下游文件不得另立取值）──────────────────
 enumerations:
@@ -220,7 +220,9 @@ rules:
   - id: R-018
     layer: standard
     title: 示范句非同源
-    assertion: 章末心动句与八处示范节清单比对，载体/动作/落点意象 ≥2 项相同＝复写，必改
+    assertion: 章末心动句与八处示范节清单按落点意象加权比对——落点同族/同义＝复写必改；
+               三项全同或落点同族＋载体/动作任一相同＝复写必改；载体＋动作相同但落点意义全新＝合法变奏，
+               须在 examples_used 登记「换写」及新落点意义
     source: core/audience.md
     severity: hard
   - id: R-019
@@ -271,17 +273,18 @@ rules:
   - id: R-024
     layer: standard
     title: 成文工艺（章节因果链 / 叙事距离 / 氛围 / 跨章文风一致性）
-    assertion: 每章开写前填场景—续篇链（目标→冲突→灾难四型→决定→下一场目标）；
-               场间连接只允许「因此／但是」，❌ 不用「然后」纯时间顺延；
-               按文风契约标叙事距离档，环境细节须经视角人物注意力过滤，
-               ❌ 不写氛围结论词、不列全通道感官清单；
-               章末过结构层 AI 痕迹七族与三遍编辑（结构遍→声音遍→行级遍）；
-               账本 distribution 逐章登记文风指纹与意象母题并比对近 5 章
+    assertion: 写作时点只带三条正向目标（她要什么／什么在挡／什么出人意料），审计移到润色结构遍；
+               每章填场景—续篇链（目标→灾难四型→决定→下一场目标），场间只允许「因此／但是」；
+               按文风契约标叙事距离档，环境细节经注意力过滤；
+               结构遍过权重审计、链压缩与受限戏剧宿主；声音遍过叙述层声口与结构层八族；
+               文风指纹与意象母题逐章登记并比对近 5 章
     source: core/prose-craft.md
     source_note: >-
-      权威节见 core/prose-craft.md 一～六节；与 core/style.md 的分工（词句层 vs 成文层）
-      见 SKILL.md 拆分原理第 9 条；落点＝S01/S02/S04/S41/S46 与冷读维度 10/15/17/20/22，
-      ❌ 不新增 S 编号与冷读维度编号；示范节清单八处不变
+      权威节见 core/prose-craft.md 一～六节（1.6 链压缩／3.2 叙述层声口／5.1 八族／5.6 权重审计）；
+      与 core/style.md 的分工（词句层 vs 成文层）见 SKILL.md 拆分原理第 9 条；
+      落点＝S01/S02/S04/S28/S29/S41/S46 与冷读维度 10/15/16/17/20/22，
+      ❌ 不新增 S 编号与冷读维度编号；示范节清单八处不变；
+      示范句落点加权见 R-018；短篇缩放唯一页 core/short-form.md
     severity: soft
 
 # ── 四、章循环状态机（供 scripts/state_machine.py 与 gatecheck [17] 消费）──

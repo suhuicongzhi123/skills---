@@ -12,7 +12,7 @@
   - CLI 形态：有 shell 的平台直接调用（--out 写文件）；
   - --format text：纯文本，无 shell 平台可由宿主拼进 system prompt。
 硬层（rules/hard-layer.md）不参与 scope 过滤、不参与检索，开写前须整段单独注入。
-v7.0.0：规则包**默认仍附硬层全文**（兼容只拼这一份规则包进 system prompt 的平台）；
+规则包**默认仍附硬层全文**（兼容只拼这一份规则包进 system prompt 的平台）；
 已由宿主/hook 单独整段注入硬层时，用 --no-hard-layer 去掉重复全文（省约 4.3 KB/章）。
 ⚠ 去掉该参数前必须确认硬层确实已在场；拿不准就用默认，宁可重复不可遗漏。
 
@@ -108,9 +108,9 @@ def render_text(ctx, pack, hard_layer_path, include_hard=True):
 
 
 def render_compact(ctx, pack, hard_layer_path, include_hard=True):
-    """紧凑档（v6.2.0 小上下文适配）：规则 ID＋title＋一句话断言（截 60 字）。
+    """紧凑档（小上下文适配）：规则 ID＋title＋一句话断言（截 60 字）。
 
-    v7.0.0：**默认仍附硬层全文**（--include-hard-layer 为显式同义写法）；
+    **默认仍附硬层全文**（--include-hard-layer 为显式同义写法）；
     仅当硬层已单独整段注入时才用 --no-hard-layer 去掉重复全文，省约 4.3 KB/章；
     代价：规则细节不在场——文末固定声明「compact 档只作索引，
     涉动作/生理/辅具写法须回读源文件」。

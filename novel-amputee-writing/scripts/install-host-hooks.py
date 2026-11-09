@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-宿主 hook 平台转变器（兼容层 · v6.1.0）
+宿主 hook 平台转变器（兼容层）
 
 解决的问题：`.claude/` 只被 Claude Code 识别，国内 agent 平台安装技能时忽略该目录。
 本脚本把 host-hooks.yaml 声明的 hook 语义**转变**为目标平台可用的形式：
@@ -90,7 +90,7 @@ def build_rule_file(platform_label):
         GENERATED_MARK,
         f"# novel-amputee-writing 宿主 hook 规则（{platform_label} 规则常驻形态）",
         "",
-        "> 本文件由 install-host-hooks.py 从 host-hooks.yaml 转变生成（v6.1.0）。",
+        "> 本文件由 install-host-hooks.py 从 host-hooks.yaml 转变生成。",
         "> **强制力降级声明**：原设计为宿主事件钩子（宿主强制）；本平台无已核实的事件钩子，",
         "> 转变为规则常驻＋AI 自律——**硬层驱逐风险回到「压缩/长会话后可能丢失」**，",
         "> 每章开写前重读硬层是最低补偿。平台目录形态未经官方实测，注册前请按平台文档核对。",
@@ -99,7 +99,7 @@ def build_rule_file(platform_label):
         "",
         f"- 整段读取并保持于上下文：`{hard_rel}`",
         "- ❌ 禁止摘要、禁止参与语义检索或相似度裁剪；每章开写前重读一次（防压缩驱逐）",
-        "- **压缩恢复（v6.2.0）**：收到写作/续写指令时先自检「能引用硬层禁令原文吗」——",
+        "- **压缩恢复**：收到写作/续写指令时先自检「能引用硬层禁令原文吗」——",
         "  不能＝疑似被上下文压缩，按 `novel-amputee-writing/core/workflow.md#压缩恢复协议`",
         "  重读最小恢复集（①硬层②本章规则包③章契约④账本坐标⑤上章末500字），",
         "  恢复动作记一行账本日志（压缩发生＝可审计事件）",

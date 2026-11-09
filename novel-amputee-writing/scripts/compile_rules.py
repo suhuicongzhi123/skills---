@@ -138,7 +138,7 @@ def main():
     section("ENUM-01", "禁用字面量扫描完成")
 
     # ── 5b. 题材枚举与账本权威源 / Schema 三者一致（防「另立取值」复发）──
-    # 历史实证：v5.24.0 初版 IR 另立「末世·丧尸·生存」，而账本权威源是「末世生存」，
+    # 历史实证：初版 IR 另立「末世·丧尸·生存」，而账本权威源是「末世生存」，
     # 导致末世专属规则按账本值展开不到、且合法账本被 Schema 拒收；内部 scope 覆盖检查查不出。
     ir_genres = [str(x).strip() for x in ((ir.get("enumerations") or {}).get("题材大类") or [])]
     setup_p = os.path.join("core", "character-setup.md")

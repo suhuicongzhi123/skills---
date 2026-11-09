@@ -17,12 +17,13 @@
       审查员；pro 章草稿+自查报告→本体/审查报告→冷读）；缺指纹/不同号 → FAIL
   [7] 稽查全覆盖 22/22；审查报告「维度N」集合 == {1..22}
   [8] 输入隔离：审查报告出现自查报告文件名 → FAIL（冷读者不得看自查结论）
-  [9] 自查覆盖（v6.2.0 分级）：按账本 自查档 取期望全集——标准 38/38（语义项）、lite 10/10
+  [9] 自查覆盖（分级）：按账本 自查档 取期望全集——标准 38/38（语义项）、lite 10/10
       （短篇核心项）；报告 ID 集合==本档语义项全集、判定行数==全集数、与「自查覆盖: N/N」
       机检锚一致（只列 ID 不写判定 → 判定向量为空，同源判定失效 → FAIL）；
       机检 11 项（MACHINE_IDS）混入自查报告 → FAIL（[18] 代判项不占自查行）
   [9-b] 模板初值黑名单：待填/待运行/未过/待查 → FAIL（防"复制模板即合规"）
-  [10] 交付闸字段 == 通过（唯一合法值；无 python＝无法过闸＝不得交付）
+  [10] 交付闸字段 == 通过（唯一合法值；无 python＝无法过闸＝不得交付；
+       --precheck 豁免本项，供 bootstrap 三步的第一步使用）
   [11] 冷读引文实证：审查报告命中草稿原文引文 ≥3 条（「」内 ≥8 字）——
       零命中＝未读草稿的空报告
   [12] 主语污染：审查报告出现「我写/作为队长」类主上下文人称模式 → FAIL
@@ -50,7 +51,7 @@
       「已交付」时须闭合到「已过闸 → 已交付」；flash 不得伪填「已冷读」，pro/max 交付
       轨迹必须过「已冷读」。状态表内嵌于本脚本（自包含，运行时不依赖技能目录），
       与 rules/rules.yaml chapter_states 由 scripts/compile_rules.py 校验一致。
-  [18] 自查形式化项机检（v6.2.0 分级——11 项代判，AI 不再逐项自查；编号体系不变，
+  [18] 自查形式化项机检（分级——11 项代判，AI 不再逐项自查；编号体系不变，
       权威清单见 templates/chapter.md 分级标注）：
       登记类（全局段）：S05/S09 钩子类型枚举 H1–H7/h8–h10（首字符即强度标定）；
       S06 章节功能五枚举；S07 主冲突线beat三态；S12 张力级 1–5；
@@ -84,7 +85,7 @@ DIM_SET = set(range(1, 23))
 VERDICT_SET = {"通过", "不通过", "不适用"}
 SELF_MARK = {"✓": "通过", "√": "通过", "✗": "不通过", "×": "不通过"}
 CHECKLIST_IDS = {f"S{i:02d}" for i in range(1, 50)}
-# v6.2.0 自查分级（templates/chapter.md 权威清单）：编号体系 S01–S49 不变，仅执行分工变化——
+# 自查分级（templates/chapter.md 权威清单）：编号体系 S01–S49 不变，仅执行分工变化——
 # MACHINE_IDS 11 项由 [18] 机检代判（AI 不再逐项自查，写作时仍须遵守规则本身）；
 # SEMANTIC_IDS 38 项为 AI 自查语义项；LITE_IDS 10 项为短篇 lite 档核心自查（账本 自查档: lite 时）。
 MACHINE_IDS = {"S05", "S06", "S07", "S09", "S11", "S12", "S14", "S38", "S42", "S48", "S49"}
@@ -174,7 +175,30 @@ def tail_fingerprint(path):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("dir"); ap.add_argument("--chapter", type=int, default=None)
+    ap.add_argument("--precheck", action="store_true",
+                    help="bootstrap 第一步：跳过 [10] 两字段（机检运行/交付闸），其余检查照跑")
+    ap.add_argument("--report", default=None,
+                    help="把本次输出同时写入 UTF-8 报告文件（Windows GBK 控制台可读）")
     a = ap.parse_args()
+    # Windows GBK 控制台输出中文报错会乱码 → stdout 强制 UTF-8；不支持时静默退回原编码
+    try:
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    except (AttributeError, ValueError, OSError):
+        pass
+    if a.report:
+        import atexit
+        _rf = open(a.report, "w", encoding="utf-8")
+
+        class _Tee:
+            def __init__(self, *ws): self.ws = ws
+            def write(self, s):
+                for w in self.ws: w.write(s)
+                return len(s)
+            def flush(self):
+                for w in self.ws: w.flush()
+
+        sys.stdout = _Tee(sys.stdout, _rf)
+        atexit.register(_rf.close)
     root = os.path.realpath(a.dir)
     ledger = os.path.join(root, "state-ledger.yaml")
     if not os.path.isfile(ledger):
@@ -215,6 +239,8 @@ def main():
                     if mark not in otext:
                         errors.append(f"第1章｜大纲契约块不完整（缺「{mark}」非空标记）")
                         break
+    if a.precheck:
+        print("PRECHECK [10] 已豁免：机检运行／交付闸 两字段待回填（bootstrap 第一步）")
     for e in logs:
         try: ch = int(e.get("章"))
         except (TypeError, ValueError): ch = e.get("章", "?")
@@ -222,6 +248,9 @@ def main():
             pass  # 关注章外仍全量检查（历史章 FAIL 一并报）
         # [0-b] 模板初值黑名单：占位值出现＝未真实执行（防"复制模板即合规"）
         for _k in ("选定模式", "实际执行模式", "审查深度", "机检运行", "交付闸", "自查覆盖"):
+            # --precheck 时这两字段尚未回填，占位值属正常，不作初值黑名单判定
+            if a.precheck and _k in ("机检运行", "交付闸"):
+                continue
             _v = str(e.get(_k, "") or "").strip()
             if _v in ("待填", "待运行", "未过", "待查"):
                 fail(ch, f"字段「{_k}」仍为模板占位值「{_v}」——未真实执行，须实跑后回填")
@@ -328,7 +357,7 @@ def main():
             fp = os.path.realpath(os.path.join(root, dp))
             if os.path.isfile(fp) and fp.startswith(root + os.sep):
                 draft_text = open(fp, encoding="utf-8").read()
-        # [9] 自查覆盖（v6.2.0 分级）：按账本 自查档 取期望全集——标准 38/38（语义项；
+        # [9] 自查覆盖（分级）：按账本 自查档 取期望全集——标准 38/38（语义项；
         #     机检 11 项由 [18] 代判不占自查行）、lite 10/10（短篇核心项）＋ID 全集＋行数断言
         self_tier = str(((data.get("当前状态") or {}).get("自查档")) or "标准").strip()
         if self_tier not in ("标准", "lite"):
@@ -366,7 +395,7 @@ def main():
                           if SELF_MARK.get(v, v) not in VERDICT_SET]
                 if bad_sv:
                     fail(ch, f"自查判定值非法（须 通过/不通过/不适用，或 ✓/✗）: {'；'.join(bad_sv[:3])}")
-                # 不适用白名单（v6.2.0 调整：S48/S49 转机检后移出；lite 档 10 项均须实判）
+                # 不适用白名单（调整后：S48/S49 转机检后移出；lite 档 10 项均须实判）
                 NA_ALLOWED = set() if self_tier == "lite" else {"24", "39", "47"}
                 bad_na = sorted({f"S{n}" for n, v in srows
                                  if SELF_MARK.get(v, v) == "不适用" and n not in NA_ALLOWED})
@@ -429,11 +458,12 @@ def main():
                 elif bad2 == bad1:
                     fail(ch, f"自查的不通过维度与审查完全相同（{sorted(bad1)}）——无独立发现，"
                               f"判同源照抄；自查须有自己的命中项或明确反证")
-        # [10] 闸判定＋机检运行
-        if e.get("机检运行") != "是":
-            fail(ch, f"机检运行={e.get('机检运行') or '未登记'}——脚本漏跑＝严重制度失败，须实际运行 gatecheck 并取得 PASS 后交付")
-        if e.get("交付闸") != "通过":
-            fail(ch, f"交付闸={e.get('交付闸')}——未过闸章不得交付")
+        # [10] 闸判定＋机检运行（bootstrap：--precheck 豁免这两字段，其余检查照跑）
+        if not a.precheck:
+            if e.get("机检运行") != "是":
+                fail(ch, f"机检运行={e.get('机检运行') or '未登记'}——脚本漏跑＝严重制度失败，须实际运行 gatecheck 并取得 PASS 后交付")
+            if e.get("交付闸") != "通过":
+                fail(ch, f"交付闸={e.get('交付闸')}——未过闸章不得交付")
         # [14] 交付凭证（PASS 印章——哈希链含章草稿：交付正文被换→印章失效）
         try:
             st = stamp_of(ch, draft_text, sc_text, rp_text)
@@ -450,7 +480,7 @@ def main():
                     fail(ch, f"正文SHA不符（gate-pass 记录 {got_sha.group(1)} ≠ 当前 {cur_sha}）——交付正文已被替换，须重跑完整流程")
                 elif not got or got.group(1) != st:
                     fail(ch, f"交付印章不符（gate-pass-第{ch}章.txt）——产物被篡改或印章伪造，须重跑 gatecheck 重新过闸")
-            elif not errors:
+            elif not errors and not a.precheck:
                 gen_stamps.append((ch, sf, st, draft_text))
     # [0-c] 核查记录占位值：任一项仍为「待查」＝未实查（与日志初值黑名单同源）
     for rec in (data.get("核查记录") or []):
@@ -560,7 +590,7 @@ def main():
             if mode in ("pro", "max") and "已冷读" not in seg:
                 fail("本章", f"{mode} 模式交付轨迹缺「已冷读」——冷读稽查不可跳过")
 
-    # [18] 自查形式化项机检（v6.2.0 分级剥离的 11 项之登记类——S05/S06/S07/S09/S11/S12/S14/S38；
+    # [18] 自查形式化项机检（分级剥离的 11 项之登记类——S05/S06/S07/S09/S11/S12/S14/S38；
     #      S42 正文文本模式在章循环内逐章判，S48/S49 附页结构在 [9] 报告块内判）。
     # 输入＝账本「本章登记」块（章末登记，跨章可查）；AI 不再逐项自查，本节代判。
     # 边界如实声明：本节只判**登记的枚举合法性与可算术性**，不判登记与正文内容的一致
@@ -638,6 +668,9 @@ def main():
     if errors:
         for x in errors: print("  -", x)
         sys.exit(1)
+    if a.precheck:
+        print("PRECHECK 完成：未发现其他 FAIL（[10] 两字段已豁免）——回填「机检运行: 是」「交付闸: 通过」后，须正式运行一次取 PASS 才可交付")
+        sys.exit(0)
     print("PASS 交付闸机检：模式保真(降级禁止)/代理凭证互异/产物三验/生成指纹/维度覆盖/输入隔离/引文实证/主语无污染/非同源/自查交叉(分级38|10)/闸判定/印章/三条硬闸(B·C档)/资源账窗口(末世)/章节状态机/形式化项[18] 全过")
     sys.exit(0)
 
