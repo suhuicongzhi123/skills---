@@ -1,6 +1,6 @@
 ---
 name: novel-amputee-writing
-version: 7.1.0
+version: 7.2.0
 author: 溯洄从之
 description: 面向慕残者(devotee/wannabe)群体的截肢者题材小说写作技能。主角为截肢者，下肢截肢为主（髋离断为主）、上肢截肢为辅（肩离断，含肘离断/腕离断）。覆盖拐杖、假肢、日常动作、高频生活场景、身体细节、幻肢感、亲密关系、W视角等主要方面，含剧情节奏/弧线/场景结构/章节因果链/文风与叙事距离/写作氛围/长篇文风一致性等通用写作技法，支持现实向、幻想向、末世、古装四类题材。本技能应在用户要求写截肢者/残障者题材小说、续写、大纲、人物设定、章节，或提到"慕残""截肢""残肢""拐杖""假肢""髋离断""幻肢""独臂""肩离断""肘离断""腕离断""单臂"等时使用；明确要求本技能时同样触发。不触发：非截肢题材普通小说、纯医学/康复专业内容、猎奇式苦难叙事。
 ---
@@ -21,7 +21,7 @@ description: 面向慕残者(devotee/wannabe)群体的截肢者题材小说写�
 | 单一权威 | 同一规则只在一处立定义；索引注释是导航摘要，不是规则权威；新增方法论进 `core/prose-craft.md`，短篇缩放进 `core/short-form.md`，❌ 不复述数字 |
 | 写法 | 规则正文用祈使/不定式。⚠ 例外：`## ★执行者身份` 的第二人称是行为契约（角色锚），非教学语气 |
 | 自包含 | 包内资源自足；仓库根 `.claude/` 属可选增强层，缺失时按 `PLATFORM-CN.md` 显式声明降级，不得当作运行前提 |
-| 校验 | 改完跑 `python scripts/verify.py`（内含编译检查＋库内自检），再跑宿主 `quick_validate.py` 验 frontmatter；**两个校验器都 PASS 才算改完**。改 `scripts/gatecheck.py` 后须先 `python scripts/selfcheck.py --update-baseline` 重算基线（`rules/rules.yaml#script_baselines`） |
+| 校验 | 改完跑 `python scripts/verify.py`（内含编译检查＋库内自检），再跑宿主 `quick_validate.py` 验 frontmatter；**两个校验器都 PASS 才算改完**。改 `scripts/gatecheck.py` 后须先 `python scripts/selfcheck.py --update-baseline` 重算基线（`rules/rules.yaml#script_baselines`）；**改 `scripts/` 另须端到端实跑 E-029 四场景**（静态检查机检不出运行时遮蔽） |
 | 索引格式 | **带 `#锚点` 的引用一律单独成行**：❌ 不得写进 YAML 内联数组（形如 `[文件A#X, 文件B#Y]`），逗号/`]` 会被锚点解析器吃进锚点名，造成假「锚点落空」；文档里的反例也不要写成真实文件名，会被当成引用 |
 
 > **长参考文件**：>100 行的按需文件顶部带目录，防「只取前 N 行」读不全。关键约束置文件首/尾，
@@ -297,6 +297,8 @@ injection:
   写到W视角: [topics/wannabe.md]
   写到对抗/冲突场景: [topics/conflict-scenes.md]
   写到战斗/追逐/围堵: [topics/combat-mechanics.md, topics/conflict-scenes.md]
+    # ⚠ combat-mechanics §十五（高魔豁免，约占该文件 36%）按题材条件注入：仅高武/高魔/神话读；
+    #   现实向/古装/无超自然能力的末世战斗章跳过整节（省在场视图预算），仍过 K01–K13。
   写到受限场景: [topics/limitation-scenes.md]
   写到节奏/张力场景: [core/pacing.md]
   写到文风/氛围/跨章一致性: [core/prose-craft.md, core/style.md]

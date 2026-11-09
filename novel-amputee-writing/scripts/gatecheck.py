@@ -28,7 +28,8 @@
       零命中＝未读草稿的空报告
   [12] 主语污染：审查报告出现「我写/作为队长」类主上下文人称模式 → FAIL
   [13] 同源判定：审查 22 维判定向量与「自查 S 编号折算后的维度向量」高度一致
-      （≥21/22 且审查存在不通过项）→ FAIL（同源伪装）。
+      （比例 ≥95% 且审查存在不通过项）→ WARN（同源信号，交主代理受理裁定；引文/位置不同的合法同判不阻断，
+      ❌ 不硬 FAIL 逼审查员造差异）。硬防伪由 [8] 输入隔离/[12] 主语纯净/[11] 引文实证/调用凭证兜底。
       「独立发现」分两层：本脚本只判「审查侧有 ≥1 条不通过 / 反证轮 ≥3 段实质核验」（裸子串不算）；
       「是否自查未发现」由 [13] 比对兜底、主代理受理时裁定（审查员依 [8] 看不到自查报告，不自证）——
       见 core/cold-review.md#五 受理验收③④。
@@ -59,8 +60,8 @@
       受限让路补法=无 → 破窗 FAIL；S38 首章beat数 ≤2（distribution 块，仅第 1 章）。
       正文类（章循环内）：S42 结构性破折号 ≤3/叙述层（对话引号内白名单先剥离）＋
       注释式纠错变体家族＝0＋分句式对比句 ≤1。
-      结构类（[9] 报告块内）：S48/S49 附页 A/B 行数证据 A:≥8 / B:≥6（pro/max 必填，
-      flash 建议填缺则 WARN）。
+      结构类（[9] 报告块内）：S48/S49 附页 A/B 行数证据存在性（pro/max 必填「A:N」「B:N」，N 可为 0；
+      ❌ 不设行数下限，全覆盖属语义判定；flash 建议填缺则 WARN）。
       边界如实声明：只判枚举合法性与可算术性，不判登记与正文语义一致性
       （钩子兑现句是否真在末段等语义半区仍由冷读把关）。
 
@@ -179,15 +180,18 @@ def main():
                     help="bootstrap 第一步：跳过 [10] 两字段（机检运行/交付闸），其余检查照跑")
     ap.add_argument("--report", default=None,
                     help="把本次输出同时写入 UTF-8 报告文件（Windows GBK 控制台可读）")
-    a = ap.parse_args()
+    args = ap.parse_args()
+    # 命名空间统一命名 args：❌ 禁止再用单字母 a 作长生命周期变量——轨迹循环曾用 a, b 遮蔽本命名空间，
+    # 导致全合规项目在 PASS 前 AttributeError（7.1.0 运行缺陷，见 CHANGELOG）。
     # Windows GBK 控制台输出中文报错会乱码 → stdout 强制 UTF-8；不支持时静默退回原编码
     try:
         sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     except (AttributeError, ValueError, OSError):
         pass
-    if a.report:
+    if args.report:
         import atexit
-        _rf = open(a.report, "w", encoding="utf-8")
+        _rf = open(args.report, "w", encoding="utf-8")
+        _orig_stdout = sys.stdout
 
         class _Tee:
             def __init__(self, *ws): self.ws = ws
@@ -195,11 +199,21 @@ def main():
                 for w in self.ws: w.write(s)
                 return len(s)
             def flush(self):
-                for w in self.ws: w.flush()
+                for w in self.ws:
+                    try: w.flush()
+                    except ValueError: pass
 
-        sys.stdout = _Tee(sys.stdout, _rf)
-        atexit.register(_rf.close)
-    root = os.path.realpath(a.dir)
+        sys.stdout = _Tee(_orig_stdout, _rf)
+
+        def _close_report():
+            # 退出前先刷完、再还原 sys.stdout，最后关闭报告文件；
+            # 否则解释器退出时 flush 到已关闭的 Tee 会 ValueError 并把退出码改成 120
+            try: sys.stdout.flush()
+            except Exception: pass
+            sys.stdout = _orig_stdout
+            _rf.close()
+        atexit.register(_close_report)
+    root = os.path.realpath(args.dir)
     ledger = os.path.join(root, "state-ledger.yaml")
     if not os.path.isfile(ledger):
         print("FAIL 未找到 state-ledger.yaml（目录＝小说项目工作区）"); sys.exit(1)
@@ -237,19 +251,27 @@ def main():
                 otext = open(ofp, encoding="utf-8").read()
                 for mark in ("★主题材契约", "基调核心循环", "主冲突线"):
                     if mark not in otext:
-                        errors.append(f"第1章｜大纲契约块不完整（缺「{mark}」非空标记）")
+                        errors.append(f"第1章｜大纲契约块不完整（缺「{mark}」标记）")
                         break
-    if a.precheck:
+                    # 非空判定（防复制空模板即过）：取标记所在行，剥离 HTML 注释与冒号/空白后须有实值。
+                    # ★主题材契约 是节标题，只查存在；基调核心循环/主冲突线 是字段，须有非空值。
+                    if mark != "★主题材契约":
+                        line = next((ln for ln in otext.splitlines() if mark in ln), "")
+                        val = re.sub(r"<!--.*?-->", "", line.split(mark, 1)[1]).strip().lstrip("：:* ").strip()
+                        if not val:
+                            errors.append(f"第1章｜大纲契约块「{mark}」为空（仅标签/注释，无实值）——复制空模板不算已填大纲")
+                            break
+    if args.precheck:
         print("PRECHECK [10] 已豁免：机检运行／交付闸 两字段待回填（bootstrap 第一步）")
     for e in logs:
         try: ch = int(e.get("章"))
         except (TypeError, ValueError): ch = e.get("章", "?")
-        if a.chapter is not None and ch != a.chapter:
+        if args.chapter is not None and ch != args.chapter:
             pass  # 关注章外仍全量检查（历史章 FAIL 一并报）
         # [0-b] 模板初值黑名单：占位值出现＝未真实执行（防"复制模板即合规"）
         for _k in ("选定模式", "实际执行模式", "审查深度", "机检运行", "交付闸", "自查覆盖"):
             # --precheck 时这两字段尚未回填，占位值属正常，不作初值黑名单判定
-            if a.precheck and _k in ("机检运行", "交付闸"):
+            if args.precheck and _k in ("机检运行", "交付闸"):
                 continue
             _v = str(e.get(_k, "") or "").strip()
             if _v in ("待填", "待运行", "未过", "待查"):
@@ -348,8 +370,10 @@ def main():
                     scf = prods.get("自查报告")
                     if scf and scf in rp_text:
                         fail(ch, f"审查报告出现自查报告文件名（{scf}）——输入污染：冷读者不得看自查结论")
-                    # [12] 主语污染
-                    pm = PERSONA_PAT.search(rp_text)
+                    # [12] 主语污染（先剥离引号内草稿引文——审查员引证草稿对话/第一人称叙述含「我写」等属合法引文，
+                    # 只搜审查员自己的叙述文字，防误报；与 S42 破折号检查同口径剥离引号）
+                    rp_plain = re.sub(r"[「『“][^」』”]*[」』”]", "", rp_text)
+                    pm = PERSONA_PAT.search(rp_plain)
                     if pm:
                         fail(ch, f"审查报告含主上下文人称模式（「{pm.group(0)}」）——独立子代理无创作过程记忆，判非独立")
         dp = prods.get("章草稿")
@@ -412,15 +436,17 @@ def main():
                 if not tm: fail(ch, f"自查报告缺『自查覆盖: {n_exp}/{n_exp} 全查』机检锚: {srp}")
                 elif tm.group(1) != str(n_exp) or tm.group(2) != str(n_exp):
                     fail(ch, f"自查报告 {tm.group(1)}/{tm.group(2)} ≠ {n_exp}/{n_exp}")
-                # [18-S48/S49] 附页 A/B 结构机检（pro/max 必填 ≥8/≥6 行；flash 建议填——缺则 WARN）
+                # [18-S48/S49] 附页 A/B 结构机检：pro/max 须附页已填（行数证据存在）；
+                # ❌ 不设行数下限——有多少句查多少句，全覆盖属语义判定（冷读维度 17）；
+                # A:0/B:0 合法（本章无发力支撑句/无可比对句），防固定行数下限逼造动作链与元素过密。
                 if self_tier == "标准":
-                    ma = re.search(r"\bA[:：]\s*(\d+)", sc_text)
-                    mb = re.search(r"\bB[:：]\s*(\d+)", sc_text)
+                    ma = re.search(r"(?<![A-Za-z0-9])A[:：]\s*(\d+)", sc_text)
+                    mb = re.search(r"(?<![A-Za-z0-9])B[:：]\s*(\d+)", sc_text)
                     if act in ("pro", "max"):
-                        if not ma or int(ma.group(1)) < 8:
-                            fail(ch, "S48 附页A支点三问不足——须「A:≥8」行数证据（pro/max 必填，逐句 ≥8 行）")
-                        if not mb or int(mb.group(1)) < 6:
-                            fail(ch, "S49 附页B示范比对不足——须「B:≥6」行数证据（pro/max 必填，逐句 ≥6 行）")
+                        if not ma:
+                            fail(ch, "S48 附页A支点三问未填——须「A:N」行数证据（pro/max 必填，逐句全覆盖，N 可为 0）")
+                        if not mb:
+                            fail(ch, "S49 附页B示范比对未填——须「B:N」行数证据（pro/max 必填，逐句全覆盖，N 可为 0）")
                     elif not (ma and mb):
                         warns.append(f"第{ch}章｜S48/S49 附页 flash 为建议项（未填不阻断），pro/max 升级后必填")
         # [18-S42] 正文文本模式机检：结构性破折号≤3/注释式纠错变体＝0/分句对比句≤1
@@ -442,8 +468,10 @@ def main():
             hits = [q for q in quotes if q in draft_text]
             if len(hits) < 3:
                 fail(ch, f"审查报告命中草稿的原文引文仅 {len(hits)}/3——未真实读草稿的空报告（引文实证不过）")
-        # [13] 同源判定（pro/max）：相同判定比例 ≥95%（21/22）即 FAIL——
-        #     全同或仅 1 处差异＝同源伪装强信号（阈值避免误杀真实冷读）
+        # [13] 同源判定（pro/max）：判定高度一致是同源「信号」而非照抄实据——独立审查常 converge 于多数维度通过，
+        #     纯判定相似（引文/位置不同）属合法同判，降为 WARN 交主代理受理裁定（对齐 cold-review ④「主代理据此裁定」），
+        #     ❌ 不再硬 FAIL 逼审查员造差异。硬防伪仍由输入隔离[8]/主语纯净[12]/引文实证[11]/调用凭证兜底。
+        #     阈值用比例（修旧 bug：common=20/same=20 与 lite common=10 永不触发）。
         if act in ("pro", "max") and rp_text and sc_text:
             v1 = verdict_vector(rp_text)
             v2 = selfcheck_dim_vector(sc_text)   # 自查按 S 编号落盘，先折算成维度
@@ -452,14 +480,13 @@ def main():
             bad1 = {k for k in v1 if v1[k] == "不通过"}
             bad2 = {k for k in v2 if v2[k] == "不通过"}
             # 豁免：审查无「不通过」项时无差异空间，本项不成立（防误杀干净章）
-            if bad1:
-                if len(common) >= 20 and same >= 21:
-                    fail(ch, f"审查与自查 {same}/{len(common)} 维判定相同（≥95%）——同源伪装强信号（独立视角必有权重差异）")
+            if bad1 and len(common) >= 10:
+                if same / len(common) >= 0.95:
+                    warns.append(f"第{ch}章｜[13] 审查与自查 {same}/{len(common)} 维判定高度一致——同源信号，交主代理受理裁定（引文/位置不同的合法同判不阻断）")
                 elif bad2 == bad1:
-                    fail(ch, f"自查的不通过维度与审查完全相同（{sorted(bad1)}）——无独立发现，"
-                              f"判同源照抄；自查须有自己的命中项或明确反证")
+                    warns.append(f"第{ch}章｜[13] 自查与审查不通过维度相同（{sorted(bad1)}）——交主代理裁定是否独立发现")
         # [10] 闸判定＋机检运行（bootstrap：--precheck 豁免这两字段，其余检查照跑）
-        if not a.precheck:
+        if not args.precheck:
             if e.get("机检运行") != "是":
                 fail(ch, f"机检运行={e.get('机检运行') or '未登记'}——脚本漏跑＝严重制度失败，须实际运行 gatecheck 并取得 PASS 后交付")
             if e.get("交付闸") != "通过":
@@ -480,7 +507,7 @@ def main():
                     fail(ch, f"正文SHA不符（gate-pass 记录 {got_sha.group(1)} ≠ 当前 {cur_sha}）——交付正文已被替换，须重跑完整流程")
                 elif not got or got.group(1) != st:
                     fail(ch, f"交付印章不符（gate-pass-第{ch}章.txt）——产物被篡改或印章伪造，须重跑 gatecheck 重新过闸")
-            elif not errors and not a.precheck:
+            elif not errors and not args.precheck:
                 gen_stamps.append((ch, sf, st, draft_text))
     # [0-c] 核查记录占位值：任一项仍为「待查」＝未实查（与日志初值黑名单同源）
     for rec in (data.get("核查记录") or []):
@@ -506,19 +533,18 @@ def main():
                 missing = [g for g in hard_gates if g not in hg]
                 if missing:
                     fail("本章", f"硬闸自查缺项 {missing}——须齐备成年/非自愿/同意/疼痛非快感四项")
+                core_gates = ("成年", "非自愿", "疼痛非快感")
                 for g in hard_gates:
                     v = str(hg.get(g, "") or "").strip()
                     if v in ("待查", ""):
                         fail("本章", f"硬闸自查[{g}]为「待查/空」——未实查，须逐条填 通过/不适用")
                     elif v == "不通过":
                         fail("本章", f"硬闸自查[{g}]＝不通过——触碰内容硬闸，本章不得交付（SKILL 〇-补）")
+                    elif v == "不适用" and g in core_gates:
+                        fail("本章", f"硬闸自查[{g}]＝不适用——{g}是绝对线（INV-01），B/C 档须实判「通过」；仅「同意」可视情境不适用")
                     elif v not in ("通过", "不适用"):
                         fail("本章", f"硬闸自查[{g}]取值非法「{v}」——须为 通过/不适用/不通过/待查")
-                # B/C 档下四项全填「不适用」＝形同未判，须至少成年/非自愿/疼痛非快感为「通过」
-                if isinstance(hg, dict) and all(
-                        str(hg.get(g, "") or "").strip() == "不适用"
-                        for g in ("成年", "非自愿", "疼痛非快感")):
-                    fail("本章", "B/C 档亲密章三条核心硬闸全填「不适用」＝形同未判，须逐条实判为「通过」")
+                # 成年/非自愿/疼痛非快感 已在上方逐项强制「通过」（不适用即 FAIL），与 INV-01「四项齐备实判通过」对齐。
 
     # [16] 资源账窗口空窗机检（仅末世/生存题材，账本 资源账.启用: 是 时）
     # 只认章号窗口、不判「本章算不算一场危机」——那是 cold-review 维度19 的叙事软查。
@@ -568,11 +594,11 @@ def main():
         if bad_states:
             fail("本章", f"章节状态.轨迹含非法态 {sorted(set(bad_states))}")
         for i in range(len(trail) - 1):
-            a, b = trail[i], trail[i + 1]
-            if a in FSM_TRANS and b not in FSM_TRANS[a]:
-                fail("本章", f"章节状态非法转移 {a} → {b}（合法后继：{FSM_TRANS[a]}）")
-            if (a, b) in FSM_FORBIDDEN:
-                fail("本章", f"章节状态跳步 {a} → {b}——不得跳过中间手续")
+            s1, s2 = trail[i], trail[i + 1]
+            if s1 in FSM_TRANS and s2 not in FSM_TRANS[s1]:
+                fail("本章", f"章节状态非法转移 {s1} → {s2}（合法后继：{FSM_TRANS[s1]}）")
+            if (s1, s2) in FSM_FORBIDDEN:
+                fail("本章", f"章节状态跳步 {s1} → {s2}——不得跳过中间手续")
         # 闭环判定只看**当前章段**，不看全局日志、也不看历史章段：
         # ① 日志里前 N-1 章都标了「交付闸: 通过」，用全局日志触发会把本章误卡；
         # ② 轨迹是**跨章累计**的（「已交付 → 待规划」回卷即 state_machine 的推进设计），
@@ -592,9 +618,10 @@ def main():
 
     # [18] 自查形式化项机检（分级剥离的 11 项之登记类——S05/S06/S07/S09/S11/S12/S14/S38；
     #      S42 正文文本模式在章循环内逐章判，S48/S49 附页结构在 [9] 报告块内判）。
-    # 输入＝账本「本章登记」块（章末登记，跨章可查）；AI 不再逐项自查，本节代判。
-    # 边界如实声明：本节只判**登记的枚举合法性与可算术性**，不判登记与正文内容的一致
-    # （如钩子兑现句是否真在末段＝S05 的语义半区，仍由冷读维度 2/10 把关）。
+    # 输入＝账本「本章登记」块（章末登记，跨章可查）；登记/枚举/可算术半区由本节代判。
+    # 边界如实声明：本节判**登记的枚举合法性与可算术性**（含 S05/S09/S11 钩子窗口算术），
+    # 不判登记与正文内容的一致（如钩子兑现句是否真在末段＝S05 的语义半区，仍由冷读维度 10/18 把关；
+    # flash 无冷读时，语义半区由写作时点规则包＋章契约约束，作者须自觉保证）。
     reg = data.get("本章登记") if isinstance(data.get("本章登记"), dict) else {}
     cur_ch_int = None
     try:
@@ -625,12 +652,37 @@ def main():
         fail("本章", "S12 张力级未登记——须为 1–5（对照体验强度曲线设计值 ±1）")
     elif tens not in {"1", "2", "3", "4", "5"}:
         fail("本章", f"S12 张力级「{tens}」非法——须为 1–5 整数")
-    # S11 弱钩不连续：近五章钩子类型窗口末 3 项不得全为 h*
+    # S05/S09/S11 钩子窗口算术（输入＝近五章钩子类型滚动窗口）。
+    # 补 [18] 原仅判枚举的可算术半区，闭合 flash 无冷读时的追读轮转真空。
+    # 边界如实声明：只判可算术项（同型轮转/余味池/强钩绝对下限/弱钩不连续）；
+    # 钩子是否真落末段、正文兑现、温馨取向 2/3 细分＝语义半区，仍由冷读维度 10/18（pro/max）与写作时点规则把关。
     win = reg.get("近五章钩子类型") or []
-    if isinstance(win, list) and len(win) >= 3:
-        tail3 = [str(x).strip() for x in win[-3:]]
-        if all(x.startswith("h") for x in tail3 if x):
-            fail("本章", f"S11 弱钩连续 3 章 {tail3}——弱钩（h8–h10）不得连续出现 3 章，须改强钩或调整")
+    if isinstance(win, list):
+        w = [str(x).strip() for x in win if str(x).strip()]
+        # S11 弱钩不连续：末 3 项须均非空且全为 h* 才判（修复空窗 all([])==True 误报）
+        if len(win) >= 3:
+            tail3 = [str(x).strip() for x in win[-3:]]
+            if all(x and x.startswith("h") for x in tail3):
+                fail("本章", f"S11 弱钩连续 3 章 {tail3}——弱钩（h8–h10）不得连续出现 3 章，须改强钩或调整")
+        # S05 近5章同型轮转：强钩 H1–H7 同型至多 1 次；弱钩 h8–h10 合并余味池至多 2 次
+        if len(w) >= 2:
+            hc = {}
+            for x in w:
+                if x.startswith("H"):
+                    hc[x] = hc.get(x, 0) + 1
+            dup = sorted(t for t, c in hc.items() if c >= 2)
+            if dup:
+                fail("本章", f"S05 近五章强钩同型复用 {dup}——同一强钩类型近 5 章至多 1 次，须换型或换载体")
+            pool = sum(1 for x in w if x.startswith("h"))
+            if pool >= 3:
+                fail("本章", f"S05 近五章余味池 {pool}/2 超限——h8/h9/h10 合并近 5 章至多 2 次")
+        # S09 强钩绝对下限：满 5 章窗口强钩 H 至少 2（温馨软下限 2/默认 3 的细分由冷读/题材契约判）
+        if len(w) >= 5:
+            strong = sum(1 for x in w if x.startswith("H"))
+            if strong < 2:
+                fail("本章", f"S09 近五章强钩 {strong}/2 低于绝对下限——追读动力不足，须加强钩（口径见 core/chapter-planning.md#二）")
+        elif cur_ch_int and cur_ch_int >= 5:
+            warns.append(f"第{cur_ch_int}章｜S05/S09 近五章钩子类型窗口不足 5 项（{len(w)}）——按账本维护规则补足，不回改不强造")
     # S14 受限beat层级枚举＋受限让路补法（破窗口径：补法=无 即报）
     lb = reg.get("受限beat")
     if isinstance(lb, dict):
@@ -640,14 +692,17 @@ def main():
     detour = reg.get("受限让路") or {}
     if isinstance(detour, dict) and str(detour.get("补法", "") or "").strip() == "无":
         fail("本章", "S14 受限让路.补法＝「无」——破窗（无核心受限且无在场/余波补偿），不得交付；补法须为 在场/余波 并填补偿章")
-    # S38 首章 beat 数 ≤2 类（仅第 1 章；字段在 distribution 块）
+    # S38 首章 beat 数 ≤2 类（仅第 1 章；字段在 distribution 块；非法值不得静默放行）
     if cur_ch_int == 1:
         fb = ((data.get("distribution") or {}).get("首章beat数"))
-        try:
-            if fb is not None and int(fb) > 2:
-                fail("第1章", f"S38 首章beat数 {fb} >2 类——首章信息量过载（查账本 distribution.首章beat数）")
-        except (ValueError, TypeError):
-            pass
+        if fb is not None:
+            try:
+                fb_int = int(str(fb).strip())
+            except (ValueError, TypeError):
+                fail("第1章", f"S38 首章beat数「{fb}」非法——须为整数（≤2 类，查账本 distribution.首章beat数）")
+            else:
+                if fb_int > 2:
+                    fail("第1章", f"S38 首章beat数 {fb_int} >2 类——首章信息量过载（查账本 distribution.首章beat数）")
 
     if errors:
         print(f"FAIL 交付闸机检未过（{len(errors)} 项）:")
@@ -668,7 +723,7 @@ def main():
     if errors:
         for x in errors: print("  -", x)
         sys.exit(1)
-    if a.precheck:
+    if args.precheck:
         print("PRECHECK 完成：未发现其他 FAIL（[10] 两字段已豁免）——回填「机检运行: 是」「交付闸: 通过」后，须正式运行一次取 PASS 才可交付")
         sys.exit(0)
     print("PASS 交付闸机检：模式保真(降级禁止)/代理凭证互异/产物三验/生成指纹/维度覆盖/输入隔离/引文实证/主语无污染/非同源/自查交叉(分级38|10)/闸判定/印章/三条硬闸(B·C档)/资源账窗口(末世)/章节状态机/形式化项[18] 全过")

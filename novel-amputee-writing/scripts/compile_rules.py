@@ -104,7 +104,9 @@ def main():
         # 通配路径只验证前缀目录存在；具体文件验证存在
         if src and not src.startswith("{"):
             p = src.split("#")[0]
-            if "{" not in p and os.path.sep in p and not os.path.isfile(p):
+            # 跨平台：source 一律用正斜杠，Windows 下 os.path.sep=='\\' 会使旧判恒 False（IR-07 失效）；
+            # 裸文件名（如 SKILL.md）也须校验。通配 {…} 跳过；目录与文件均算存在。
+            if "{" not in p and not (os.path.isfile(p) or os.path.isdir(p)):
                 fail("IR-07", f"{r.get('id')} source 文件不存在: {p}")
     section("IR-05", "layer / severity / assertion / source 校验完成")
 

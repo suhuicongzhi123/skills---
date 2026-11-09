@@ -12,7 +12,7 @@
 #   等价，Claude Code 用户零成本，无需跑转变脚本）。
 
 schema_version: 1
-skill_version: 7.1.0
+skill_version: 7.2.0
 
 # ── 转变规则 ──────────────────────────────────────────────
 conversion:
@@ -82,9 +82,9 @@ hooks:
 platform_registry:
   claude-code:
     form: event_hook
-    config: .claude/settings.json（仓库根已随仓库分发，零成本）
+    config: .claude/settings.json（由 install-host-hooks.py --platform claude-code 生成；仓库根 .claude/ 已于 v7.0.0 移除，不随仓库分发）
     verified: true
-    note: hook 事件集与 context:fork 为 Claude Code 专有扩展
+    note: hook 事件集与 context:fork 为 Claude Code 专有扩展；脚本 verified 仅覆盖 SessionStart 硬层注入子集，其余 hook 须人工注册
   codebuddy:
     form: rule_resident
     config: 项目根 .codebuddy/ 规则目录

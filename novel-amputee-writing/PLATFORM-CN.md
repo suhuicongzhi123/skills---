@@ -72,18 +72,19 @@
 
 ### Claude Code（参照实现）
 
-- 仓库根 `.claude/` 接入层 clone 即得：`settings.json`（SessionStart hook 强制注入
-  `rules/hard-layer.md` 全文＝L3b 硬层常驻宿主强制）＋ 三个 skill——
-  `chapter-rules`（L1 规则包展开＋`!` 动态注入硬层）、`redteam-review`
-  （`context: fork` 独立子代理红队＝L5）、`verify`（交付闸四链，命名 `verify` 挂
-  commit 前自动运行约定）。
+- `.claude/` 接入层**不随仓库分发**（v7.0.0 已移除仓库根 `.claude/`）：用 `scripts/install-host-hooks.py
+  --platform claude-code` 生成 `settings.json`（SessionStart hook 强制注入 `rules/hard-layer.md` 全文
+  ＝L3b 硬层常驻宿主强制，hard-layer-inject 子集）；`chapter-rules`（L1 规则包展开＋`!` 动态注入硬层）、
+  `redteam-review`（`context: fork` 独立子代理红队＝L5）、`verify`（交付闸四链，命名 `verify` 挂
+  commit 前自动运行约定）三个 skill 按 `host-hooks.yaml` 人工注册。缺失时按 L3b 显式降级，❌ 不得当作运行前提。
 - 可开层：L0–L5 与 L6 全开（L4 视 API 侧实现，L4b 无 logits 访问除外）。
 - ⚠ hook 事件集与 fork 语义是 Claude Code 专有扩展（非 Agent Skills 开放标准部分），
   **其他平台不可直接搬 `.claude/` 配置**——用 `scripts/install-host-hooks.py` 转变
   （事件钩子型→等价注册；规则常驻型→规则文件＋强制力降级显式声明；未核实→不猜测写入，
   见 `host-hooks.yaml`），或按本文件第 4 节适配自检逐项重建。
-- 写作项目独立建仓时：复制 `.claude/` 与 `novel-amputee-writing/` 到项目根，
-  `${CLAUDE_PROJECT_DIR}` 相对路径即成立。
+- 写作项目独立建仓时：复制 `novel-amputee-writing/` 到项目根，再跑
+  `install-host-hooks.py --platform claude-code --project-dir <项目根> --yes` 生成 `.claude/`
+  （❌ 不从仓库根复制——仓库根已无此目录），`${CLAUDE_PROJECT_DIR}` 相对路径即成立。
 
 ## 4. 每章开写前的适配自检
 
@@ -101,7 +102,7 @@
 
 - 生理事实语义（髋离断 / 膝上 / 膝下 / 上肢差异，**❌ 不跨类型套用**）
 - 文笔、声口、去 AI 化、心动句非同源
-- `eval/eval-set.yaml` 里 28 条历史复发模式（其中**评测用例 L3** 语义层 13 条；注意与能力层 L3 同名不同义）
+- `eval/eval-set.yaml` 里 29 条历史复发模式（其中**评测用例 L3** 语义层 13 条；注意与能力层 L3 同名不同义）
 
 **机检全绿 ≠ 内容无误。** 这一条在任何平台都成立。
 ## 6. 上下文预算表（小上下文机型选档）
