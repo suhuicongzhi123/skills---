@@ -85,6 +85,27 @@ v5.24.0 修订（四方向架构落地）：
       AI 高频句式）、六族改写方向改为删除优先、E-022 回归用例；DEAD 再补 3 项，
       仍全部为人工确认档；本脚本检查逻辑未变，[5] 基线不变。
 
+ v6.3.0 修订（成文工艺总线＋正式技能规范符合性，未动 gatecheck.py）：
+   ㉔ 新增 core/prose-craft.md 作为「章节因果链／叙事距离／氛围／跨章文风」的
+      唯一新规则权威源，联动 rules.yaml R-024、账本 distribution 文风指纹与
+      意象母题、templates/chapter-contract.md、outline 文风契约、character-card
+      声口指纹、cold-review 既有 5 个维度内的补充核查、eval E-023～E-027。
+      DEAD 词表补氛围结论词 6 项，仍全部为**人工确认档**（有台词/反讽合法边界）；
+      本脚本检查逻辑未变，[5] 基线仍 182bbd8191aa0e5e。
+      ⚠ [4] 孤儿判定口径＝全库 .md/.yaml（剔除 CHANGELOG.md）拼接后 basename
+      子串匹配＋types/ genre/ 通配豁免；E-008 文档表述已按此口径校准，
+      「只在 SKILL.md 登记」不是唯一合法形式。
+
+ v7.0.0 修订（可重算基线 ＋ 输出降噪，脚本逻辑未改）：
+   ㉕ gatecheck.py 哈希基线从本文件硬编码常量迁到 rules/rules.yaml 的
+      script_baselines.gatecheck_py（单一事实源）。改 gatecheck.py 后执行
+      `python scripts/selfcheck.py --update-baseline` 重算并回写，再跑正常自检；
+      ❌ 不再允许手改本文件里的哈希常量（历史上因此产生过跨环境误报）。
+   ㉖ [3] 禁令句命中改为汇总一行（--verbose 可逐条查看上下文）：扫描范围与
+      判定逻辑不变，疑似复发仍逐条打印并计 FAIL，只是不再刷 40 行噪音。
+   ㉗ 新增 scripts/verify.py 统一入口（一次跑编译检查＋自检），防「只跑一条」。
+
+用法：python scripts/selfcheck.py [--verbose] [--update-baseline]
 退出码：0 通过 / 1 有问题
 """
 import re, glob, os, sys, hashlib
@@ -276,6 +297,17 @@ DEAD = [
     "她记着",
     "记性＋小算计",
     "顺手把门垫踢正",
+    # ── v6.3.0 废止项（氛围结论词收束，人工确认档）──────────────────
+    # 禁因：氛围词本身不制造氛围；用抽象结论替代经过视角注意力过滤的具体感官，
+    #   且常作章末/段末收束，与六族「替读者做总结」同族（core/prose-craft.md 第四节）。
+    # 合法边界：人物带具体缘由的自问、反讽台词、真实引语不受限。
+    # ⚠ 只做人工确认档（[3] 列出上下文供维护者判断），❌ 不进 gatecheck [18] 强 FAIL。
+    "空气仿佛凝固了",
+    "时间仿佛静止",
+    "静得能听见心跳",
+    "五味杂陈",
+    "说不清道不明的情绪",
+    "仿佛整个世界都安静了",
 ]
 hits = {}          # (file, line) -> [命中的词]，同一行多词只报一次
 scan = sorted(glob.glob("**/*.md", recursive=True) + glob.glob("**/*.yaml", recursive=True))
@@ -288,17 +320,24 @@ for entry in DEAD:
         for i, l in enumerate(open(f, encoding="utf-8", errors="ignore"), 1):
             if w in l and not (excl and excl in l):
                 hits.setdefault((f, i), []).append(w)
+VERBOSE = "--verbose" in sys.argv
+banned_count = 0
 for (f, i), ws in sorted(hits.items()):
     l = open(f, encoding="utf-8", errors="ignore").read().split("\n")[i - 1]
     # 出现在禁令句里多半合法 → 列出上下文让维护者判断，不静默放行
     banned = ("已废止" in l or "❌" in l or "不写" in l
               or "禁止" in l or "反例" in l)
-    flag = "［禁令句，人工确认］" if banned else "［疑似复发］"
-    print(f"[3] 「{'/'.join(ws)}」{flag} {f}:{i}")
+    if banned:
+        banned_count += 1
+        if VERBOSE:
+            print(f"[3] 「{'/'.join(ws)}」［禁令句，人工确认］ {f}:{i}")
+            print(f"      {l.strip()[:100]}")
+        continue
+    print(f"[3] 「{'/'.join(ws)}」［疑似复发］ {f}:{i}")
     print(f"      {l.strip()[:100]}")
-    if not banned:
-        fail += 1
-print(f"[3] 废止表述: {len(hits)} 处（上方［］标记项请人工确认）")
+    fail += 1
+print(f"[3] 废止表述: {len(hits)} 处（禁令句 {banned_count} 处按人工确认档放行；"
+      f"疑似复发 {len(hits) - banned_count} 处；--verbose 可看禁令句上下文）")
 
 # ── [4] 孤儿文件（存在但全域零引用）────────────────────────
 # 背景：equipment-risk.md 于 v4.6.3 声明删除却仍存活（疑似备份恢复带回），
@@ -326,13 +365,27 @@ fail += len(orphans)
 
 # [5] gatecheck.py 哈希基线（防篡改验证机制——SKILL 〇-补 第 6 类红线支撑）
 # 哈希前归一行尾（\r\n→\n）：git autocrlf 使磁盘行尾随克隆环境漂移（repo 存 LF，
-# Windows 检出 CRLF）——按原始字节哈希会跨环境误报；归一后基线跨 LF/CRLF 稳定
-GATECHECK_SHA = "182bbd8191aa0e5e"   # v6.2.0：gatecheck.py 新增 [18] 形式化项机检（自查分级 49→38 语义项＋11 机检项＋lite 10 项，[9] 按自查档取全集）＋fail() 本章显示修复后重算（原 ee2713cfb978e7d5；中间值 55fc74e749ae888c 为 fail 修复前，已作废）
+# Windows 检出 CRLF）——按原始字节哈希会跨环境误报；归一后基线跨 LF/CRLF 稳定。
+# v7.0.0：基线单一事实源＝rules/rules.yaml 的 script_baselines.gatecheck_py；
+#   `python scripts/selfcheck.py --update-baseline` 重算并回写。
+#   ❌ 本文件不再存第二份常量（双副本漂移是历史故障源）。
+IR_PATH = "rules/rules.yaml"
+BASE_RE = re.compile(r"^([ \t]*gatecheck_py:[ \t]*)([0-9a-f]{16})([ \t]*(?:#.*)?)$", re.M)
 _raw = open("scripts/gatecheck.py", "rb").read()
 _cur = hashlib.sha256(_raw.replace(b"\r\n", b"\n")).hexdigest()[:16]
-if _cur != GATECHECK_SHA:
+_ir = open(IR_PATH, encoding="utf-8").read()
+_m = BASE_RE.search(_ir)
+if not _m:
     fail += 1
-    print("[5] gatecheck.py 哈希基线不符（当前 " + _cur + " 不等于 基线 " + GATECHECK_SHA + "）——脚本被篡改，恢复后重跑")
+    print(f"[5] {IR_PATH} 缺 script_baselines.gatecheck_py（16 位十六进制）——基线不可用")
+elif "--update-baseline" in sys.argv:
+    open(IR_PATH, "w", encoding="utf-8", newline="\n").write(
+        _ir[:_m.start(2)] + _cur + _ir[_m.end(2):])
+    print(f"[5] 基线已重算并写回 {IR_PATH}: {_m.group(2)} → {_cur}（本次其余检查仍照常汇总）")
+elif _cur != _m.group(2):
+    fail += 1
+    print("[5] gatecheck.py 哈希基线不符（当前 " + _cur + " ≠ 基线 " + _m.group(2)
+          + "）——脚本已改动且未重算基线；确认改动后跑 --update-baseline，或恢复脚本")
 else:
     print("[5] gatecheck.py 哈希基线一致: " + _cur)
 

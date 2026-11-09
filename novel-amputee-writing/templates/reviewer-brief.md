@@ -24,7 +24,8 @@
 - 前 N 章正文（**仅维度 10 剧情结构 / 12 密度频率 / 16 移动-辅具 / 21 情节查重用**；
   其余维度只读本章稿——输入集口径以 `core/cold-review.md#五、调用方式` 为准，两处不一致时以该文件为准）
 - 规则库（按维度读）：core/cold-review.md（22 维定义）、core/physio-audit.md、
-  core/audience.md、core/style.md、core/worldbuilding.md、core/chapter-planning.md、
+  core/audience.md、core/style.md、core/prose-craft.md（维度 10/15/17/20/22 的补充核查；
+  ❌ 不新增维度编号，仍报 22/22）、core/worldbuilding.md、core/chapter-planning.md、
   types/{type}.md、topics/limitation-scenes.md、topics/conflict-scenes.md、
   topics/timeline.md、topics/mobility-modes.md、topics/clothing.md、
   topics/combat-mechanics.md（战斗/追逐章必读）

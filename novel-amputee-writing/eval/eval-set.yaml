@@ -7,11 +7,13 @@
 # ⚠ 平台兼容：本文件是纯数据，任何平台可解析；optimize_prompts.py 当前输出静态评分（DSPy 自动优化为预留接口）。
 # ⚠ 逐字校对须知：E-011 / E-014 的 wrong 字段**刻意保留英文直引号**——
 #   它们是黑名单字面量，用于匹配真实错误写法；改成「」会让黑名单失效，不是笔误。
-#   E-020 / E-021 / E-022 的 wrong 为**描述性反例**（不写 DEAD 词表完整字面量，避免 [3] 判成复发），
-#   逐字反例全表见 core/style.md 的「★AI 高频句式家族」「★人物活性」「★伪活性判定」三节。
+#   E-020 / E-021 / E-022 及 v6.3.0 新增 E-023～E-027 的 wrong 均为**描述性反例**
+#   （不写 DEAD 词表完整字面量，避免 [3] 判成复发）；
+#   逐字反例全表见 core/style.md 的「★AI 高频句式家族」「★人物活性」「★伪活性判定」三节，
+#   以及 core/prose-craft.md 的第四、五节（氛围词禁令／结构层七族）。
 
 schema_version: 1
-skill_version: 6.2.2
+skill_version: 7.0.0
 
 # 每条用例：历史上真实发生过的问题 + 期望被哪一层拦住
 # level: L0=纯数据/离线可判 · L1=编译期可判 · L2=生成期可判 · L3=仅语义/人工可判
@@ -77,8 +79,8 @@ cases:
   - id: E-008
     title: 新增文件零引用
     history: 孤儿文件判定只看 .md/.yaml 的 basename 是否在其他文件出现。
-    wrong: 新增模板未被 SKILL.md 注入索引登记
-    right: 每个新增 .md/.yaml 都在 SKILL.md / workflow.md / PLATFORM-CN.md 中出现
+    wrong: 新增模板在全库零引用，或把「只登记 SKILL.md 即可」当成唯一合法形式
+    right: 新增 .md/.yaml 的 basename 须在全库任一 .md/.yaml（CHANGELOG.md 除外）中出现；推荐在 SKILL.md 注入索引登记；types/ 与 genre/ 另有通配豁免。机检口径以 scripts/selfcheck.py [4] 为准
     catch_by: scripts/selfcheck.py [4]
     level: L0
 
@@ -212,6 +214,64 @@ cases:
            不是补动作；四步修法见 core/style.md#★伪活性判定
     catch_by: 人工逐字校对（语义层）+ core/style.md#★伪活性判定 + R-022/R-023 + S41
     level: L3
+
+  - id: E-023
+    title: 结构层 AI 痕迹七族复发（词句全绿、整页仍像模型）
+    history: v6.2.2 前的去 AI 化全部落在词句层（套话／六族／破折号／伪活性）；
+             2025–2026 去 AI 清单指出更隐蔽的一族在段落与结构层：三项并列、同型段首、
+             场景总结尾、感官清单化、情绪直说、安全中性腔、对话同一语域。
+             逐处看都合法，合计密度即污染——与破折号总闸是同一个病。
+    wrong: ❌ 只查词句层、逐处放行，全章合计密度不查；段落形状与角色语域不进自查
+    right: 按 core/prose-craft.md 第五节逐族报全章合计密度，四层同过
+           （词句→结构→跨章→编辑顺序），修法仍以删除优先
+    catch_by: 人工逐字校对（语义层）+ core/prose-craft.md + R-024 + S41 + 冷读维度 15
+    level: L3
+
+  - id: E-024
+    title: 章节「然后」链／无灾难（靠漂亮句子掩盖结构缺口）
+    history: 场景—续篇结构（Swain）与 BUT/THEREFORE 因果链是长篇推进的骨架；
+             AI 逐章生成时最易写成时间顺延：事件一个接一个、没有目标、结尾一切照旧，
+             且润色阶段习惯靠改句子补救——句子改得再好也修不好没有 turn 的场景。
+    wrong: ❌ 场间连接只能填「然后」，缺目标／静态冲突／结局「是」／无续篇，却进入行级润色
+    right: 开写前填场景—续篇链（目标→逐拍升级→灾难四型→决定→下一场目标），
+           章末过五问诊断；结构遍不过不许进声音遍与行级遍
+    catch_by: 章契约链检表 + core/prose-craft.md 第一节 + R-024 + S01/S02/S04 + 冷读维度 10
+    level: L3
+
+  - id: E-025
+    title: 氛围清单化与叙事距离跳档
+    history: 氛围词本身不制造氛围；检索所得共识是让环境经视角人物的注意力过滤后
+             只留下 1–2 条感官通道，并以反声写静。AI 常见病是全通道罗列、
+             抽象概括词收尾，以及一段内无标记跳进他人内心（限知视角泄漏）。
+    wrong: ❌ 用氛围结论词和五感清单造氛围，或叙述距离忽远忽近、写出角色不可能知道的信息
+    right: 按 core/prose-craft.md 第三、四节标距离档、定注意模式、删氛围结论词；
+           环境细节须有因果或属意象母题变奏；冲突段感官 ≤1–3 句
+    catch_by: 人工逐字校对（语义层）+ core/prose-craft.md + R-024 + 冷读维度 20/22
+    level: L3
+
+  - id: E-026
+    title: 跨章文风指纹复发（单章合规、全书换腔）
+    history: AI slop 是累积的——逐章独立润色查不出同一句式家族、章末收束型、
+             意象母题同写法的跨章复用；2026 长篇一致性评测把「叙事风格」列为
+             与事实／时间线／角色／世界观并列的独立错误维。
+    wrong: ❌ 无跨章文风台账，逐章各自润色，近 5 章同一句式家族或收束型反复出现
+    right: 账本 distribution.文风指纹 与 distribution.意象母题 逐章登记并比对近 5 章；
+           同家族 ≥2 次换写法，母题按变奏三选一；示范节清单八处与 R-018 口径不变
+    catch_by: 账本窗口比对 + core/prose-craft.md 第五节 + R-024 + S46 + 冷读维度 17
+    level: L3
+
+  - id: E-027
+    title: 正式技能规范符合性（frontmatter／自包含／渐进式披露）
+    history: 大改时最易把详细规则堆回 SKILL.md、给 frontmatter 加宿主不识别的字段、
+             让技能包依赖包外的宿主接入层，或新增文件零引用（孤儿文件是历史高发复发项）。
+    wrong: SKILL.md 正文承载规则细节；description 用第二人称或含尖括号；
+           新增 .md 全库零引用；包外目录被当作运行前提且无降级声明
+    right: frontmatter 只留 name/description（＋version/author）；SKILL.md 只留导航与契约，
+           详细规则进按需层；包内资源自足，接入层缺失须显式降级声明；
+           改完跑 scripts/verify.py（统一入口：编译检查＋库内自检），PASS 才算完成；
+           宿主 quick_validate.py 另验 frontmatter；改 gatecheck.py 后须 --update-baseline 重算
+    catch_by: quick_validate.py + scripts/verify.py（内含 selfcheck [1]/[1b]/[4] 与 compile_rules）+ 人工校对
+    level: L1
 
 # 优化目标（供 optimize_prompts.py 计算分层加权风险概览）
 scoring:

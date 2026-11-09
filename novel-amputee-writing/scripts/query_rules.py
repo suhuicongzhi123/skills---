@@ -11,7 +11,10 @@
 双形态：
   - CLI 形态：有 shell 的平台直接调用（--out 写文件）；
   - --format text：纯文本，无 shell 平台可由宿主拼进 system prompt。
-硬层（rules/hard-layer.md）**永远单独附带、不参与 scope 过滤、不参与检索**。
+硬层（rules/hard-layer.md）不参与 scope 过滤、不参与检索，开写前须整段单独注入。
+v7.0.0：规则包**默认仍附硬层全文**（兼容只拼这一份规则包进 system prompt 的平台）；
+已由宿主/hook 单独整段注入硬层时，用 --no-hard-layer 去掉重复全文（省约 4.3 KB/章）。
+⚠ 去掉该参数前必须确认硬层确实已在场；拿不准就用默认，宁可重复不可遗漏。
 
 ⚠ 本脚本不做语义相似度召回。禁令是「低频但致命」的，按场景相似度检索会漏掉它。
 """
@@ -72,7 +75,7 @@ def expand(ir, ctx):
     return {"hard": hard, "standard": std, "soft": soft, "all": selected}
 
 
-def render_text(ctx, pack, hard_layer_path):
+def render_text(ctx, pack, hard_layer_path, include_hard=True):
     lines = []
     lines.append("=== 本章规则包（由 query_rules.py 展开，勿凭记忆补写规则）===")
     lines.append(f"题材={ctx.get('题材大类') or '未指定'} | 类型={ctx.get('截肢类型') or '未指定'} | "
@@ -82,9 +85,12 @@ def render_text(ctx, pack, hard_layer_path):
     lines.append("")
     lines.append("【硬约束常驻层】整段见 rules/hard-layer.md，❌ 不参与检索、不得省略；")
     lines.append("  三条硬闸 / 回避清单 / 器具损耗禁令 / 类型生理红线 / 移动承重 / 环境归因。")
-    if os.path.isfile(hard_layer_path):
+    if include_hard and os.path.isfile(hard_layer_path):
         lines.append("")
         lines.append(read(hard_layer_path).rstrip())
+    elif not include_hard:
+        lines.append("  ⚠ 本包按 --no-hard-layer 生成，未附硬层全文：仅当宿主已单独整段注入硬层时可用；")
+        lines.append("     未注入者须去掉该参数重新生成，否则不得开写。")
     for title, key in (("本章适用·硬层规则", "hard"),
                        ("本章适用·标准规则", "standard"),
                        ("本章适用·体检提示（软）", "soft")):
@@ -101,10 +107,11 @@ def render_text(ctx, pack, hard_layer_path):
     return "\n".join(lines)
 
 
-def render_compact(ctx, pack, hard_layer_path):
-    """紧凑档（v6.2.0 小上下文适配）：规则 ID＋title＋一句话断言（截 60 字）＋硬层全文。
+def render_compact(ctx, pack, hard_layer_path, include_hard=True):
+    """紧凑档（v6.2.0 小上下文适配）：规则 ID＋title＋一句话断言（截 60 字）。
 
-    实测：规则区缩至 text 档约 2/3，总体约 13%（硬层 4.3 KB 全文永远附带不可减）；
+    v7.0.0：**默认仍附硬层全文**（--include-hard-layer 为显式同义写法）；
+    仅当硬层已单独整段注入时才用 --no-hard-layer 去掉重复全文，省约 4.3 KB/章；
     代价：规则细节不在场——文末固定声明「compact 档只作索引，
     涉动作/生理/辅具写法须回读源文件」。
     """
@@ -114,9 +121,13 @@ def render_compact(ctx, pack, hard_layer_path):
                  f"尺度档={ctx.get('亲密尺度档') or '未指定'} | 模式={ctx.get('工作流模式') or '未指定'} | "
                  f"章号={ctx.get('chapter') or '未指定'}")
     lines.append("")
-    lines.append("【硬约束常驻层】（全文，❌ 不裁剪）")
-    if os.path.isfile(hard_layer_path):
-        lines.append(read(hard_layer_path).rstrip())
+    if include_hard:
+        lines.append("【硬约束常驻层】（全文，❌ 不裁剪）")
+        if os.path.isfile(hard_layer_path):
+            lines.append(read(hard_layer_path).rstrip())
+    else:
+        lines.append("【硬约束常驻层】未附全文（--no-hard-layer）：须已单独整段注入 rules/hard-layer.md；")
+        lines.append("  三条硬闸 / 回避清单 / 器具损耗禁令 / 类型生理红线 / 移动承重 / 环境归因。")
     for key in ("hard", "standard", "soft"):
         if pack[key]:
             lines.append("")
@@ -129,8 +140,8 @@ def render_compact(ctx, pack, hard_layer_path):
     return "\n".join(lines)
 
 
-def render_markdown(ctx, pack, hard_layer_path):
-    t = render_text(ctx, pack, hard_layer_path)
+def render_markdown(ctx, pack, hard_layer_path, include_hard=True):
+    t = render_text(ctx, pack, hard_layer_path, include_hard)
     return "# 本章规则包\n\n```text\n" + t + "\n```\n"
 
 
@@ -146,6 +157,12 @@ def main():
     ap.add_argument("--chapter", type=int, default=None)
     ap.add_argument("--format", default="text", choices=["text", "json", "markdown", "compact"])
     ap.add_argument("--out", default=None)
+    grp = ap.add_mutually_exclusive_group()
+    grp.add_argument("--no-hard-layer", dest="include_hard", action="store_false",
+                     help="硬层已由宿主/hook 单独整段注入时使用：规则包不再重复附 4.3 KB 全文")
+    grp.add_argument("--include-hard-layer", dest="include_hard", action="store_true",
+                     help="显式附带硬层全文（默认；无 shell 或仅拼这一份规则包的平台必须保留）")
+    ap.set_defaults(include_hard=True)
     a = ap.parse_args()
 
     root = os.path.abspath(a.root)
@@ -166,20 +183,21 @@ def main():
         out = {"context": {k: v for k, v in ctx.items() if v is not None},
                "hard_layer_file": "rules/hard-layer.md",
                "hard_layer_always_on": True,
+               "hard_layer_included": a.include_hard,
                "counts": {k: len(pack[k]) for k in ("hard", "standard", "soft")},
                "rules": pack["all"]}
         text = json.dumps(out, ensure_ascii=False, indent=2)
     elif a.format == "markdown":
-        text = render_markdown(ctx, pack, hard_path)
+        text = render_markdown(ctx, pack, hard_path, a.include_hard)
     elif a.format == "compact":
-        text = render_compact(ctx, pack, hard_path)
+        text = render_compact(ctx, pack, hard_path, a.include_hard)
     else:
-        text = render_text(ctx, pack, hard_path)
+        text = render_text(ctx, pack, hard_path, a.include_hard)
 
     if a.out:
         with open(a.out, "w", encoding="utf-8", newline="\n") as f:
             f.write(text + "\n")
-        print(f"规则包已写入 {a.out}（{len(text)} 字符；"
+        print(f"规则包已写入 {a.out}（{len(text)} 字符；硬层全文{'已附' if a.include_hard else '未附'}；"
               f"硬 {len(pack['hard'])} / 标准 {len(pack['standard'])} / 软 {len(pack['soft'])} 条）")
     else:
         print(text)

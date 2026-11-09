@@ -1,10 +1,13 @@
 # 本章契约（填空骨架 · 依据 query_rules.py 产出的规则包填写，脚本不直接改写本文件）
 
 > 用途：每章开写前生成一份，作为**本章唯一注入的规则视图**。
-> 生成：`python scripts/query_rules.py --genre <题材> --type <类型> --tier <尺度档> --mode <模式> --chapter-kind <章型> --conflict <冲突强度档> --chapter <N> --out <项目目录>/chapter-rules-N.md`
+> 生成：`python scripts/query_rules.py --genre <题材> --type <类型> --tier <尺度档> --mode <模式> --chapter-kind <章型> --conflict <冲突强度档> --chapter <N> --no-hard-layer --out <项目目录>/chapter-rules-N.md`
 > ⚠ `--out` 须指向**项目目录**：脚本产出的是「规则包文本」，不是本模板；❌ 若指向技能目录内的
 > `chapter-contract.md` 会覆盖本骨架。产出后据此手工填写本契约各栏。
 > 无 shell 的平台：用 `--format text` 由宿主拼进 system prompt（见 `PLATFORM-CN.md`）。
+> ⚠ 上列命令已带 `--no-hard-layer`，前提＝开写前已整段注入 `rules/hard-layer.md`
+>   （与 `core/workflow.md` 第 8 节第 4 步一致）；仅拼这一份规则包的平台须**去掉**该参数
+>   让规则包自带硬层全文。两形态不可叠加、也不可都省。
 > ⚠ 本模板是**填空骨架**，不是规则本体；规则本体在 `rules/rules.yaml`，
 >   解释与示例仍在各专项文件。本契约未载的事实一律回读源文件。
 
@@ -58,6 +61,12 @@
 
 - 章纲一行十四项已填：是 / 否（**否即不许开写**）
 - 章八要素 / turn / 阅读承诺：＿
+- **场景—续篇链（v6.3.0）**：目标 ＿ → 冲突逐拍升级 ＿ → 灾难四型 ＿ → 决定 ＿ → 下一场目标 ＿；
+  逐场连接词「因此／但是」已核：是 / 否（出现「然后」＝断链，回炉重排 beat）。
+  权威＝`core/prose-craft.md` 第一节的场景诊断五问；⚠ 与 turn 并行，**不新增第九要素**；
+  「立场→后果」四环按同文件第二节核（活性锚见账本 `角色固定属性.人物活性锚`）
+- **本章文风坐标（v6.3.0）**：叙事距离档 ＿（默认档见账本 `题材契约.文风契约`；偏离须写动机）／
+  感官主通道 ＿（1–2 条）／意象母题本次变奏 ＿／近 5 章 `distribution.文风指纹` 查重结论 ＿
 - 受限配额与窗口状态：＿
 - 章末钩子类型与近 5 章轮转：＿
 - 张力级目标：＿
