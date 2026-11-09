@@ -8,7 +8,7 @@
 |------|-----|------|
 | `main` | `v4.12.1` | 正式版 |
 | `preview` | `v5.23.0` | **测试版（当前最新 tag）** |
-| `develop` | `v6.2.2` | 开发线（宿主接入层＋hook 兼容层＋小上下文适配＋句式家族＋人物活性，验证后推 preview） |
+| `develop` | `v7.0.0` | 开发线（成文工艺总线＋超大体量库重组：体积 -17%/规则包减半/单一事实源/统一校验入口，验证后推 preview） |
 
 ### 安装
 
@@ -22,7 +22,7 @@ git clone https://github.com/suhuicongzhi123/skills---.git
 git clone -b preview https://github.com/suhuicongzhi123/skills---.git
 ```
 
-开发线分支（当前 v6.2.2）：
+开发线分支（当前 v7.0.0）：
 ```bash
 git clone -b develop https://github.com/suhuicongzhi123/skills---.git
 ```
@@ -84,9 +84,40 @@ git checkout v5.23.0   # 或 v5.21.3 / v5.21.2 / v5.21.1 / v5.21.0 / v5.20.0 / v
 > （v6.2.1，仅 develop）、
 > AI 高频句式家族补全（六族：泛化顿悟/时间命运金句/定义式反转/得失对仗宣言/
 > 空泛并列感悟/万能沉默占位）＋人物活性四条根因整改（R-023 正向规则/压缩恢复
-> 回人/人物卡声口/去AI化≠去人性化）＋伪活性判定（v6.2.2，仅 develop）。
+> 回人/人物卡声口/去AI化≠去人性化）＋伪活性判定（v6.2.2，仅 develop）、
+> 成文工艺总线：章节因果链/叙事距离/氛围/跨章文风一致性＋正式技能规范符合性体检
+> （v6.3.0，仅 develop）、超大体量库重组：SKILL.md 629→396 行/全库 -17%/
+> 规则包减半（--no-hard-layer）/哈希基线迁移 rules.yaml/统一校验入口 verify.py/
+> 仓库根 .claude/ 改可选增强层（v7.0.0，仅 develop）。
 
 ## 版本说明
+
+### v7.0.0 · 超大体量技能库重组（开发线）
+
+- **动因**：联网检索超大体量技能库优化方案（Agent Skills 官方最佳实践/
+  context rot 与 lost-in-the-middle/技能失效四型/压缩实证）后针对性重组；
+  生理事实专项内容零删减零改写（types/topics/physio-audit SHA-256 聚合一致）
+- **效率**：SKILL.md 629→396 行（58KB→29KB）；规则包 text 10.1→5.9KB、
+  compact 7.9→3.7KB（`--no-hard-layer`：硬层已整段注入时不再重复附全文，
+  两形态不可叠加、也不可都省）；写作时点在场视图 ≈18→14KB；全库 -17%
+  （1.04MB/67 文件，删 .pyc 与重复模板 platform-capabilities.yaml）
+- **稳定性**：哈希基线迁移至 `rules.yaml script_baselines.gatecheck_py` 托管
+  （`--update-baseline` 重算，gatecheck 内容未动哈希仍 `182bbd8191aa0e5e`）；
+  新增统一校验入口 `scripts/verify.py`（compile_rules＋selfcheck 汇总，防漏跑）；
+  [3] 禁令句降噪汇总一行（--verbose 逐条）；5 个大文件顶部目录防部分读取
+- **人工逐字通检**：机检全绿仍修复 15 类问题（注入索引锚点格式 63 处假落空/
+  占位文件名假悬空/维护期例外与重算流程等）——机检不可替代人工校对
+- **仓库根 `.claude/` 改可选增强层**：host-hooks.yaml 为单一事实源，
+  可由 install-host-hooks.py 自规范重新生成；缺失时按 PLATFORM-CN 显式降级
+- 本版仅在 develop 分支，验证通过后推送 preview 测试通道
+
+### v6.3.0 · 成文工艺总线（开发线）
+
+- **解决的问题**：章节因果链／叙事距离／氛围／跨章文风一致性无总线约束，
+  各章工艺决策分散
+- **内容**：成文工艺总线（章节因果链/叙事距离/氛围/跨章文风一致性四维）
+  ＋正式技能规范符合性体检
+- 本版仅在 develop 分支，验证通过后推送 preview 测试通道
 
 ### v6.2.2 · AI 高频句式家族补全 ＋ 人物活性（开发线）
 
