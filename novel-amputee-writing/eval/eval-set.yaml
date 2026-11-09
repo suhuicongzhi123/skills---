@@ -289,6 +289,21 @@ cases:
            core/chapter-planning.md#★核心受限的戏剧宿主 + S28/S29/S41 + 冷读维度 15/16
     level: L3
 
+  - id: E-029
+    title: 机检脚本端到端运行时回归（变量遮蔽／退出清理）
+    history: 7.1.0 发布版 gatecheck.py 的状态机轨迹循环用 a, b 作循环变量，遮蔽了
+             argparse 命名空间 a；全合规项目走到 PASS 前抛 AttributeError，退出码 1。
+             静态校验（verify.py 16 项＋哈希基线＋语法编译）全绿却漏检，因为机检不执行脚本。
+             同一发布的 --report 用 atexit 过早关闭报告文件，退出 flush 失败把退出码改成 120。
+    wrong: ❌ 只跑静态检查／哈希基线／语法编译就发布；❌ 用单字母 a 作 argparse 命名空间；
+           ❌ 把报告文件交给 atexit 直接 close 而不还原 sys.stdout
+    right: 改 scripts/ 后必须端到端实跑四场景并断言退出码——
+           ① 合规项目（轨迹 ≥2 态）→ PASS/0；② --precheck → PRECHECK 完成/0 且无 PASS 字样；
+           ③ 不合规项目 → FAIL 清单/1；④ 无章节状态块的旧账本 → PASS/0；
+           另核 --report UTF-8 落盘、全程零 Traceback。命名空间统一命名 args。
+    catch_by: 端到端实跑（四场景退出码断言） + scripts/gatecheck.py 内防复发注释
+    level: L1
+
 # 优化目标（供 optimize_prompts.py 计算分层加权风险概览）
 scoring:
   weights: {L0: 1.0, L1: 1.2, L2: 1.5, L3: 2.0}

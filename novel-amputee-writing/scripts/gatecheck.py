@@ -179,15 +179,18 @@ def main():
                     help="bootstrap 第一步：跳过 [10] 两字段（机检运行/交付闸），其余检查照跑")
     ap.add_argument("--report", default=None,
                     help="把本次输出同时写入 UTF-8 报告文件（Windows GBK 控制台可读）")
-    a = ap.parse_args()
+    args = ap.parse_args()
+    # 命名空间统一命名 args：❌ 禁止再用单字母 a 作长生命周期变量——轨迹循环曾用 a, b 遮蔽本命名空间，
+    # 导致全合规项目在 PASS 前 AttributeError（7.1.0 运行缺陷，见 CHANGELOG）。
     # Windows GBK 控制台输出中文报错会乱码 → stdout 强制 UTF-8；不支持时静默退回原编码
     try:
         sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     except (AttributeError, ValueError, OSError):
         pass
-    if a.report:
+    if args.report:
         import atexit
-        _rf = open(a.report, "w", encoding="utf-8")
+        _rf = open(args.report, "w", encoding="utf-8")
+        _orig_stdout = sys.stdout
 
         class _Tee:
             def __init__(self, *ws): self.ws = ws
@@ -195,11 +198,21 @@ def main():
                 for w in self.ws: w.write(s)
                 return len(s)
             def flush(self):
-                for w in self.ws: w.flush()
+                for w in self.ws:
+                    try: w.flush()
+                    except ValueError: pass
 
-        sys.stdout = _Tee(sys.stdout, _rf)
-        atexit.register(_rf.close)
-    root = os.path.realpath(a.dir)
+        sys.stdout = _Tee(_orig_stdout, _rf)
+
+        def _close_report():
+            # 退出前先刷完、再还原 sys.stdout，最后关闭报告文件；
+            # 否则解释器退出时 flush 到已关闭的 Tee 会 ValueError 并把退出码改成 120
+            try: sys.stdout.flush()
+            except Exception: pass
+            sys.stdout = _orig_stdout
+            _rf.close()
+        atexit.register(_close_report)
+    root = os.path.realpath(args.dir)
     ledger = os.path.join(root, "state-ledger.yaml")
     if not os.path.isfile(ledger):
         print("FAIL 未找到 state-ledger.yaml（目录＝小说项目工作区）"); sys.exit(1)
@@ -239,17 +252,17 @@ def main():
                     if mark not in otext:
                         errors.append(f"第1章｜大纲契约块不完整（缺「{mark}」非空标记）")
                         break
-    if a.precheck:
+    if args.precheck:
         print("PRECHECK [10] 已豁免：机检运行／交付闸 两字段待回填（bootstrap 第一步）")
     for e in logs:
         try: ch = int(e.get("章"))
         except (TypeError, ValueError): ch = e.get("章", "?")
-        if a.chapter is not None and ch != a.chapter:
+        if args.chapter is not None and ch != args.chapter:
             pass  # 关注章外仍全量检查（历史章 FAIL 一并报）
         # [0-b] 模板初值黑名单：占位值出现＝未真实执行（防"复制模板即合规"）
         for _k in ("选定模式", "实际执行模式", "审查深度", "机检运行", "交付闸", "自查覆盖"):
             # --precheck 时这两字段尚未回填，占位值属正常，不作初值黑名单判定
-            if a.precheck and _k in ("机检运行", "交付闸"):
+            if args.precheck and _k in ("机检运行", "交付闸"):
                 continue
             _v = str(e.get(_k, "") or "").strip()
             if _v in ("待填", "待运行", "未过", "待查"):
@@ -459,7 +472,7 @@ def main():
                     fail(ch, f"自查的不通过维度与审查完全相同（{sorted(bad1)}）——无独立发现，"
                               f"判同源照抄；自查须有自己的命中项或明确反证")
         # [10] 闸判定＋机检运行（bootstrap：--precheck 豁免这两字段，其余检查照跑）
-        if not a.precheck:
+        if not args.precheck:
             if e.get("机检运行") != "是":
                 fail(ch, f"机检运行={e.get('机检运行') or '未登记'}——脚本漏跑＝严重制度失败，须实际运行 gatecheck 并取得 PASS 后交付")
             if e.get("交付闸") != "通过":
@@ -480,7 +493,7 @@ def main():
                     fail(ch, f"正文SHA不符（gate-pass 记录 {got_sha.group(1)} ≠ 当前 {cur_sha}）——交付正文已被替换，须重跑完整流程")
                 elif not got or got.group(1) != st:
                     fail(ch, f"交付印章不符（gate-pass-第{ch}章.txt）——产物被篡改或印章伪造，须重跑 gatecheck 重新过闸")
-            elif not errors and not a.precheck:
+            elif not errors and not args.precheck:
                 gen_stamps.append((ch, sf, st, draft_text))
     # [0-c] 核查记录占位值：任一项仍为「待查」＝未实查（与日志初值黑名单同源）
     for rec in (data.get("核查记录") or []):
@@ -568,11 +581,11 @@ def main():
         if bad_states:
             fail("本章", f"章节状态.轨迹含非法态 {sorted(set(bad_states))}")
         for i in range(len(trail) - 1):
-            a, b = trail[i], trail[i + 1]
-            if a in FSM_TRANS and b not in FSM_TRANS[a]:
-                fail("本章", f"章节状态非法转移 {a} → {b}（合法后继：{FSM_TRANS[a]}）")
-            if (a, b) in FSM_FORBIDDEN:
-                fail("本章", f"章节状态跳步 {a} → {b}——不得跳过中间手续")
+            s1, s2 = trail[i], trail[i + 1]
+            if s1 in FSM_TRANS and s2 not in FSM_TRANS[s1]:
+                fail("本章", f"章节状态非法转移 {s1} → {s2}（合法后继：{FSM_TRANS[s1]}）")
+            if (s1, s2) in FSM_FORBIDDEN:
+                fail("本章", f"章节状态跳步 {s1} → {s2}——不得跳过中间手续")
         # 闭环判定只看**当前章段**，不看全局日志、也不看历史章段：
         # ① 日志里前 N-1 章都标了「交付闸: 通过」，用全局日志触发会把本章误卡；
         # ② 轨迹是**跨章累计**的（「已交付 → 待规划」回卷即 state_machine 的推进设计），
@@ -668,7 +681,7 @@ def main():
     if errors:
         for x in errors: print("  -", x)
         sys.exit(1)
-    if a.precheck:
+    if args.precheck:
         print("PRECHECK 完成：未发现其他 FAIL（[10] 两字段已豁免）——回填「机检运行: 是」「交付闸: 通过」后，须正式运行一次取 PASS 才可交付")
         sys.exit(0)
     print("PASS 交付闸机检：模式保真(降级禁止)/代理凭证互异/产物三验/生成指纹/维度覆盖/输入隔离/引文实证/主语无污染/非同源/自查交叉(分级38|10)/闸判定/印章/三条硬闸(B·C档)/资源账窗口(末世)/章节状态机/形式化项[18] 全过")

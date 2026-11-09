@@ -81,6 +81,24 @@
 - 归档口径（v7.0.0 起「仅保留最近 1 版全文」）执行：7.0.0 压为单行摘要移入
   历史归档区（全文见 git 提交 `d7b0ec8`）。
 
+### 五、运行缺陷修复（7.1.0 hotfix，已同步 develop）
+
+- **P0 变量遮蔽**：`scripts/gatecheck.py` 状态机轨迹循环 `a, b = trail[i], ...` 遮蔽
+  argparse 命名空间 `a`；全合规项目在 PASS 前 `if a.precheck` 抛 `AttributeError`（退出码 1），
+  交付闸对合规项目永不放行；`--precheck` 同崩。修复＝循环变量改 `s1/s2`，命名空间统一改
+  `args` 并留防复发注释。
+- **P1 报告退出清理**：`--report` 的 `atexit` 直接关闭报告文件，解释器退出时 flush
+  到已关闭的 Tee → `ValueError`、退出码被改成 120。修复＝退出前先 flush、还原
+  `sys.stdout`、再关闭文件。
+- 基线 `ae522a975b3c9c35` → `3240552bdbc9e7a1`（`--update-baseline` 重算）。
+- 端到端回归四场景全部实跑通过（合规 PASS/0、precheck 完成/0、不合规 FAIL/1、
+  无章节状态旧账本 PASS/0），另核 `--report` UTF-8 落盘与全程零 Traceback；
+  固化为 `eval/eval-set.yaml` E-029，`SKILL.md` 〇-规 校验行增端到端要求。
+- **远端同步**：本补丁已推送至远端 `develop` 分支，版本号保持 7.1.0（hotfix 不升版）；
+  本地与远端 `novel-amputee-writing/` 逐字节一致。
+  ⚠ 若远端被回退到 `07a5640` 或更早提交，会重新引入本缺陷——恢复时以本节与 E-029
+  四场景回归为判据，❌ 不得只看静态校验全绿。
+
 ## 历史版本归档（v7.0.0 及更早）
 
 - **7.0.0** 超大体量技能库重组（MAJOR，含 6.3.0 一并入库）：SKILL.md 629→396 行/全库 -17%（1.04MB/67 文件）/规则包减半 --no-hard-layer/删 platform-capabilities.yaml/哈希基线迁 rules.yaml script_baselines 托管+--update-baseline/统一校验入口 verify.py/[3] 禁令句降噪/5 大文件顶部目录/人工逐字通检修复 15 类（注入索引锚点 63 处假落空等）/仓库根 .claude/ 改可选增强层；6.3.0 成文工艺总线（章节因果链/叙事距离/氛围/跨章文风一致性）+规范符合性体检——全文见 git 提交 d7b0ec8/a3f01ab，无 tag
