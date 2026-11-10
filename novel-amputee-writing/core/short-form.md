@@ -17,7 +17,7 @@
 | 钩子 | 章末仍须登记钩型；N<5 时轮转简化为「不连续同型」 | 章末钩子＝全篇收束 | `core/chapter-planning.md#二、章末钩子类型库` |
 | 亲密戏 | 1–2 场（B 档可更密、C 档更疏） | 可 1 场 | 本页第二节 |
 | 结构形态 | 四「节」（每节 1–2 章或一个场景群），不叫卷／段 | 章内四转 | `core/structure.md` 第六节 |
-| 自查档 | lite（5 题收集＋10 项自查） | lite | `templates/chapter.md` 的「lite 档」节 |
+| 自查档 | lite（5 题收集＋5 组自查） | lite | `templates/chapter.md` 的「lite 档」节 |
 | 交付闸 | **不降级**：gatecheck 机检、同模式同产物集、三条硬闸全过 | 同左 | `core/workflow.md#〇-补、执行完整性硬卡口` |
 
 - **两套配额互不套用**：受限 beat 走「篇幅档表」（短篇看全篇总量），

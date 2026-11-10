@@ -133,7 +133,7 @@
   → 用户显式指令（登记 `templates/state-ledger.yaml#用户指令变更` 后）
   → 既有硬闸：受限配额（按篇幅档取值）· 招牌元素限频 · topics/timeline.md 幻肢档位表
               · core/chapter-planning.md#六、亲密戏的编排 位置函数 · 冲突强度档窗口
-  → templates/outline.md#★主题材契约（基调与基调核心循环）
+  → templates/outline.md#★主题材契约 —— 含基调与基调核心循环
   → 本节四卷规格（心动型 / 主导变量 / 取用倾向 / 署名场景）
 ```
 

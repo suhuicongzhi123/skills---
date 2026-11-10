@@ -71,14 +71,23 @@ def patch_ledger(text, target, new_trail):
     has_state = any(l.lstrip().startswith("当前态:") for l in block if l.strip())
     has_trail = any(l.lstrip().startswith("轨迹:") for l in block if l.strip())
     new_block = []
+    # v9.5 修：`轨迹:` 若原为块式列表（轨迹:\n  - 待规划），替换成流式值后
+    # 必须吞掉其后的 `- xxx` 行，否则留下孤儿列表项，整份账本 YAML 解析崩掉
+    # （实测：推进到「已规划」后 line 113-116 结构非法，后续所有脚本全炸）。
+    _skip_sub = False
     for l in block:
         stripped = l.lstrip() if l.strip() else l
         indent = l[:len(l) - len(stripped)]
         if stripped.startswith("当前态:"):
+            _skip_sub = False
             new_block.append(indent + f"当前态: {target}\n")
         elif stripped.startswith("轨迹:"):
+            _skip_sub = True
             new_block.append(indent + f"轨迹: {trail_yaml}\n")
+        elif _skip_sub and stripped.startswith("- "):
+            continue          # 块式列表项，已并入上一行的流式值
         else:
+            _skip_sub = False
             new_block.append(l)
     if not (has_state and has_trail):
         base_indent = "  "

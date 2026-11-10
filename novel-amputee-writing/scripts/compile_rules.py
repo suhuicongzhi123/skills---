@@ -77,6 +77,33 @@ def main():
         return emit(a.as_json, errors, warnings, checks)
     ok("IR-01", "rules.yaml 解析通过")
 
+    # ── 1-补 版本号三处一致（v9.5）────────────────────────────
+    # 实测漂移：skill_version 从 9.3.0 起一直停在 9.2.0，连续三个版本没同步
+    # （9.3 账本 lint / 9.4 生成层 / 9.5 情绪信号层 都没改它）。
+    # 后果：无法判定「这份技能到底是哪一版」，CHANGELOG 与产物对不上。
+    # MAINTENANCE 早已写明「三处同改」，但靠人记必然漏——能脚本化的不要靠文档。
+    _ver = {}
+    try:
+        _m = re.search(r"(?m)^version:\s*([\w.\-]+)\s*$", read("SKILL.md"))
+        if _m:
+            _ver["SKILL.md"] = _m.group(1)
+    except Exception:
+        pass
+    if isinstance(ir.get("skill_version"), str):
+        _ver["rules/rules.yaml"] = ir.get("skill_version")
+    try:
+        _hk = yaml.safe_load(read("host-hooks.yaml")) or {}
+        if isinstance(_hk.get("skill_version"), str):
+            _ver["host-hooks.yaml"] = _hk.get("skill_version")
+    except Exception:
+        warn("VER-02", "host-hooks.yaml 读取失败，版本一致性只核了两处")
+    if len(set(_ver.values())) > 1:
+        fail("VER-01", f"版本号三处不一致：{_ver}——"
+                       f"改版本须三处同改（SKILL.md version / rules.yaml skill_version"
+                       f" / host-hooks.yaml skill_version）")
+    elif _ver:
+        section("VER-01", f"版本号三处一致：{next(iter(_ver.values()))}")
+
     # ── 2. 必填块与 schema 版本 ────────────────────────────
     for key in ("schema_version", "enumerations", "invariants", "rules",
                 "chapter_states", "consistency_checks"):

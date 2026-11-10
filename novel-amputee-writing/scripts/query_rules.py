@@ -75,6 +75,91 @@ def expand(ir, ctx):
     return {"hard": hard, "standard": std, "soft": soft, "all": selected}
 
 
+# 章型 → 本章必读专项文件（v9：旧版 --chapter-kind 只写进包头，战斗章不带 K 表，BUG-015/023）
+KIND_EXTRA = {
+    "战斗": [("topics/combat-mechanics.md", "§十四 K01–K13 自查表、§八 制造四选一、§一 回合与三拍链（回合≠场）"),
+             ("core/intensity.md", "三、战斗回合制：回合数、四拍写法、动作密度（每 100 字 ≥2 个动作）")],
+    "亲密": [("topics/intimacy-explicit.md", "§〇-前 亲密戏也是戏、体位矩阵、露骨度下限"),
+             ("core/intensity.md", "四、对话博弈（越近越短，但不许换人）")],
+    "日常": [("topics/daily-actions.md", "蹲/坐/起身/弯腰/转身 分型速查"),
+             ("core/intensity.md", "一、强度曲线（日常章最容易全章平坦）"),
+             ("core/scene-drive.md", "四、详略差（日常章是第一大流水账灾区）、三、假戏六型")],
+    "对话": [("core/voice.md", "二 声音四要素、四 语气切换矩阵、十一 自查三问"),
+             ("core/emotion-signal.md", "一 三层信号（语言＞身体＞面部）、四 紧张时的语言失控六种"),
+             ("core/intensity.md", "四、对话博弈（争夺物、抢话、答非所问）")],
+    "开篇": [("core/opening.md", "前 3 章留存窗口与钩子"),
+             ("core/intensity.md", "一、强度曲线（开篇章必须有峰值）")],
+    "收束": [("core/structure.md", "弧线收口与回扣"),
+             ("core/intensity.md", "一、强度曲线（收束章的峰值靠前）")],
+}
+
+# 本章型最容易犯的一个毛病（v9.2 推广，BUG-038）：
+# 只给必读文件不够——文件是「该看什么」，毛病是「最容易写错什么」。
+# 实测中这一类提示是全篇最有效的一行（「日常章最容易全章平坦」直接改掉了当章写法）。
+KIND_PITFALL = {
+    "战斗": "把「回合」当「场」——单回合三拍，一场要 3–6 回合；"
+            "另一常见错是打中没有后果（打中了对方无伤无代价地走回来）",
+    "亲密": "按体位矩阵逐项打勾，写成清点式——矩阵是排除法工具，不是施工图；"
+            "一场选一个体位写到站住，比换三个各写两段更有分量",
+    "日常": "全章平坦，没有一个峰值——日常章最容易从头到尾一个音量，"
+            "把最重的一件事用最平的句子写完；"
+            "第二大坑是「只有做事、没有动手」：开门/搬椅/拖地/理货，件件必成，"
+            "读起来是一份值班日志（见 core/scene-drive.md#一 做事≠动手）",
+    "对话": "两个人只在交换信息，没有争任何东西；"
+            "更常见的是所有配角都用主角的句长和语气（配角三律：反差／生活／记忆）；"
+            "第三大坑是所有人共用一套表情动作——都「看了对方一眼」「没说话」"
+            "（盖住名字认不出谁是谁，见 core/emotion-signal.md#六）",
+    "开篇": "前三百字交代背景、身世、世界规则，主角还没遇上一件非解决不可的事；"
+            "开篇的容忍度是「三句之内有事」",
+    "收束": "把该给的结果一直拖到最后一段，前面全是铺垫；"
+            "或者收得太干净——没有余波，读者合上书就忘了",
+}
+
+# 题材 → 本章必读 + 本题材红线 + 本题材最易犯的毛病（v9.3，BUG-044）
+# 立条原因：题材包决定的是「这本书的骨架」（三幕、故事引擎、红线），比章型更上位，
+# 但旧版只有章型会带出必读清单，题材这一层整层缺失。作者只能自己记得去读 genre/*.md。
+GENRE_EXTRA = {
+    "现实向": {
+        "files": [
+            ("genre/realistic.md", "两条红线／三幕骨架（常态→破裂→新常态）／故事引擎／日常章配比"),
+            ("topics/daily-scenes.md", "通勤·厨房·如厕·租房 场景库"),
+            ("core/worldbuilding.md", "受限来源恒为身体结构，不写环境控诉"),
+        ],
+        "redline": "❌ 不写超自然（出现任何即非现实向）｜❌ 不写治愈（截肢不可逆）｜"
+                   "❌ 破裂不归因于残疾（破裂来自生活，残疾只提高代价）",
+        "pitfall": "把日常写成「不便清单」——应写她怎么把日子过顺，不写她有多难；"
+                   "另一常见错是让受限全挂在环境上（台阶、水汽、东西太小），而不是身体结构",
+    },
+    "幻想向": {
+        "files": [
+            ("genre/fantasy.md", "特殊移动体系（第八节）／能力代价与失效／受限换算"),
+            ("core/worldbuilding.md", "缺失解释框架（病因学/献祭/天罚）须锁定"),
+        ],
+        "redline": "❌ 能力来源须独立于截肢（不写「失去腿换来神力」）｜"
+                   "❌ 代偿不得抹掉身体事实（变形后须缺同一侧）",
+        "pitfall": "用术法或变身绕开受限——绕一次，后面每一章都要为此找补；"
+                   "另一常见错是把代偿写成「更强了」，那等于取消题材",
+    },
+    "末世生存": {
+        "files": [
+            ("genre/postapocalyptic.md", "资源账／器具可得性／危机节奏"),
+            ("core/worldbuilding.md", "秩序崩解后的无障碍与辅具来源"),
+        ],
+        "redline": "❌ 不写高科技修复（除非题材明写）｜❌ 资源账连续 3 章不记账＝经济系统失效",
+        "pitfall": "把末世写成背景布——资源账不记，危机就没有重量；"
+                   "或者反过来，把每一天都写成生存危机，读者会疲劳",
+    },
+    "古装向": {
+        "files": [
+            ("genre/historical.md", "器具按时代（木杖/木义腿）／礼法与身体"),
+            ("core/worldbuilding.md", "时代对残疾的解释框架"),
+        ],
+        "redline": "❌ 器具与医学不得超时代｜❌ 不写现代康复观念与无障碍话语",
+        "pitfall": "用现代口吻写古人的身体观——「康复训练」「心理建设」这类词一出现就出戏",
+    },
+}
+
+
 def render_text(ctx, pack, hard_layer_path, include_hard=True):
     lines = []
     lines.append("=== 本章规则包（由 query_rules.py 展开，勿凭记忆补写规则）===")
@@ -84,13 +169,24 @@ def render_text(ctx, pack, hard_layer_path, include_hard=True):
                  f"章号={ctx.get('chapter') or '未指定'}")
     lines.append("")
     lines.append("【硬约束常驻层】整段见 rules/hard-layer.md，❌ 不参与检索、不得省略；")
-    lines.append("  三条硬闸 / 回避清单 / 器具损耗禁令 / 类型生理红线 / 移动承重 / 环境归因。")
+    lines.append("  三条硬闸 / 回避清单与器具禁令 / 类型生理红线 / 移动与承重 / 环境归因 / 写作时点三问。")
     if include_hard and os.path.isfile(hard_layer_path):
         lines.append("")
         lines.append(read(hard_layer_path).rstrip())
     elif not include_hard:
         lines.append("  ⚠ 本包按 --no-hard-layer 生成，未附硬层全文：仅当宿主已单独整段注入硬层时可用；")
         lines.append("     未注入者须去掉该参数重新生成，否则不得开写。")
+    # ── 动笔前四问（v9.4）：放在规则列表之前，因为「有没有戏」比「有没有违规」更前置。
+    # 立条原因：实测一章机检全绿、段落指标全达标，读起来是清单——五件事答得出，
+    # 但第 3 件填「跟着走了一圈」，第 4/5 件填「无」。规则再多也拦不住「没有事件」的稿子。
+    lines.append("")
+    lines.append("【动笔前四问（v9.4 · 先过这一关，再看下面的规则）】")
+    lines.append("  ① 这一章她动手几次、败在哪？（「跟着走/看着/数着/照做/等着/记着」不算动手）")
+    lines.append("  ② 对手今天本来想干什么？（须与她的目标冲突；答不出＝配角只有功能、没有嘴）")
+    lines.append("  ③ 篇幅第一名是谁？（必须是「动手并失败的那一次」，不是搬东西/走路/收拾/等待）")
+    lines.append("  ④ 她哪三处不在状态？（多余的一步/顺序错乱/中途停住/话没说完/做完发现没必要）")
+    lines.append("  答不出＝这章还没有戏：改事件（加一次会失败的动手），❌ 不要用描写补。")
+    lines.append("  详见 core/scene-drive.md#七；四问须落盘进章契约「★四行硬项」，gatecheck [27] 硬检。")
     for title, key in (("本章适用·硬层规则", "hard"),
                        ("本章适用·标准规则", "standard"),
                        ("本章适用·体检提示（软）", "soft")):
@@ -102,6 +198,36 @@ def render_text(ctx, pack, hard_layer_path, include_hard=True):
                 lines.append(f"    机检：{r['enforced_by']}")
             if r.get("source"):
                 lines.append(f"    权威源：{r['source']}")
+    lines.append("")
+    # ── 题材专项（v9.3，BUG-044）：题材比章型上位，故排在章型之前 ──
+    # 旧版只有章型会带出必读清单，题材只参与规则 scope 过滤，不产生「必读文件」——
+    # 于是两条红线、三幕骨架、故事引擎全靠作者自己去读文件，这是唯一没进包的一层。
+    _genre = (ctx.get("题材大类") or "").strip()
+    if _genre in GENRE_EXTRA:
+        _g = GENRE_EXTRA[_genre]
+        lines.append("")
+        lines.append(f"【本题材专项（题材={_genre}）】规则包不展开正文，按下列清单回读源文件")
+        for _f, _w in _g["files"]:
+            lines.append(f"  - {_f}  →  {_w}")
+        lines.append("")
+        lines.append(f"【本题材红线】{_g['redline']}")
+        lines.append(f"【本题材最易犯的一个毛病】{_g['pitfall']}")
+    elif _genre:
+        lines.append("")
+        lines.append(f"【本题材专项】题材「{_genre}」无专属清单；现实向／幻想向／末世生存／古装向 四类自动带出。")
+
+    _kind = (ctx.get("chapter_kind") or "").strip()
+    if _kind in KIND_EXTRA:
+        lines.append("")
+        lines.append(f"【本章型专项（章型={_kind}）】规则包不展开正文，按下列清单回读源文件")
+        for _f, _w in KIND_EXTRA[_kind]:
+            lines.append(f"  - {_f}  →  {_w}")
+        if _kind in KIND_PITFALL:
+            lines.append("")
+            lines.append(f"【本章型最易犯的一个毛病】{KIND_PITFALL[_kind]}")
+    elif _kind:
+        lines.append("")
+        lines.append(f"【本章型专项】章型「{_kind}」无专属清单；战斗/亲密/日常/对话/开篇/收束 六类自动带出。")
     lines.append("")
     lines.append("=== 规则包结束：本包未载的事实一律回读源文件，❌ 不得凭摘要写作 ===")
     return "\n".join(lines)
@@ -127,7 +253,7 @@ def render_compact(ctx, pack, hard_layer_path, include_hard=True):
             lines.append(read(hard_layer_path).rstrip())
     else:
         lines.append("【硬约束常驻层】未附全文（--no-hard-layer）：须已单独整段注入 rules/hard-layer.md；")
-        lines.append("  三条硬闸 / 回避清单 / 器具损耗禁令 / 类型生理红线 / 移动承重 / 环境归因。")
+        lines.append("  三条硬闸 / 回避清单与器具禁令 / 类型生理红线 / 移动与承重 / 环境归因 / 写作时点三问。")
     for key in ("hard", "standard", "soft"):
         if pack[key]:
             lines.append("")
