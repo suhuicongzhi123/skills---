@@ -36,6 +36,8 @@ for f in glob.glob("**/*", recursive=True):
         continue
     if os.path.basename(f) == "CHANGELOG.md":     # 历史记录不参与锚点判定
         continue
+    if "docs/reports/" in f.replace("\\", "/"):   # 报告目录不参与检查（包含历史记录）
+        continue
     src = open(f, encoding="utf-8", errors="ignore").read()
     # v4.9.0: 字符类加 \u4e00-\u9fff，支持 {题材} 等中文占位符
     # v4.17.0: 兼容裸引用（反引号可选）——裸引用必须带锚点，锚点字符集排除
@@ -51,6 +53,9 @@ for f in glob.glob("**/*", recursive=True):
         if os.path.basename(pat) in RUNTIME:      # 运行时产物，跳过
             continue
         expanded = glob.glob(pat.replace("{type}", "*").replace("{题材}", "*"))
+        # 过滤掉非类型定义文件（_template和COMPARISON是辅助文件，不是类型定义）
+        if "{type}" in pat:
+            expanded = [f for f in expanded if os.path.basename(f) not in ("_template.md", "COMPARISON.md")]
         if not expanded:
             if "{" not in pat:                    # 非通配引用却无匹配 → 悬空
                 dangling.add((f, pat))
@@ -89,7 +94,7 @@ MINI = ["适用范围", "失效条目", "移动样态", "身体细节", "幻肢�
 miss_total = 0
 for p in sorted(glob.glob("types/*.md")):
     name = os.path.basename(p)[:-3]
-    if name == "_template":
+    if name in ("_template", "COMPARISON"):  # 跳过模板文件和对照表（非类型定义）
         continue
     need = MINI if name == "bilateral" else FULL     # 叠加层按最小集
     lines = open(p, encoding="utf-8").readlines()
@@ -226,6 +231,9 @@ for entry in DEAD:
     for f in scan:
         # CHANGELOG 记录的是"清理了什么"，必须保留原文，不参与创作注入 → 跳过
         if os.path.basename(f) == "CHANGELOG.md":
+            continue
+        # 报告目录不参与检查（包含历史记录和审查报告）
+        if "docs/reports/" in f.replace("\\", "/"):
             continue
         for i, l in enumerate(open(f, encoding="utf-8", errors="ignore"), 1):
             if w in l and not (excl and excl in l):
