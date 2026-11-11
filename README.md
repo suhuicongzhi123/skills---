@@ -8,7 +8,7 @@
 |------|-----|------|
 | `main` | `v4.12.1` | 正式版 |
 | `preview` | `v5.23.0` | **测试版（当前最新 tag）** |
-| `develop` | `v9.5.0`（开发线，无 tag） | 开发线（生成层重建＋强度/情感/情绪信号层六连更，验证后推 preview） |
+| `develop` | `v9.5.1`（开发线，无 tag） | 开发线（生成层重建＋强度/情感/情绪信号层六连更＋质量整改，验证后推 preview） |
 
 ### 安装
 
@@ -22,7 +22,7 @@ git clone https://github.com/suhuicongzhi123/skills---.git
 git clone -b preview https://github.com/suhuicongzhi123/skills---.git
 ```
 
-开发线分支（当前 v9.5.0）：
+开发线分支（当前 v9.5.1）：
 ```bash
 git clone -b develop https://github.com/suhuicongzhi123/skills---.git
 ```
@@ -96,9 +96,25 @@ git checkout v5.23.0   # 或以下实存 tag（7.x 仅在 develop 开发线，�
 > 生成层重建：人物声音/场景引擎/审查减负＋批四拆分压缩＋全库通查修 9 处自洽缺口
 > （v8.0.0–v8.0.1，仅 develop）、六连更：强度层→情感层与配角声口→判据收口 7 条→
 > 账本 lint＋词表兜底→正向强制层治「全绿但没戏」→情绪信号层治「面瘫」
-> （v9.0.0–v9.5.0，仅 develop）。
+> （v9.0.0–v9.5.0，仅 develop）、
+> 质量整改与可用性增强（14 问题修复＋QUICKCHECK/FAQ/COMPARISON 三新文档，v9.5.1，
+> 仅 develop）。
 
 ## 版本说明
+
+### v9.5.1 · 质量整改与可用性增强（开发线）
+
+- **解决的问题**：系统性全库审查（62 个 md＋10 个脚本）发现 14 个问题
+  （1 P0＋3 P1＋6 P2＋4 优化），增强可用性与规则一致性
+- **P0**：双侧髋离断「空椅面」概念混淆——改写为「椅面前方没有腿伸出」，
+  `core/audience.md` 坐面对照表补「⚠️ 关键区别」行
+- **P1**：髋离断假肢**使用场景分层表**（日常双拐/正式场合假肢/腾手假肢＋单拐）；
+  单腿跳连跳口径与幻肢感近期档特殊口径；冷读报告受理验收流程文档化
+- **可用性三新文档**：`QUICKCHECK.md`（5 分钟最小必查）＋`FAQ.md`（九类 22 问）＋
+  `types/COMPARISON.md`（髋离断/膝上/膝下十二维对照）
+- **删 `docs/`**：reports 历史报告归档无存在必要（.gitignore 忽略不入库/机检
+  特意跳过/结论已沉淀进 CHANGELOG 与代码；机检 [4] 亦独立报残留，双重印证）
+- 哈希基线 `b37afc56b17a9437`（--update-baseline 托管）；本版仅在 develop 分支
 
 ### v9.0.0–v9.5.0 · 强度层 → 情绪信号层 六连更（开发线）
 
