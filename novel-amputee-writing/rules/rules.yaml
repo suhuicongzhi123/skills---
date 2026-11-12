@@ -13,14 +13,14 @@
 #       ❌ 不得据它推断「已支持按该维展开」（见 core/workflow.md 第 8 节）。
 
 schema_version: 1
-skill_version: 9.7.4
+skill_version: 9.7.5
 
 # ── 校验基线（单一事实源）──────────────────────────
 # gatecheck.py 改动后执行 `python scripts/selfcheck.py --update-baseline` 重算并回写；
 # 自检读取本值，❌ 不在 selfcheck.py 再存一份常量（双副本漂移是历史故障源）。
 # 口径：sha256(CRLF→LF 归一后的文件字节)[:16]。
 script_baselines:
-  gatecheck_py: aa11bddc6fef9aaf
+  gatecheck_py: bdc959ec46dc6ddf
 
 # ── 一、枚举（唯一定义；下游文件不得另立取值）──────────────────
 enumerations:

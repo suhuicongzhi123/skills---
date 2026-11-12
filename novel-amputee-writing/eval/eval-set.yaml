@@ -13,7 +13,7 @@
 #   以及 core/prose-craft.md 的第四、五节（氛围词禁令／结构层八族）。
 
 schema_version: 1
-skill_version: 9.7.4
+skill_version: 9.7.5
 
 # 每条用例：历史上真实发生过的问题 + 期望被哪一层拦住
 # level: L0=纯数据/离线可判 · L1=编译期可判 · L2=生成期可判 · L3=仅语义/人工可判
