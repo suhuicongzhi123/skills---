@@ -164,7 +164,7 @@ CHECKLIST_IDS = {f"S{i:02d}" for i in range(1, 50)}
 MACHINE_IDS = {"S05", "S06", "S07", "S09", "S11", "S12", "S14", "S38", "S42", "S48", "S49"}
 GROUP_IDS = {f"G{i:02d}" for i in range(1, 13)}
 LITE_GROUPS = {"G01", "G02", "G03", "G05", "G11"}
-# 组 → 成员 S（与 templates/chapter.md 逐条一致；49 项全覆盖、不重不漏）
+# 组 → 成员 S（与 templates/chapter.md 逐条一致；50 项全覆盖、不重不漏）
 G2S = {
     "G01": ["S18", "S19", "S20", "S21", "S22", "S23"],
     "G02": ["S17", "S32", "S33", "S34", "S40"],

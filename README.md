@@ -8,7 +8,7 @@
 |------|-----|------|
 | `main` | `v9.5.1` | **正式版（当前最新 tag）** |
 | `preview` | `v9.5.1` | **测试版（与 main 同 tag）** |
-| `develop` | `v9.7.2`（开发线） | 开发线（改法铁则＋语义化版本规范＋跌撞腔整改＋审查清单口径更正＋注释式纠错清理，验证后推 preview） |
+| `develop` | `v9.7.3`（开发线） | 开发线（改法铁则＋语义化版本规范＋跌撞腔整改＋审查清单口径更正＋注释式纠错清理＋自查编号计数修正，验证后推 preview） |
 
 ### 安装
 
@@ -22,7 +22,7 @@ git clone https://github.com/suhuicongzhi123/skills---.git
 git clone -b preview https://github.com/suhuicongzhi123/skills---.git
 ```
 
-开发线分支（当前 v9.7.2）：
+开发线分支（当前 v9.7.3）：
 ```bash
 git clone -b develop https://github.com/suhuicongzhi123/skills---.git
 ```
@@ -103,9 +103,23 @@ git checkout v9.5.1   # 或以下历史 tag（v6.x–v9.5.0 仅在 develop 开�
 > ＋战斗红线 A/B/C 分组＋机检可见性修复，v9.6.0，仅 develop）、
 > 改法铁则／语义化版本规范／跌撞腔整改（v9.7.0，仅 develop）、
 > 审查清单口径更正（G01–G12 映射＋六类第 6 项＋复合辅具，v9.7.1，仅 develop）、
-> 注释式纠错清理（28 处元评论删除＋附页位置条自相矛盾修正，v9.7.2，仅 develop）。
+> 注释式纠错清理（28 处元评论删除＋附页位置条自相矛盾修正，v9.7.2，仅 develop）、
+> 自查编号计数修正（S01–S49→S01–S50，补 G10 的 S50 折算锚，v9.7.3，仅 develop）。
 
 ## 版本说明
+
+### v9.7.3 · 自查编号计数漂移修正（开发线）
+
+- **性质**：PATCH（9.7.2 → 9.7.3）。计数修正与联动同步，用法不变
+- **问题**：`gatecheck.py` 的 `G2S` 已含 **S50**（G10 的机检折算锚，v9 补），
+  而文档体系仍写 `S01–S49`，`templates/chapter.md` 的 G10 也未标 S50
+  ——与 v9.6 修「R 编号上限 025→034」同类，是同轮漏改的计数
+- **修正**：`MAINTENANCE`／`chapter.md`(2)／`cold-review.md`(3)／`prose-craft.md`
+  统一为 `S01–S50`；G10 补「S50 · 声口可辨，机检折算锚」；`gatecheck` 注释 49→50 项
+- **口径澄清**：S50 不占自查行——`[9]` 只校验 G01–G12 组号，S50 仅用于 `[13]` 维度折算
+- **哈希**：`gatecheck.py` 仅改注释、行为不变；基线重算
+  `4a587e9e7d7b88d3` → `aa11bddc6fef9aaf`
+- **校验**：`verify.py` PASS；`G2S` 实测 50 项无缺号无重复
 
 ### v9.7.2 · 注释式纠错清理（开发线）
 
