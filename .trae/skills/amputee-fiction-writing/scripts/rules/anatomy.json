@@ -1,0 +1,23 @@
+{
+  "_comment": "截肢平面解剖词表。absent_terms 为该平面已不存在、与截肢侧侧别词共现时应报错的身体部件；has_stump 为 false 时出现残肢/残端类词报错。机器版对应 references/02_生理事实/ 与禁忌动作总表，ID 与人工表同步。",
+  "codes": {
+    "HD": { "name": "髋离断", "limb": "lower", "has_stump": false, "absent_terms": ["大腿", "膝", "膝盖", "小腿", "踝", "脚踝", "脚"] },
+    "TF": { "name": "大腿截肢", "limb": "lower", "has_stump": true, "absent_terms": ["膝", "膝盖", "小腿", "踝", "脚踝", "脚"] },
+    "KD": { "name": "膝离断", "limb": "lower", "has_stump": true, "absent_terms": ["小腿", "踝", "脚踝", "脚"] },
+    "TT": { "name": "小腿截肢", "limb": "lower", "has_stump": true, "absent_terms": ["踝", "脚踝", "脚"] },
+    "SYM": { "name": "赛姆截肢", "limb": "lower", "has_stump": true, "absent_terms": ["脚"] },
+    "FT": { "name": "足部分截肢", "limb": "lower", "has_stump": true, "absent_terms": [] },
+    "SD": { "name": "肩离断", "limb": "upper", "has_stump": false, "absent_terms": ["上臂", "肘", "肘部", "前臂", "腕", "手腕", "手"] },
+    "FQ": { "name": "肩胛胸廓间截肢", "limb": "upper", "has_stump": false, "absent_terms": ["上臂", "肘", "肘部", "前臂", "腕", "手腕", "手"] },
+    "TH": { "name": "大臂截肢", "limb": "upper", "has_stump": true, "absent_terms": ["肘", "肘部", "前臂", "腕", "手腕", "手"] },
+    "ED": { "name": "肘离断", "limb": "upper", "has_stump": true, "absent_terms": ["前臂", "腕", "手腕", "手"] },
+    "TR": { "name": "前臂截肢", "limb": "upper", "has_stump": true, "absent_terms": ["腕", "手腕", "手"] },
+    "WD": { "name": "腕离断", "limb": "upper", "has_stump": true, "absent_terms": ["手"] },
+    "PH": { "name": "手部分截肢", "limb": "upper", "has_stump": true, "absent_terms": [] }
+  },
+  "stump_terms": ["残肢", "残端"],
+  "side_words": { "L": "左", "R": "右" },
+  "lower_side_nouns": ["腿", "脚", "膝", "踝"],
+  "upper_side_nouns": ["臂", "手", "肘", "腕", "肩"],
+  "amputation_hint_terms": ["截肢", "残肢", "残端", "缺失", "没了", "截去", "空袖", "空裤", "软组织"]
+}

@@ -1,0 +1,133 @@
+{
+  "_comment": "禁忌动作规则，ID 与 references/02_生理事实/禁忌动作总表.md 完全对应。patterns 为正则片段；allow_context 出现时若在匹配点附近命中则跳过（表示动作由辅具/代偿合理完成）；automated=false 的规则只做人工审查。",
+  "rules": [
+    {
+      "id": "ACT-LEG-01", "applies_to": ["HD", "TF", "KD", "TT"], "severity": "error",
+      "description": "无辅具双脚站立/行走/迈步",
+      "patterns": ["双脚站", "两腿站", "站起身", "站了起来", "猛地站起", "迈步", "走向前", "走过去", "向前走", "行走"],
+      "allow_context": ["拐", "轮椅", "拄", "撑", "扶"]
+    },
+    {
+      "id": "ACT-LEG-02", "applies_to": ["HD", "TF", "KD", "TT"], "severity": "error",
+      "description": "跑、奔、跳跃、冲刺类动作",
+      "patterns": ["奔跑", "跑步", "狂奔", "飞奔", "跳跃", "跳起", "一跃", "冲刺", "跑了", "跑去", "跑向"],
+      "allow_context": ["轮椅", "豁免"]
+    },
+    {
+      "id": "ACT-LEG-03", "applies_to": ["HD", "TF", "KD", "TT", "SYM", "FT"], "severity": "error",
+      "description": "截肢侧踢、蹬、踹、踮、勾物",
+      "patterns": ["踢", "踹", "蹬腿", "蹬出", "踮脚", "用脚勾"],
+      "allow_context": ["健侧", "豁免"]
+    },
+    {
+      "id": "ACT-LEG-04", "applies_to": ["HD", "TF", "KD"], "severity": "error",
+      "description": "截肢侧膝部动作（弯膝、跪地、膝行）",
+      "patterns": ["跪地", "跪下", "双膝跪", "膝行", "弯膝", "膝盖一软", "屈膝"]
+    },
+    {
+      "id": "ACT-LEG-05", "applies_to": ["HD", "TF", "KD", "TT"], "severity": "error",
+      "description": "跷二郎腿、双腿交叠、双膝并拢",
+      "patterns": ["二郎腿", "双腿交叠", "双膝并拢", "两腿交叠"]
+    },
+    {
+      "id": "ACT-LEG-06", "applies_to": ["HD", "TF", "KD", "TT", "SYM"], "severity": "error",
+      "description": "截肢侧穿鞋袜、系鞋带",
+      "patterns": ["穿鞋", "穿袜", "系鞋带", "绑鞋带", "袜子套"]
+    },
+    {
+      "id": "ACT-LEG-07", "applies_to": ["HD", "TF", "KD", "TT"], "severity": "error",
+      "description": "残端/软组织垫直接承重站立或行走",
+      "patterns": ["残端.{0,6}(踩|站|承重|着地)", "残肢.{0,6}(踩|站|走|承重)", "软组织.{0,6}承重"]
+    },
+    {
+      "id": "ACT-LEG-08", "applies_to": ["HD", "TF", "KD", "TT", "SYM"], "severity": "error",
+      "description": "截肢侧脚踝动作",
+      "patterns": ["踮脚", "脚踝一转", "转动脚踝", "踝部发力"]
+    },
+    {
+      "id": "ACT-FT-01", "applies_to": ["FT"], "severity": "warning",
+      "description": "足部截肢者全速爆发跑/急转，需交代代价",
+      "patterns": ["全速跑", "急转弯", "猛地变向", "全力冲刺"]
+    },
+    {
+      "id": "ACT-BLL-01", "applies_to": ["BLL"], "severity": "error",
+      "description": "双侧下肢截肢者任何站立/行走/跑跳（无豁免）",
+      "patterns": ["站起", "站起身", "迈步", "行走", "奔跑", "跑步", "跳起", "走向", "跑去"],
+      "allow_context": ["豁免"]
+    },
+    {
+      "id": "ACT-BLL-02", "applies_to": ["BLL"], "severity": "error",
+      "description": "跌倒后瞬间起身、无过程地面转移",
+      "patterns": ["一跃而起", "猛地起身", "立刻站起", "一下就爬了起来", "迅速站起"]
+    },
+    {
+      "id": "ACT-BLL-03", "applies_to": ["BLL"], "severity": "error",
+      "description": "无轮椅的长距离位移、双拐摆荡行走",
+      "patterns": ["摆荡步态", "双拐.{0,4}(走|行走|前进)", "拄拐.{0,4}长途"]
+    },
+    {
+      "id": "ACT-BLL-04", "applies_to": ["BLL"], "severity": "warning", "automated": false,
+      "description": "忽略高度差取物、无减压久坐（人工审查）",
+      "patterns": []
+    },
+    {
+      "id": "ACT-ARM-01", "applies_to": ["SD", "FQ", "TH", "ED", "TR", "WD"], "severity": "error",
+      "description": "截肢侧手/指动作（握抓捏指挥手写字按键）",
+      "patterns": ["握住", "抓住", "抓起", "捏着", "挥手", "挥了挥", "挥挥手", "挥着手", "写字", "按键", "指了指", "接过", "用手", "伸手"],
+      "allow_context": ["健侧", "另一只手", "豁免"]
+    },
+    {
+      "id": "ACT-ARM-02", "applies_to": ["SD", "FQ", "TH", "ED"], "severity": "error",
+      "description": "截肢侧弯肘、前臂动作",
+      "patterns": ["弯肘", "肘部一", "前臂.{0,4}(抬|挥|放|压)", "手肘.{0,4}(弯|顶)"]
+    },
+    {
+      "id": "ACT-ARM-03", "applies_to": ["SD", "FQ", "TH", "ED", "TR", "WD", "PH"], "severity": "error",
+      "description": "双手协同动作（鼓掌、捧抱提、接物、拧毛巾、背后系扣）",
+      "patterns": ["鼓掌", "双手", "两手", "捧住", "捧起", "抱住", "接住", "拧毛巾", "背后系", "双手捧", "双手端", "双手抱"],
+      "allow_context": ["豁免", "残肢夹", "用脚", "口咬"]
+    },
+    {
+      "id": "ACT-ARM-04", "applies_to": ["SD", "FQ", "TH", "ED", "TR", "WD", "PH"], "severity": "error",
+      "description": "截肢侧撑地支撑",
+      "patterns": ["单手撑地", "手臂撑地", "伸手撑", "用手撑住地面", "手掌.{0,4}撑"]
+    },
+    {
+      "id": "ACT-PH-01", "applies_to": ["PH"], "severity": "warning", "automated": false,
+      "description": "超出角色卡登记残留指能力的精细动作（人工审查）",
+      "patterns": []
+    },
+    {
+      "id": "ACT-BUL-01", "applies_to": ["BUL"], "severity": "warning",
+      "description": "双侧上肢截肢者持物动作缺少代偿说明",
+      "patterns": ["握住", "抓起", "端着", "提着", "拿着", "捧起"],
+      "allow_context": ["脚", "嘴", "残肢", "代偿", "适配", "豁免"]
+    },
+    {
+      "id": "ACT-BUL-02", "applies_to": ["BUL"], "severity": "error",
+      "description": "双侧上肢截肢者跌倒时伸手撑地",
+      "patterns": ["伸手撑地", "双手撑地", "下意识伸手", "手臂撑地"]
+    },
+    {
+      "id": "ACT-BUL-03", "applies_to": ["BUL"], "severity": "warning",
+      "description": "无适配方案的自理动作（进食、书写、系扣、开门）",
+      "patterns": ["用筷子", "系扣", "拧开", "开门"],
+      "allow_context": ["脚", "嘴", "残肢", "适配", "改装", "豁免"]
+    },
+    {
+      "id": "ACT-COMBO-01", "applies_to": ["COMBO"], "severity": "error", "automated": false,
+      "description": "复合截肢规则并集由脚本按角色代码自动展开，人工复核",
+      "patterns": []
+    },
+    {
+      "id": "ACT-COMBO-02", "applies_to": ["COMBO"], "severity": "error", "automated": false,
+      "description": "移动方案与上肢能力冲突，由 DEV 系列规则机器检查",
+      "patterns": []
+    },
+    {
+      "id": "ACT-COMBO-03", "applies_to": ["COMBO"], "severity": "warning", "automated": false,
+      "description": "转移省略过程（人工审查）",
+      "patterns": []
+    }
+  ]
+}

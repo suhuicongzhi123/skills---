@@ -1,0 +1,47 @@
+{
+  "_comment": "辅具检查规则。suppress_context 命中时表示正文已交代拐杖安置/转移过程，跳过该条。",
+  "rules": [
+    {
+      "id": "DEV-01", "severity": "error",
+      "description": "双拐使用中出现双手占用动作且无安置交代",
+      "crutch_in_use": ["腋拐", "肘拐", "双拐", "拄着拐", "撑着双拐", "两根拐"],
+      "conflict_patterns": ["双手端", "双手捧", "双手抱", "两手提", "两手端", "双手接", "端着.{0,4}(盆|碗|盘|箱)", "抱着.{0,4}(箱|人|包裹)"],
+      "suppress_context": ["并拢", "倚在", "倚放", "平放", "夹在腋下", "收好", "放在", "靠在", "袖箍", "垂挂"]
+    },
+    {
+      "id": "DEV-02", "severity": "warning",
+      "description": "单拐角色持拐手出现持物动作，需有换手/安置交代",
+      "crutch_in_use": ["单拐", "一根拐", "一支拐"],
+      "conflict_patterns": ["提着", "拎着", "端着", "抱着"],
+      "suppress_context": ["换手", "夹在", "倚", "放下", "靠在"]
+    },
+    {
+      "id": "DEV-03", "severity": "error",
+      "description": "轮椅使用中出现站立/行走动作且无转移交代",
+      "crutch_in_use": ["坐在轮椅", "轮椅上", "驱动轮椅", "推着轮椅"],
+      "conflict_patterns": ["站起", "站起身", "迈步", "走向", "跑去", "走了过去", "跳了下来"],
+      "suppress_context": ["转移", "挪到", "撑着.{0,6}挪", "扶着.{0,6}站", "转移板", "锁刹"]
+    },
+    {
+      "id": "DEV-04", "severity": "error",
+      "description": "正文出现清单未登记的辅具（凭空出现）",
+      "inventory_mention_terms": ["腋拐", "肘拐", "拐", "轮椅", "转移板"],
+      "conflict_patterns": [],
+      "suppress_context": []
+    },
+    {
+      "id": "DEV-05", "severity": "error", "automated": "ledger_only",
+      "description": "辅具台账场景断档：期初状态不等于上一场景期末状态",
+      "crutch_in_use": [],
+      "conflict_patterns": [],
+      "suppress_context": []
+    },
+    {
+      "id": "DEV-06", "severity": "warning",
+      "description": "无拐单腿跳搭配奔跑/追逐/长距离关键词，超出无拐移动边界",
+      "crutch_in_use": [],
+      "conflict_patterns": ["单腿跳.{0,10}(追|冲|奔|跑|几条街|数百米)", "(追|冲|奔).{0,10}单腿跳", "跳着跑"],
+      "suppress_context": ["豁免"]
+    }
+  ]
+}
