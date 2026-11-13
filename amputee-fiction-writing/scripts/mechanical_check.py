@@ -16,8 +16,42 @@ mechanical_check.py —— 截肢题材小说机械自查脚本
   1 = 存在错误级问题
   2 = 运行错误（文件缺失、配置非法、规则文件损坏）
 
-配置 JSON 结构示例见 assets/机械自查配置示例.json。
-台账 JSON 结构：{"scenes":[{"scene":"场景一","opening":{"C-01":"门边立放"},"closing":{"C-01":"手中"}}]}
+配置 JSON schema（完整示例见 assets/机械自查配置示例.json，本说明为字段口径唯一权威）：
+{
+  "work": {"title": "作品名", "genre": "题材", "library_version": "vX.Y.Z"},
+  "characters": [
+    {
+      "name": "角色名（必填）",
+      "aliases": ["别名"],            # 可选，机械识别同一人用
+      "amputations": [                # 必填，缺失即退出码 2
+        {"code": "HD", "side": "L"}   # 键名是 code 不是 type；side 只接受 L/R/B
+      ],
+      "devices": ["C-01"]             # 可选，引用下方 devices[].id
+    }
+  ],
+  "devices": [                        # 顶层扁平列表，禁止按角色嵌套成对象
+    {"id": "C-01", "holder": "角色名", "type": "axillary_crutches", "count": 2}
+  ],
+  "exemptions": [
+    {"name": "豁免名", "rules": ["规则ID"], "scenes": ["场景一"], "boundary": "边界", "cost": "代价"}
+  ]
+}
+
+amputations[].code 取值（与 scripts/rules/anatomy.json 同步，共 13 个）：
+  下肢 HD 髋离断 / TF 大腿截肢 / KD 膝离断 / TT 小腿截肢 / SYM 赛姆截肢 / FT 足部分截肢
+  上肢 SD 肩离断 / FQ 肩胛胸廓间截肢 / TH 大臂截肢 / ED 肘离断 / TR 前臂截肢 / WD 腕离断 / PH 手部分截肢
+devices[].type 取值：axillary_crutches 腋拐 / forearm_crutches 肘拐 / single_crutch 单拐 /
+                    wheelchair 轮椅 / transfer_board 转移板
+exemptions[].scenes 的场景名与正文分场对齐：二级标题用标题全文，* * * 分隔线依次为场景一、场景二……
+
+高频配置错误（均以退出码 2 拒绝运行，先查这四项）：
+  1. 字段写成 amputation —— 正确为 amputations 数组；
+  2. 截肢项内写 "type" —— 正确键名为 code；
+  3. devices 按角色嵌套成对象 —— 正确为顶层扁平列表，角色用 id 数组引用；
+  4. side 写中文「左/右」 —— 只接受 L/R/B。
+
+台账 JSON 结构（--ledger 可选）：
+  {"scenes":[{"scene":"场景一","opening":{"C-01":"门边立放"},"closing":{"C-01":"手中"}}]}
 """
 
 import argparse
@@ -47,19 +81,43 @@ def load_json(path, allow_missing=False):
         sys.exit(2)
 
 
+SCENE_DIVIDER = re.compile(r"\*[ \t]*\*[ \t]*\*")
+SCENE_NUMERALS = "一二三四五六七八九十"
+
+
+def scene_name(index):
+    """分隔线切出的场景按顺序命名为场景一、场景二……超过十个用阿拉伯数字。"""
+    return "场景" + (SCENE_NUMERALS[index - 1] if index <= 10 else str(index))
+
+
 def split_scenes(text):
-    """按二级标题切场景，返回 [(标题, 起始行号, 正文), ...]"""
+    """按二级标题或独占一行的 * * * 分隔线切场景，返回 [(标题, 起始行号, 正文), ...]。
+
+    正式小说排版不使用场景二级标题：含分隔线时，分隔线之间的行文依次命名为
+    场景一、场景二……，与豁免标记中的场景号对齐；无分隔线时全文按一场处理。
+    二级标题切分保留，兼容改动前的章节文件。
+    """
+    has_divider = any(SCENE_DIVIDER.fullmatch(ln.strip()) for ln in text.splitlines())
     scenes = []
-    current_title = "全文"
+    segment = 1
+    current_title = scene_name(segment) if has_divider else "全文"
     current_start = 1
     buffer = []
     for idx, line in enumerate(text.splitlines(), start=1):
+        stripped = line.strip()
         if line.startswith("## "):
             if buffer:
                 scenes.append((current_title, current_start, "\n".join(buffer)))
+                buffer = []
             current_title = line[3:].strip()
             current_start = idx
-            buffer = []
+        elif SCENE_DIVIDER.fullmatch(stripped):
+            if buffer:
+                scenes.append((current_title, current_start, "\n".join(buffer)))
+                buffer = []
+            segment += 1
+            current_title = scene_name(segment)
+            current_start = idx
         else:
             buffer.append(line)
     if buffer:
