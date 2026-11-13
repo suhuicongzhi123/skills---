@@ -4,6 +4,9 @@
 
 ---
 
+> **目录（>100 行按需文件，勿整体加载）**：一 机检与验证｜二 生理事实与类型｜三 移动与辅具｜四 器具与禁令｜
+> 五 写作流程与机制｜六 内容与创作｜七 错误与调试｜八 技能库维护｜九 快速参考。
+
 ## 一、机检与验证
 
 ### Q1: 为什么机检PASS了，冷读还是发现问题？
@@ -285,7 +288,7 @@ python scripts/verify.py
 
 **恢复后留痕**：压缩发生 = 可审计事件，需记录。
 
-详见 `SKILL.md#〇-压、压缩恢复协议`。
+详见 `SKILL.md#二、压缩恢复协议`。
 
 ---
 
@@ -328,7 +331,7 @@ python scripts/verify.py
 
 三问全过 → 再判层级（核心/弱受限/点缀）
 
-详见 `topics/limitation-scenes.md#四-补2、受限层级判定`。
+详见 `topics/limitation-scenes.md#六、受限层级判定`。
 
 ---
 
@@ -426,7 +429,7 @@ python scripts/query_rules.py --list
 
 ### Q22: 如何向技能库报告bug或建议？
 
-**A**: 本技能库遵循"维护期例外"原则（SKILL.md#〇-补、严重错误分级）。
+**A**: 本技能库遵循"维护期例外"原则（SKILL.md#三、严重错误分级）。
 
 **报告渠道**：
 1. GitHub Issues（如果有公开仓库）
@@ -450,7 +453,7 @@ python scripts/query_rules.py --list
 |-----------|-----------|
 | 生理事实速查 | `types/{type}.md` |
 | 不可能动作 | `types/{type}.md#不可能动作` |
-| 三条硬闸 | `rules/hard-layer.md#一` |
+| 成年闸与恢复期红线 | `rules/hard-layer.md#一` |
 | 器具禁令 | `core/audience.md#★器具损耗与更换禁令` |
 | 移动方式 | `topics/mobility-modes.md#一` |
 | 受限判定 | `topics/limitation-scenes.md#一` |

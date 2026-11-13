@@ -77,7 +77,7 @@ def main():
             no_auto_layer.append(c.get("id"))
     l3_cases = [c.get("id") for c in cases if c.get("level") == "L3"]
 
-    hard_ok = all(k in hard for k in ("三条硬闸", "回避清单", "器具损耗与更换禁令", "类型生理红线"))
+    hard_ok = all(k in hard for k in ("成年闸", "回避清单", "器具损耗与更换禁令", "类型生理红线"))
     if a.check_hard_layer and not hard_ok:
         print("FAIL 硬约束常驻层缺必需小节")
         return 1

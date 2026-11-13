@@ -28,12 +28,10 @@
             "档位": { "type": "string", "enum": ["A 含蓄", "B 情色（半程）", "C 成人（全程）"] },
             "硬闸自查": {
               "type": "object",
-              "description": "B/C 档时四项必填且实判；gatecheck [15] 强制",
+              "description": "B/C 档时两项必填且实判；gatecheck [15] 强制",
               "properties": {
                 "成年": { "$ref": "#/$defs/闸判定" },
-                "非自愿": { "$ref": "#/$defs/闸判定" },
-                "同意": { "$ref": "#/$defs/闸判定" },
-                "疼痛非快感": { "$ref": "#/$defs/闸判定" }
+                "恢复期": { "$ref": "#/$defs/闸判定" }
               },
               "additionalProperties": false
             }

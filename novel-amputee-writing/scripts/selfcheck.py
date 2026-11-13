@@ -281,7 +281,7 @@ for f in orphans:
     print(f"      {f}（全域零引用——确认是否为应删未删的残留）")
 fail += len(orphans)
 
-# [5] gatecheck.py 哈希基线（防篡改验证机制——SKILL 〇-补 第 6 类红线支撑）
+# [5] gatecheck.py 哈希基线（防篡改验证机制——SKILL 三 第 6 类红线支撑）
 # 哈希前归一行尾（\r\n→\n）：git autocrlf 使磁盘行尾随克隆环境漂移（repo 存 LF，
 # Windows 检出 CRLF）——按原始字节哈希会跨环境误报；归一后基线跨 LF/CRLF 稳定。
 # v7.0.0：基线单一事实源＝rules/rules.yaml 的 script_baselines.gatecheck_py；

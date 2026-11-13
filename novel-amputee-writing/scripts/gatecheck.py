@@ -33,15 +33,15 @@
       ❌ 不硬 FAIL 逼审查员造差异）。硬防伪由 [8] 输入隔离/[12] 主语纯净/[11] 引文实证/调用凭证兜底。
       「独立发现」分两层：本脚本只判「审查侧有 ≥1 条不通过 / 反证轮 ≥3 段实质核验」（裸子串不算）；
       「是否自查未发现」由本项比对+主代理复核裁定（审查员依 [8] 看不到自查报告，不自证）——
-      见 core/cold-review.md#五 受理验收③④ 与 core/workflow.md#冷读报告受理验收流程。
+      见 core/cold-review.md#八 受理验收③④ 与 core/workflow.md#冷读报告受理验收流程。
   [14] 交付凭证（三模式）：gate-pass-第N章.txt，含正文SHA（sha256(章草稿)
       [:16]）＋正文字数＋印章（sha256(章号+章草稿+自查+审查)[:16]）重算比对
       ——交付正文被替换 → SHA/印章不符 FAIL；FAIL 运行不生成凭证；
       交付正文须逐字节来自被检章草稿文件，交付时附凭证内 SHA 与字数
-  [15] 三条硬闸机检（B/C 档亲密章）：本章登记.亲密戏登记.档位 为 B/C 时，
-      硬闸自查四项（成年/非自愿/同意/疼痛非快感）须齐备且均为「通过」；
+  [15] 成年闸与恢复期红线机检（B/C 档亲密章）：本章登记.亲密戏登记.档位 为 B/C 时，
+      硬闸自查两项（成年/恢复期）须齐备且均为「通过」；
       任一「待查」＝未实查 FAIL、任一「不通过」＝触硬闸 FAIL。
-      硬闸不因题材/用户指令关闭（SKILL 〇-补）；缺失字段视为未登记 FAIL。
+      硬闸不因题材/用户指令关闭（SKILL 三）；缺失字段视为未登记 FAIL。
   [16] 资源账窗口空窗机检（仅末世/生存题材，账本 资源账.启用: 是 时）：
       资源账.上次记账章 与日志最大章号差 ≥3（＝连续 3 章未记账）→ FAIL（经济系统失效），
       与 genre/postapocalyptic.md「连续 3 章不记账＝经济系统失效」逐字对齐。
@@ -201,7 +201,7 @@ def parse_agents(raw):
         return names, creds, True
     return list(raw), None, False
 
-# 自查 S 编号 → 稽查维度（映射表权威源：core/cold-review.md#四-补）
+# 自查 S 编号 → 稽查维度（映射表权威源：core/cold-review.md#五）
 S2D = {
     "S01": [10], "S02": [10], "S03": [10], "S04": [10], "S05": [10],
     "S06": [18, 19], "S07": [19], "S08": [18], "S09": [18], "S10": [18],
@@ -359,7 +359,7 @@ def main():
     if args.chapter is not None and args.chapter not in ch_nums:
         errors.append(
             f"第{args.chapter}章未在账本「工作流执行日志」登记——机检没有验收对象，"
-            f"此时的 PASS 不作数。先按 core/workflow.md#8 登记本章日志与产物路径，再跑机检")
+            f"此时的 PASS 不作数。先按 core/workflow.md#八 登记本章日志与产物路径，再跑机检")
     if ch_nums and min(ch_nums) == 1:
         first_e = next((e for e in logs if str(e.get("章")) == "1" or e.get("章") == 1), None)
         outline = (first_e or {}).get("产物", {}).get("大纲") if first_e else None
@@ -470,7 +470,7 @@ def main():
                     nq = len(set(re.findall(r"问\s*([1-7])\s*[｜|]", rp_text)))
                     if nq == 6:
                         warns.append(f"第{ch}章｜审查报告只答到读感第 6 问——"
-                                     f"v9.1 起须补第 7 问（她在乎什么，我能不能说出来），见 core/cold-review.md#〇")
+                                     f"须补第 7 问（她在乎什么，我能不能说出来），见 core/cold-review.md#〇")
                     if nq < 6:
                         fail(ch, f"审查报告读感七问仅 {nq}/7（格式「问N｜答案｜引文」）——"
                                  f"冷读第一动作未做，见 core/cold-review.md#〇；仅答 6 问按 WARN 兼容旧报告")
@@ -488,7 +488,7 @@ def main():
                     # 输入清单段必须存在
                     if "输入清单" not in rp_text:
                         fail(ch, "审查报告缺「输入清单」段（须列收到的文件）")
-                    # 独立发现（对应 core/cold-review.md#五 受理验收④）：
+                    # 独立发现（对应 core/cold-review.md#八 受理验收④）：
                     # 本项只判「审查侧有没有实质发现」——≥1 条维度判定「不通过」，或「## 反证轮」≥3 段核验。
                     # 「是否自查未发现」不在此判（审查员依③看不到自查报告，无法自证）：
                     #   由下方 [13] 同源判定用 selfcheck_dim_vector(自查) 比对兜底，主代理受理时裁定。
@@ -888,7 +888,7 @@ def main():
                     if _n30 >= 2:
                         warns.append(f"第{ch}章{_htag28}｜[30] 近 5 章同场景域同招法 {_n30} 次"
                                      f"（{_k30[0]}／{_k30[1]}）——战斗过程/解法复用，须换招或升级"
-                                     f"（core/chapter-planning.md#一-补3、genre/fantasy.md 第十一节）")
+                                     f"（core/chapter-planning.md#四、genre/fantasy.md 第十一节）")
         # [31] 默认性格禁令（R-034 全类型）与题材分割（R-032）：
         _fixed31 = data.get("角色固定属性") or {}
         _persona31 = f"{_fixed31.get('性格', '') or ''} {_fixed31.get('声口', '') or ''}"
@@ -909,7 +909,7 @@ def main():
         if _genre30 and not _is_fantasy30 and _tier31 and _tier31 not in ("无", "E0", "—", "-"):
             fail(ch, f"[31] 题材分割越界：题材大类「{_genre30}」非幻想向，"
                      f"战斗豁免档位却为「{_tier31}」——R-032 主角光环／能力强化补偿为幻想向专属，"
-                     f"现实向及零豁免题材恒填「无」/E0（genre/realistic.md#六）")
+                     f"现实向及零豁免题材恒填「无」/E0（genre/realistic.md#七）")
         if _is_fantasy30 and _battle30 and _tier31 in ("", "无", "E0", "—", "-"):
             warns.append(f"第{ch}章{_htag28}｜[31] 幻想向战斗章未登记豁免档位——"
                          f"R-032 未登记即回落零豁免；本章若用了主角补偿，须先在世界观与账本登记")
@@ -942,7 +942,7 @@ def main():
                     warns.append(f"第{ch}章{_htag}｜[19] 叙述段碎片化：{n_short}/{len(narr)} 段不超过 20 字"
                                  f"（{ratio:.0%}，阈值 {_thr:.0%}；本章对白 {_dlg_ratio:.0%}）"
                                  f"——一段一句＝没有段落组织，"
-                                 f"见 core/intensity.md#五、段落卫生（v9.4 降级：❌ 本节不治流水账）——"
+                                 f"见 core/intensity.md#五、段落卫生（❌ 本节不治流水账）——"
                                  f"这一段只是排版卫生，治不了流水账；流水账看 core/scene-drive.md#四 的详略差")
 
             # ② 长段不足：叙述段里 ≥80 字的不足 3 段（0 段＝全章都在短句上蹦）
@@ -1072,7 +1072,7 @@ def main():
                                  f"须补一轮复核并更新「复核字数」")
             else:
                 warns.append(f"第{ch}章｜[11] 审查报告缺「复核字数: N」——"
-                             f"无法核对复核之后是否又改过稿（格式见 core/cold-review.md#五）")
+                             f"无法核对复核之后是否又改过稿（格式见 core/cold-review.md#八）")
         # [13] 同源判定（pro/max）：判定高度一致是同源「信号」而非照抄实据——独立审查常 converge 于多数维度通过，
         #     纯判定相似（引文/位置不同）属合法同判，降为 WARN 交主代理受理裁定（对齐 cold-review ④「主代理据此裁定」），
         #     ❌ 不再硬 FAIL 逼审查员造差异。硬防伪仍由输入隔离[8]/主语纯净[12]/引文实证[11]/调用凭证兜底。
@@ -1157,10 +1157,10 @@ def main():
         if todo:
             fail(rec.get("章", "?"), f"核查记录仍有「待查」项 {todo[:4]}——未实查，须逐项改为 ✓/✗＋说明")
 
-    # [15] 三条硬闸机检（B/C 档亲密章）——硬闸不因题材/用户指令关闭（SKILL 〇-补）
-    # 账本结构：本章登记.亲密戏登记.{档位, 硬闸自查{成年,非自愿,同意,疼痛非快感}}
+    # [15] 成年闸与恢复期红线机检（B/C 档亲密章）——不因题材/用户指令关闭（SKILL 三）
+    # 账本结构：本章登记.亲密戏登记.{档位, 硬闸自查{成年,恢复期}}
     # 与 state-ledger.yaml 模板字段、core/workflow.md 章末核查、chapter-planning 6.1 第0条联动。
-    hard_gates = ("成年", "非自愿", "同意", "疼痛非快感")
+    hard_gates = ("成年", "恢复期")
     intim = (data.get("本章登记") or {}).get("亲密戏登记")
     if isinstance(intim, dict):
         tier = str(intim.get("档位", "") or "").strip()
@@ -1168,23 +1168,22 @@ def main():
         if tier and (tier.startswith("B") or tier.startswith("C")):
             hg = intim.get("硬闸自查")
             if not isinstance(hg, dict) or not hg:
-                fail("本章", "B/C 档亲密章缺 `本章登记.亲密戏登记.硬闸自查` 登记——三条硬闸不可判定，不得交付")
+                fail("本章", "B/C 档亲密章缺 `本章登记.亲密戏登记.硬闸自查` 登记——成年/恢复期不可判定，不得交付")
             else:
                 missing = [g for g in hard_gates if g not in hg]
                 if missing:
-                    fail("本章", f"硬闸自查缺项 {missing}——须齐备成年/非自愿/同意/疼痛非快感四项")
-                core_gates = ("成年", "非自愿", "疼痛非快感")
+                    fail("本章", f"硬闸自查缺项 {missing}——须齐备成年/恢复期两项")
                 for g in hard_gates:
                     v = str(hg.get(g, "") or "").strip()
                     if v in ("待查", ""):
                         fail("本章", f"硬闸自查[{g}]为「待查/空」——未实查，须逐条填 通过/不适用")
                     elif v == "不通过":
-                        fail("本章", f"硬闸自查[{g}]＝不通过——触碰内容硬闸，本章不得交付（SKILL 〇-补）")
-                    elif v == "不适用" and g in core_gates:
-                        fail("本章", f"硬闸自查[{g}]＝不适用——{g}是绝对线（INV-01），B/C 档须实判「通过」；仅「同意」可视情境不适用")
+                        fail("本章", f"硬闸自查[{g}]＝不通过——触碰内容硬闸，本章不得交付（SKILL 三）")
+                    elif v == "不适用":
+                        fail("本章", f"硬闸自查[{g}]＝不适用——{g}是绝对线（INV-01），B/C 档须实判「通过」")
                     elif v not in ("通过", "不适用"):
                         fail("本章", f"硬闸自查[{g}]取值非法「{v}」——须为 通过/不适用/不通过/待查")
-                # 成年/非自愿/疼痛非快感 已在上方逐项强制「通过」（不适用即 FAIL），与 INV-01「四项齐备实判通过」对齐。
+                # 成年/恢复期 已在上方逐项强制「通过」（不适用即 FAIL），与 INV-01「两项齐备实判通过」对齐。
 
     # [16] 资源账窗口空窗机检（仅末世/生存题材，账本 资源账.启用: 是 时）
     # 只认章号窗口、不判「本章算不算一场危机」——那是 cold-review 维度19 的叙事软查。
@@ -1323,7 +1322,7 @@ def main():
         if len(w) >= 5:
             strong = sum(1 for x in w if x.startswith("H"))
             if strong < 2:
-                fail("本章", f"S09 近五章强钩 {strong}/2 低于绝对下限——追读动力不足，须加强钩（口径见 core/chapter-planning.md#二）")
+                fail("本章", f"S09 近五章强钩 {strong}/2 低于绝对下限——追读动力不足，须加强钩（口径见 core/chapter-planning.md#五）")
         elif cur_ch_int and cur_ch_int >= 5:
             warns.append(f"第{cur_ch_int}章｜S05/S09 近五章钩子类型窗口不足 5 项（{len(w)}）——按账本维护规则补足，不回改不强造")
     # S14 受限beat层级枚举＋受限让路补法（破窗口径：补法=无 即报）
@@ -1376,7 +1375,7 @@ def main():
     if args.precheck:
         print("PRECHECK 完成：未发现其他 FAIL（[10] 两字段已豁免）——回填「机检运行: 是」「交付闸: 通过」后，须正式运行一次取 PASS 才可交付")
         sys.exit(0)
-    print("PASS 交付闸机检：模式保真(降级禁止)/代理凭证互异/产物三验/生成指纹/维度覆盖/输入隔离/引文实证/主语无污染/非同源/自查交叉(分级12组|5组)/闸判定/印章/三条硬闸(B·C档)/资源账窗口(末世)/章节状态机/形式化项[18] 全过")
+    print("PASS 交付闸机检：模式保真(降级禁止)/代理凭证互异/产物三验/生成指纹/维度覆盖/输入隔离/引文实证/主语无污染/非同源/自查交叉(分级12组|5组)/闸判定/印章/成年·恢复期硬闸(B·C档)/资源账窗口(末世)/章节状态机/形式化项[18] 全过")
     sys.exit(0)
 
 if __name__ == "__main__":

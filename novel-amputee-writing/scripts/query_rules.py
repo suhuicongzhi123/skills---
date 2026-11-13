@@ -79,7 +79,7 @@ def expand(ir, ctx):
 KIND_EXTRA = {
     "战斗": [("topics/combat-mechanics.md", "§十四 K01–K13 自查表、§八 制造四选一、§一 回合与三拍链（回合≠场）"),
              ("core/intensity.md", "三、战斗回合制：回合数、四拍写法、动作密度（每 100 字 ≥2 个动作）")],
-    "亲密": [("topics/intimacy-explicit.md", "§〇-前 亲密戏也是戏、体位矩阵、露骨度下限"),
+    "亲密": [("topics/intimacy-explicit.md", "§〇 亲密戏也是戏、体位矩阵、露骨度下限"),
              ("core/intensity.md", "四、对话博弈（越近越短，但不许换人）")],
     "日常": [("topics/daily-actions.md", "蹲/坐/起身/弯腰/转身 分型速查"),
              ("core/intensity.md", "一、强度曲线（日常章最容易全章平坦）"),
@@ -109,7 +109,7 @@ KIND_PITFALL = {
     "对话": "两个人只在交换信息，没有争任何东西；"
             "更常见的是所有配角都用主角的句长和语气（配角三律：反差／生活／记忆）；"
             "第三大坑是所有人共用一套表情动作——都「看了对方一眼」「没说话」"
-            "（盖住名字认不出谁是谁，见 core/emotion-signal.md#六）",
+            "（盖住名字认不出谁是谁，见 core/emotion-signal.md#七）",
     "开篇": "前三百字交代背景、身世、世界规则，主角还没遇上一件非解决不可的事；"
             "开篇的容忍度是「三句之内有事」",
     "收束": "把该给的结果一直拖到最后一段，前面全是铺垫；"
@@ -134,11 +134,11 @@ GENRE_EXTRA = {
     "幻想向": {
         "files": [
             ("genre/fantasy.md", "第十节 受限豁免与主角补偿（R-032）／第十一节 真实战斗冲突（R-033）／第八节 特殊移动体系"),
-            ("topics/combat-magic.md", "15.4 六条红线 A/B 分组／15.6 M01–M08"),
+            ("topics/combat-magic.md", "1.5 六条红线 A/B 分组／1.7 M01–M08"),
             ("core/worldbuilding.md", "缺失解释框架＋幻想向豁免四界登记"),
         ],
         "redline": "❌ 能力来源须独立于截肢（不写「失去腿换来神力」）｜"
-                   "❌ 不得改写生理事实（15.4 A 组红线全书有效）｜"
+                   "❌ 不得改写生理事实（1.5 A 组红线全书有效）｜"
                    "❌ 战斗章禁止写成非战斗冲突、禁止复用近 5 章战斗过程｜"
                    "❌ 现实向零豁免（主角光环／能力强化补偿不得外溢）",
         "pitfall": "把登记为战斗的章写成对峙、协商或「经过一番周旋」；"
@@ -173,7 +173,7 @@ def render_text(ctx, pack, hard_layer_path, include_hard=True):
                  f"章号={ctx.get('chapter') or '未指定'}")
     lines.append("")
     lines.append("【硬约束常驻层】整段见 rules/hard-layer.md，❌ 不参与检索、不得省略；")
-    lines.append("  三条硬闸 / 回避清单与器具禁令 / 类型生理红线 / 移动与承重 / 环境归因 / 写作时点三问。")
+    lines.append("  成年闸与恢复期红线 / 回避清单与器具禁令 / 类型生理红线 / 移动与承重 / 环境归因 / 写作时点三问。")
     if include_hard and os.path.isfile(hard_layer_path):
         lines.append("")
         lines.append(read(hard_layer_path).rstrip())
@@ -257,7 +257,7 @@ def render_compact(ctx, pack, hard_layer_path, include_hard=True):
             lines.append(read(hard_layer_path).rstrip())
     else:
         lines.append("【硬约束常驻层】未附全文（--no-hard-layer）：须已单独整段注入 rules/hard-layer.md；")
-        lines.append("  三条硬闸 / 回避清单与器具禁令 / 类型生理红线 / 移动与承重 / 环境归因 / 写作时点三问。")
+        lines.append("  成年闸与恢复期红线 / 回避清单与器具禁令 / 类型生理红线 / 移动与承重 / 环境归因 / 写作时点三问。")
     for key in ("hard", "standard", "soft"):
         if pack[key]:
             lines.append("")

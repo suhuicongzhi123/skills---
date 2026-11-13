@@ -132,7 +132,7 @@ def main():
     skipped += [
         "生理事实语义（髋离断/膝上/膝下/上肢差异）——须靠 rules/hard-layer.md 常驻 + 冷读维度",
         "文笔与声口、去 AI 化、心动句非同源——须靠 core/style.md 与 core/audience.md",
-        "内容合规审核（国内平台前置/后置）——须实测目标平台，见 PLATFORM-CN.md 第 0 步",
+        "内容合规审核（国内平台前置/后置）——须实测目标平台，见 PLATFORM-CN.md 第〇步",
     ]
 
     failed = [f for f in findings if not f["pass"]]
