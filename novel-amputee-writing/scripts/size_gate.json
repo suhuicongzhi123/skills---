@@ -1,0 +1,17 @@
+{
+  "max_total_chars": 740000,
+  "max_skill_md_chars": 10000,
+  "allowed_delta_chars": 1500,
+  "initialized": true,
+  "last_total_chars": 733570,
+  "consecutive_growth": 0,
+  "change_kind": "fix",
+  "change_note": "",
+  "rule_id_counts": {
+    "R": 34,
+    "S": 50,
+    "G": 12,
+    "E": 44
+  },
+  "_note": "体量闸阈值的单一事实源。完成本次改造后跑 python scripts/size_gate.py --record 初始化基线；此后任何净增超过 allowed_delta_chars，必须先把 change_kind 改为 feature 并写明 change_note，否则 verify.py FAIL。纠错类改动只减不增。"
+}

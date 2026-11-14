@@ -175,7 +175,7 @@ python scripts/gatecheck.py <项目目录> --chapter N
 - **完整自查**：`templates/chapter.md` G01-G12
 - **机检**：`python scripts/gatecheck.py <dir> --chapter N`
 - **统一验证**：`python scripts/verify.py`
-- **常见问题**：`FAQ.md`
+- **常见问题**：`dev/FAQ.md`
 
 ---
 

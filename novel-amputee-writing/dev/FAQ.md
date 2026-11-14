@@ -487,7 +487,7 @@ python scripts/query_rules.py <rule-id>
 ---
 
 **未找到答案？**
-- 查看 `QUICKCHECK.md` - 5分钟快速自检
+- 查看 `dev/QUICKCHECK.md` - 5分钟快速自检
 - 查看 `MAINTENANCE.md` - 维护者手册
 - 查看 `SKILL.md` - 技能总纲
 - 运行 `python scripts/verify.py` - 统一验证

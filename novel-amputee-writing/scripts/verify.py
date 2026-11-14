@@ -23,6 +23,7 @@ ROOT = os.path.dirname(HERE)
 STEPS = [
     ("编译检查 compile_rules.py", "compile_rules.py", False),
     ("库内自检 selfcheck.py", "selfcheck.py", True),
+    ("体量闸 size_gate.py", "size_gate.py", False),
 ]
 
 EXTRA_OK = {"--update-baseline", "--verbose"}

@@ -1,6 +1,6 @@
 ---
 name: novel-amputee-writing
-version: 10.1.0
+version: 10.2.0
 author: 溯洄从之
 description: 面向慕残者(devotee/wannabe)群体的截肢者题材小说写作技能。主角为截肢者，下肢截肢为主（髋离断为主）、上肢截肢为辅（肩离断，含肘离断/腕离断）。覆盖拐杖、假肢、日常动作、高频生活场景、身体细节、幻肢感、亲密关系、W视角等主要方面，含人物声音与幽默/场景引擎与流水账修复/剧情节奏/弧线/场景结构/章节因果链/文风与叙事距离/写作氛围/长篇文风一致性等写作技法，支持现实向、幻想向、末世、古装四类题材；幻想向另含受限豁免／主角补偿与真实战斗冲突规则，全类型含默认性格禁令。本技能应在用户要求写截肢者/残障者题材小说、续写、大纲、人物设定、章节，或提到"慕残""截肢""残肢""拐杖""假肢""髋离断""幻肢""独臂""肩离断""肘离断""腕离断""单臂"等时使用；明确要求本技能时同样触发。不触发：非截肢题材普通小说、纯医学/康复专业内容（非小说创作）。
 ---
@@ -11,6 +11,8 @@ description: 面向慕残者(devotee/wannabe)群体的截肢者题材小说写�
 
 > **库定位**：写作地基，不是内容清单。规则与素材支撑任意题材、类型、篇幅，按需取用。
 > 「库里有」不等于「这本书要写」。
+
+> **外移说明**：第八节注入索引 → `rules/injection-index.md`；第〇/一/五节维护态 → `rules/maintenance-ops.md`。本文件保留章节锚点，正文按阶段读取。
 
 > **总纲目录**（本文件＝技能入口与索引；细则按需注入，勿整体加载）：
 > ★防什么教什么｜★执行者身份｜★写作时点与审读时点｜★交互边界｜★用户指令优先｜
@@ -125,20 +127,10 @@ description: 面向慕残者(devotee/wannabe)群体的截肢者题材小说写�
 
 ## 〇、版本与更新检查（对话首次调用时执行一次）
 
-- 每段对话首次调用检查一次，非阻塞、不提问、提示完继续
-- 有 shell：`git ls-remote --tags https://github.com/suhuicongzhi123/skills---.git`，
-  取最大版本须按版本语义排序（`sort -V | tail -1`），禁取字典序末条
-- 无 shell：读 GitHub tags API，按 x.y.z 三段数值比较
-- 本地改过技能文件时，`git pull` 前提示用户自行处理冲突
-
+> 全文已外移至 `rules/maintenance-ops.md`。本文件只保留章节锚点；按需读取该文件，❌ 不整体加载。
 ## 一、安装后注册（非 Claude Code 平台必读）
 
-> hook 语义单一事实源＝`host-hooks.yaml`；平台适配与降级声明权威全文在 `PLATFORM-CN.md`。
-
-- 有 shell：`python scripts/install-host-hooks.py --platform <平台> --project-dir <项目目录> --yes`；
-  未核实平台不猜测写入（exit 3 加人工注册指引）
-- 任何降级必须显式写进账本 `工作流执行日志`；硬层最低补偿＝每章开写前整段重读 `rules/hard-layer.md`
-
+> 全文已外移至 `rules/maintenance-ops.md`。本文件只保留章节锚点；按需读取该文件，❌ 不整体加载。
 ## 二、压缩恢复协议（小上下文机型必读）
 
 > 压缩丢的不是状态（账本、草稿、报告已落盘），是**注入**。
@@ -187,23 +179,7 @@ description: 面向慕残者(devotee/wannabe)群体的截肢者题材小说写�
 
 ## 五、文件结构与格式
 
-> **改完必跑**：`python scripts/verify.py`（编译检查＋锚点/悬空/必填节/废止表述/孤儿/哈希）。
-> 宿主 `quick_validate.py` 另验 frontmatter。两个校验器都 PASS 才算改完。
-
-| 目录 | 职责 |
-|---|---|
-| `core/` | 核心规则：`scene-drive.md` 场景驱动器（有没有发生事）｜`voice.md` 人物声音｜`scene-engine.md` 场景引擎｜`intensity.md` 强度层｜`emotion.md` 情感层｜`emotion-signal.md` 情绪出口｜`psychology.md` 心理模式库｜`style.md` 词句层｜`prose-craft.md` 成文层｜`audience.md` 受众｜`character-setup.md` 设定｜`chapter-planning.md` 章级｜`structure.md` 弧线｜`workflow.md` 流程｜`cold-review.md` 冷读｜`opening.md`／`pacing.md`／`scene.md`／`short-form.md`／`physio-audit.md`／`worldbuilding.md` |
-| `types/` | 截肢生理事实，按类型隔离 |
-| `topics/` | 主题域专项（跨类型） |
-| `genre/` | 题材适配 |
-| `templates/` | 产出模板与结构化契约（含 `voice-card.md` 声音卡） |
-| `rules/` | 规则 IR `rules/rules.yaml` ＋硬约束常驻层 `rules/hard-layer.md` |
-| `eval/` | 离线回归评测集（不进创作上下文） |
-| `scripts/` | 机检／编译／规则展开／状态机／校验回路；`verify.py` 为统一自检入口 |
-| 根 | `host-hooks.yaml`、`PLATFORM-CN.md`、`MAINTENANCE.md`（维护者规范，创作时不读）、`CHANGELOG.md` |
-
-**索引格式**：带 `#锚点` 的引用一律单独成行，不写进 YAML 内联数组（逗号会被锚点解析器吃掉）。
-
+> 全文已外移至 `rules/maintenance-ops.md`。本文件只保留章节锚点；按需读取该文件，❌ 不整体加载。
 ## 六、拆分原理
 
 | # | 原则 |
@@ -222,166 +198,7 @@ description: 面向慕残者(devotee/wannabe)群体的截肢者题材小说写�
 
 ## 八、按需注入索引
 
-> 按阶段读取，不主动全量加载。硬层 `rules/hard-layer.md` 整段常驻优先于一切按需注入。
-> `types/{type}.md` 与 `genre/{题材}.md` 为通配，覆盖目录内全部文件。
-
-```yaml
-injection:
-  常驻: [rules/hard-layer.md]
-  触发启动: [core/workflow.md, core/style.md, core/audience.md, core/voice.md]
-  角色设定:
-    - core/character-setup.md
-    - core/psychology.md         # 心理模式库 M1–M31：按人物取向取模式；呈现技法见 emotion/emotion-signal
-    - core/voice.md            # 第二节四要素 + 第四节温度矩阵，配合 templates/voice-card.md
-    - templates/voice-card.md
-    - topics/timeline.md
-    - types/{type}.md
-  类型未登记兜底:                     # 用户要求的类型不在第六节清单内
-    - 向用户确认截断平面（保留哪段骨骼／有无残端／残端可否承重）
-    - 复制 types/_template.md 建立新文件并登记到第六节
-    - 未确认前禁止静默套用最近邻类型
-  侧别为双（叠加层）: [types/bilateral.md]        # 冲突处以本文件为准（无健腿）
-  上肢低位分支: [types/elbow-wrist.md, topics/one-handed-daily.md]
-  ★上下肢复合注入规则:
-    - SKILL.md#★上下肢复合（并行注入 · 按域分工）
-  大纲/弧线规划:
-    - core/structure.md
-    - core/prose-craft.md            # 大纲期取文风契约四项＋意象母题 1–3 个并落账本
-    - core/worldbuilding.md
-    - core/chapter-planning.md
-    - core/opening.md
-    - templates/outline.md
-    - templates/chapter-outline.md
-  章级规划（每章开写前，先于正文）:
-    - core/scene-drive.md            # ★生成层：做事≠动手 / 假戏六型 / 详略差 / 配角驱动器 / 出状态
-    - core/scene-engine.md           # 一场戏五件事 / 材料三问 / 场景与概述交替
-    - core/intensity.md              # ★强度层：峰值段 / 战斗回合 / 动作密度 / 对话博弈 / 段落卫生
-    - core/emotion.md                # ★情感层：情感被平均分配 / 在乎的对象 / 压着的动作 / 漏出来的一处
-    - core/emotion-signal.md         # ★情绪出口：三层信号 / 可观察vs可命名 / 签名动作 / 紧张时的语言失控
-    - core/chapter-planning.md
-    - topics/limitation-scenes.md
-    - types/{type}.md#受限清单
-    - templates/chapter-contract.md
-    # ⚠ 本阶段只产出「本章写作卡」（含★四行硬项，gatecheck [27] 硬检）。
-    #    ❌ 不打开 templates/chapter.md（那是审读时点的表）
-  开写前必做:
-    - core/voice.md#三、开写前三句试音
-  用户指定剧情/要求提前呈现:
-    - SKILL.md#★用户指令优先（剧情变更的最高优先级）
-    - core/chapter-planning.md#十、用户指定剧情的插入与提前
-  开篇阶段: [core/opening.md, genre/{题材}.md]
-  上肢截肢分支(肩离断等):
-    不注入: [topics/crutch-spec.yaml, topics/crutch-usage.md, topics/hands-occupied.md, topics/daily-actions.md]
-    例外: 上下肢复合时本分支「不注入」全部失效，按 ★上下肢复合注入规则 并行注入
-    改注入:
-      - topics/one-handed-daily.md
-      - types/{type}.md#日常动作差异
-      - types/{type}.md#假肢使用差异
-      - types/{type}.md#身体细节
-      - types/{type}.md#幻肢感
-      - types/{type}.md#服装
-  一切移动相关(下肢, 必读): [topics/mobility-modes.md]
-  写到拐杖场景(下肢):
-    - topics/crutch-spec.yaml
-    - topics/crutch-usage.md
-    - types/{type}.md#拐杖使用差异
-  无辅具分支(辅具类型=无(单腿跳)):
-    必读: [topics/mobility-modes.md, topics/limitation-scenes.md]
-    不注入: [topics/crutch-spec.yaml, topics/crutch-usage.md, topics/hands-occupied.md]
-    战斗场景另读: topics/combat-mechanics.md#二、类型分型总表（十一型）
-  写到假肢:
-    - topics/prosthesis.md
-    - topics/fetish.md             # 恋物素材 F3/F4/F29：假肢脱卸/接受腔/穿脱仪式动作链
-    - types/{type}.md#假肢使用差异
-  写到日常动作(下肢):
-    - topics/daily-actions.md
-    - types/{type}.md#日常动作差异
-  写到高频私密/公共场景: [topics/daily-scenes.md]
-  写到双手与移动并存场景(下肢):
-    - topics/hands-occupied.md
-    - types/{type}.md#拐杖使用差异
-  写到场景构建: [core/scene-drive.md, core/scene-engine.md, core/scene.md]
-  写到对白/人物声音: [core/voice.md]
-  写到服装/衣装场景:
-    - topics/clothing.md
-    - topics/fetish.md             # 恋物素材 F0/F1/F2/F14/F16/F24/F32/F36/F37：丝袜/高跟/连裤袜/空袜管/手丝/全身袜
-    - types/{type}.md#服装
-  写到身体细节或幻肢感:
-    - topics/body-details.md
-    - topics/fetish.md             # 恋物素材 F17/F19/F20/F21/F22/F25/F26/F28/F30/F40：残肢触感/乳房/骨盆/空管/髋离断比喻
-    - types/{type}.md#身体细节
-  写到亲密关系:
-    - topics/intimacy.md
-    - core/voice.md                  # 亲密戏用词与回避方式仍按声音卡，不能换一个人
-    - topics/fetish.md               # 恋物素材 F5/F7/F11/F12/F13/F15/F23/F31/F33/F34/F38/F39：残肢互动/性工具/人偶化/踩踏
-    - topics/intimacy-explicit.md    # 条件注入：账本 亲密尺度档 = B 或 C 时唯一执行层
-    - topics/intimacy-genre.md       # 条件注入（B/C 档）：四题材 × 六栏
-  写到亲密关系·C 成人档:
-    - topics/intimacy-explicit.md    # 全量注入；须用户显式声明 C
-    - topics/intimacy-genre.md
-  写到W视角: [topics/wannabe.md]
-  写到对抗/冲突场景: [topics/conflict-scenes.md]
-  写到战斗/追逐/围堵: [topics/combat-mechanics.md, topics/conflict-scenes.md]
-  写到超自然战斗(高武/高魔/神话):
-    - topics/combat-magic.md         # 条件注入：档位 E1–E3／A·B 两组红线／六类豁免／M01–M08
-    - genre/fantasy.md               # 幻想向战斗章必读：第十节受限豁免／第十一节真实战斗冲突（R-032/R-033 唯一权威）
-    # ⚠ 现实向、古装低武、无超自然能力的末世战斗章整节不读，仍过 K01–K13
-  写到受限场景: [topics/limitation-scenes.md]
-  写到节奏/张力场景: [core/pacing.md]
-  写到文风/氛围/跨章一致性: [core/prose-craft.md, core/style.md]
-  短篇/单章(计划章数≤10): [core/short-form.md]
-  题材适配: [genre/realistic.md, genre/fantasy.md, genre/postapocalyptic.md, genre/historical.md]
-  产出模板:
-    - templates/voice-card.md
-    - templates/chapter-contract.md
-    - templates/character-card.md
-    - templates/outline.md
-    - templates/chapter-outline.md
-    - templates/state-ledger.yaml
-    - templates/ledger-schema.json
-  审读时点(初稿之后才读):
-    - templates/chapter.md           # 必过 12 组 + 文学自评 4 问 + 比对表
-    - core/cold-review.md            # 读感七问 + 必判 13 维（定义共 22 维）
-    - templates/reviewer-brief.md
-    - templates/redteam-brief.md
-  架构层(维护期):
-    - rules/rules.yaml
-    - rules/hard-layer.md
-    - MAINTENANCE.md
-    - PLATFORM-CN.md
-    - host-hooks.yaml
-    - scripts/compile_rules.py
-    - scripts/query_rules.py
-    - scripts/state_machine.py
-    - scripts/validate_output.py
-    - scripts/install-host-hooks.py
-    - scripts/gatecheck.py
-    - scripts/ledger_lint.py
-    - scripts/optimize_prompts.py
-    - scripts/selfcheck.py
-    - scripts/verify.py
-    - eval/eval-set.yaml
-  章末必过审查:                        # G01–G12；执行清单见 templates/chapter.md
-    G01_严重错误六类: SKILL.md#三、严重错误分级              # S18–S23
-    G02_回避与边界: core/audience.md#★器具损耗与更换禁令        # S17、S32–S34、S40
-    G03_动作与移动可行性: core/physio-audit.md                  # S25–S31；类型禁止项见 types/{type}.md#不可能动作
-    G04_幻肢档位: topics/timeline.md                            # S35、S36
-    G05_招牌元素限频: core/audience.md#★招牌元素密度与疲劳控制   # S37、S38
-    G06_受限供给: core/audience.md#★受限清单                    # S14–S16
-    G07_剧情结构: core/chapter-planning.md#一、章八要素          # S01–S04、S06–S08、S13
-    G08_章末钩子与张力: core/chapter-planning.md#五、章末钩子类型库  # S05、S09–S12
-    G09_大纲溯源与开篇: templates/outline.md#★主题材契约         # S24、S39
-    G10_人声与语气: core/voice.md#十一、自查三问（每章写完必答，写进章末自评）  # S50 · 声口可辨
-    G11_文笔形状: core/style.md#标点与句式三禁（叙述层）         # S41–S43、S46
-    G12_交付手续: core/workflow.md#一、执行完整性硬卡口        # S44–S49
-  新规审查落点（挂既有组与维度，不新增 S／G／维度编号）:
-    - R-032 / R-033: genre/fantasy.md     # 章末 G01/G02/G07/G08、冷读 6/9/13/19/21、机检 [30][31]、双简报第三节
-    - R-034: core/character-setup.md      # 章末 G10、冷读读感问 4、机检 [31]、双简报第三节
-  推荐流程:
-    - core/workflow.md#八、状态核查流水账
-    - core/cold-review.md
-```
-
+> 全文已外移至 `rules/injection-index.md`。本文件只保留章节锚点；按需读取该文件，❌ 不整体加载。
 ## 九、★上下肢复合（并行注入 · 按域分工）
 
 > 触发：`截肢部位: 上下肢复合`。`{type}` **取两份 `types/{type}.md` 并行注入**，
@@ -458,4 +275,4 @@ types:
 
 - **推荐流程**：章末自查（零成本）＋冷读子代理稽查（pro/max 启用；flash 不含冷读；
   跳过收集时默认 pro；模式空值＝未选定＝不得开写）
-- **版本变更一律记入 `CHANGELOG.md`**，本总纲不承载变更史
+- **版本变更一律记入 `dev/CHANGELOG.md`**，本总纲不承载变更史

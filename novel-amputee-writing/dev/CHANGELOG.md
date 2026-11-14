@@ -6,6 +6,16 @@
 > **归档口径（v7.0.0 起）**：仅保留**最近 2 版全文**（当前版＋上一版）；其余版本压为单行摘要
 > ——全文见 git 提交历史与远端 tag。变更史不参与创作注入（selfcheck 跳过本文件）。
 
+## [10.2.0] - 2026-11-14 · 注入时点手术／维护协议硬化／维护态归档
+
+- **性质**：MINOR（10.1.0 → 10.2.0）。判据：新增机检项与维护纪律；注入索引外移但章节锚点保留，既有稿子不判不通过，故不取 MAJOR。
+- **A**：`SKILL.md` 第八节注入索引 → `rules/injection-index.md`；第〇/一/五节 → `rules/maintenance-ops.md`；原章节保留标题作桩。16,881 → 9,300 字符（−44.9%）。第九节因 `types/bilateral.md` 引用其子标题 9.2 而保留原位。
+- **B**：新增 `scripts/size_gate.py` ＋ `scripts/size_gate.json`，接入 `scripts/verify.py`；[SG-1] 全库字符 / [SG-2] SKILL.md / [SG-3] 净增登记 / [SG-4] 编号计数以退出码强制。`MAINTENANCE.md` 五之二与 `PLATFORM-CN.md` 四补文档侧与无 shell 替代。
+- **C**：`CHANGELOG.md`／`FAQ.md`／`QUICKCHECK.md` → `dev/`；`MAINTENANCE.md`／`PLATFORM-CN.md`／`eval/` 因脚本硬编码路径与带锚点引用密集而保留原位，仅登记为维护态。`scripts/`／`templates/`／`rules/` 为运行时依赖，不归档。
+- **约定落库**：用户交互口径全文并入 `MAINTENANCE.md` 五之二，含作用域声明。属无对应新功能的净增，与第五节「新增规则必须有对应的新功能」冲突；豁免理由＝作为体量闸首个真实用例登记。
+- **偏离记录**：原方案 C1 拟整体归档 `scripts/`／`templates/`，经 `host-hooks.yaml:53,66-69` 核实为运行时依赖，已收缩；原提示词 B2 拟用 hook 强制注入维护铁则，改为脚本退出码强制（不依赖宿主 hook 能力）。
+- **校验**：`verify.py` PASS；交付前另跑故意超限探针验证 [SG-3] 真会 FAIL。
+
 ## [10.1.0] - 2026-11-13 · 索引序号全面规范化（重排／去插入号／精细化目录）
 
 - **性质**：MINOR（10.0.0 → 10.1.0）。用户任务：逐文件检查并重排索引序号，统一小节标题格式且连续，
