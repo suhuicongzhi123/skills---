@@ -1,5 +1,5 @@
 {
-  "skill_md_max": 14336,
+  "skill_md_max": 15360,
   "default_file_max": 56320,
   "dir_caps": {
     "基础层": 65536,
@@ -10,5 +10,5 @@
     "协作代理": 8192,
     "模板层": 8192
   },
-  "total_max": 1150000
+  "total_max": 1200000
 }
