@@ -22,6 +22,8 @@ RULES_FILE = Path(__file__).resolve().parent / "确定性检查清单.md"
 ROW = re.compile(r"^\|\s*L\d+\s*\|")
 CAT_ROW = re.compile(r"^\|\s*T\d+\s*\|")
 SPLIT = re.compile(r"(?<!\\)\|")
+QUOTES = re.compile(r"「[^」]*」|『[^』]*』|“[^”]*”")
+NARR_ONLY = {"L01", "L02", "L03", "L14"}
 WINDOW = 8
 MIN_CATS = 4
 SHINGLE = 12
@@ -61,13 +63,15 @@ def load_categories():
 
 def scan(path, rules):
     lines = path.read_text(encoding="utf-8").splitlines()
+    narr_lines = [QUOTES.sub(lambda m: " " * len(m.group(0)), ln) for ln in lines]
     print(f"== {path}")
     counts = {"高": 0, "中": 0, "信息": 0}
     for rid, name, sev, rx in rules:
         hits = []
-        for no, text in enumerate(lines, 1):
+        target_lines = narr_lines if rid in NARR_ONLY else lines
+        for no, (text, orig) in enumerate(zip(target_lines, lines), 1):
             for m in rx.finditer(text):
-                hits.append((no, m.group(0), text.strip()[:60]))
+                hits.append((no, m.group(0), orig.strip()[:60]))
         if not hits:
             continue
         counts[sev] = counts.get(sev, 0) + len(hits)
