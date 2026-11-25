@@ -10,7 +10,7 @@
   [SG-2] 分目录单文件体积上限
   [SG-3] 全库合计体积上限（不含 维护/）
   [SG-4] 编码与换行：UTF-8 无 BOM、无 CRLF
-  [SG-5] 超 100 行的文件须有目录块（前 10 行内含「目录」）
+  [SG-5] 超 100 行的文件须有目录块（前 12 行内含「目录」）
 
 退出码：0 = PASS，1 = FAIL。
 """
@@ -34,14 +34,31 @@ def check():
     failures = []
     rows = []
 
+    def check_encoding_and_toc(path, rel, check_toc=True):
+        raw = path.read_bytes()
+        if raw.startswith(b"\xef\xbb\xbf"):
+            failures.append(f"[SG-4] {rel} 带 BOM")
+        elif b"\r\n" in raw:
+            failures.append(f"[SG-4] {rel} 含 CRLF 换行")
+        else:
+            try:
+                text = raw.decode(UTF8)
+            except UnicodeDecodeError as e:
+                failures.append(f"[SG-4] {rel} 非 UTF-8: {e}")
+                return
+            n_lines = len(text.splitlines())
+            if check_toc and n_lines > 100 and "目录" not in "\n".join(text.splitlines()[:12]):
+                failures.append(f"[SG-5] {rel} 超 100 行但缺目录块")
+
     skill_md = ROOT / "SKILL.md"
     if skill_md.exists():
         size = skill_md.stat().st_size
         rows.append(("SKILL.md", size, cfg["skill_md_max"]))
         if size > cfg["skill_md_max"]:
             failures.append(f"[SG-1] SKILL.md 超限: {size} > {cfg['skill_md_max']} 字节")
+        check_encoding_and_toc(skill_md, "SKILL.md", check_toc=True)
 
-    total = 0
+    total = skill_md.stat().st_size if skill_md.exists() else 0
     for d in sorted(p for p in ROOT.iterdir() if p.is_dir() and p.name != "维护"):
         cap = cfg["dir_caps"].get(d.name, cfg["default_file_max"])
         for f in sorted(d.rglob("*")):
@@ -58,20 +75,7 @@ def check():
                 rows.append((rel, size, cap_here))
                 if size > cap_here:
                     failures.append(f"[SG-2] {rel} 超限: {size} > {cap_here} 字节")
-                raw = f.read_bytes()
-                if raw.startswith(b"\xef\xbb\xbf"):
-                    failures.append(f"[SG-4] {rel} 带 BOM")
-                elif b"\r\n" in raw:
-                    failures.append(f"[SG-4] {rel} 含 CRLF 换行")
-                else:
-                    try:
-                        text = raw.decode(UTF8)
-                    except UnicodeDecodeError as e:
-                        failures.append(f"[SG-4] {rel} 非 UTF-8: {e}")
-                        text = ""
-                    n_lines = text.count("\n") + 1
-                    if n_lines > 100 and "目录" not in "\n".join(text.split("\n")[:12]):
-                        failures.append(f"[SG-5] {rel} 超 100 行但缺目录块")
+                check_encoding_and_toc(f, rel, check_toc=True)
             else:
                 total += size
 

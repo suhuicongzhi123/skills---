@@ -2,30 +2,31 @@
 """确定性检查执行器。
 
 读取 审查层/确定性检查清单.md：
-- 规则表（L 编号）：逐条扫描正文并列出命中行。
-- 跨章统计表（T 编号）：`--cross` 模式下统计招牌类别覆盖与复读片段。
+- 规则表（L 编号）：逐条扫描正文并列出候选命中，不替代语义审查。
+- 跨章统计表（T 编号）：`--cross` 模式下输出类别趋势与复读片段候选。
 
 用法：
-  python 审查层/确定性检查.py <正文文件> [更多文件]      单文件规则检查
-  python 审查层/确定性检查.py --cross <正文文件>...       跨章统计（按文件名顺序）
-退出码：单文件模式 0 无「高」级命中，1 存在「高」级命中，2 用法错误；跨章模式恒为 0（只做预警）。
-本脚本只读，不改写任何文件。
+  python 审查层/确定性检查.py <正文文件|-> [更多文件]   单文件候选检查（- 表示标准输入）
+  python 审查层/确定性检查.py --cross <正文文件>...       跨章统计（按章号自然排序）
+退出码：单文件模式 0 无「高」级命中，1 存在「高」级命中，2 用法或读取错误；跨章模式恒为 0。
+本脚本只读，不改写任何文件。机检通过不代表正文合格。
 """
 import io
 import re
 import sys
 from pathlib import Path
 
+sys.stdin = io.TextIOWrapper(sys.stdin.buffer, encoding="utf-8")
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
+sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8")
 
 RULES_FILE = Path(__file__).resolve().parent / "确定性检查清单.md"
 ROW = re.compile(r"^\|\s*L\d+\s*\|")
 CAT_ROW = re.compile(r"^\|\s*T\d+\s*\|")
 SPLIT = re.compile(r"(?<!\\)\|")
-QUOTES = re.compile(r"「[^」]*」|『[^』]*』|“[^”]*”")
+QUOTES = re.compile(r"「[^」]*」|『[^』]*』|“[^”]*”|‘[^’]*’")
 NARR_ONLY = {"L01", "L02", "L03", "L14"}
 WINDOW = 8
-MIN_CATS = 4
 SHINGLE = 12
 REPEAT_FILES = 3
 TOP_REPEATS = 10
@@ -62,9 +63,14 @@ def load_categories():
 
 
 def scan(path, rules):
-    lines = path.read_text(encoding="utf-8").splitlines()
+    if str(path) == "-":
+        lines = sys.stdin.read().splitlines()
+        display_name = "<stdin>"
+    else:
+        lines = path.read_text(encoding="utf-8").splitlines()
+        display_name = str(path)
     narr_lines = [QUOTES.sub(lambda m: " " * len(m.group(0)), ln) for ln in lines]
-    print(f"== {path}")
+    print(f"== {display_name}")
     counts = {"高": 0, "中": 0, "信息": 0}
     for rid, name, sev, rx in rules:
         hits = []
@@ -96,8 +102,13 @@ def _overlap(a, b):
     return False
 
 
+def _chapter_key(path):
+    parts = re.split(r"(\d+)", path.name)
+    return tuple((0, int(part)) if part.isdigit() else (1, part) for part in parts)
+
+
 def cross(paths, cats):
-    paths = sorted(paths, key=lambda p: p.name)
+    paths = sorted(paths, key=_chapter_key)
     texts = [p.read_text(encoding="utf-8") for p in paths]
     names = [p.stem for p in paths]
     per_file = []
@@ -113,12 +124,12 @@ def cross(paths, cats):
         parts = " ".join(f"{cid}:{hit[cid] / kchars:.1f}" for cid, _, _ in cats)
         print(f"    {name}：{parts}")
     if len(paths) >= WINDOW:
-        print(f"  {WINDOW} 章窗口覆盖（低于 {MIN_CATS} 类为看点面过窄）：")
+        print(f"  {WINDOW} 章窗口类别覆盖（仅供观察，不作合格判定）：")
         for start in range(len(paths) - WINDOW + 1):
             covered = {cid for cid, _, _ in cats
                        if any(per_file[i][cid] for i in range(start, start + WINDOW))}
-            flag = "  ← 过窄" if len(covered) < MIN_CATS else ""
-            print(f"    第 {start + 1}–{start + WINDOW} 章：{len(covered)} 类{flag}")
+            note = "（仅作观察，不作合格判定）"
+            print(f"    第 {start + 1}–{start + WINDOW} 章：{len(covered)} 类{note}")
     else:
         covered = {cid for cid, _, _ in cats if any(h[cid] for h in per_file)}
         print(f"  全部章节覆盖：{len(covered)} 类（不足 {WINDOW} 章，窗口统计跳过）")
@@ -148,20 +159,24 @@ def cross(paths, cats):
 def main():
     args = sys.argv[1:]
     if not args:
-        print("用法：python 审查层/确定性检查.py <正文文件> [更多文件]\n"
+        print("用法：python 审查层/确定性检查.py <正文文件|-> [更多文件]（- 表示标准输入）\n"
               "      python 审查层/确定性检查.py --cross <正文文件>...")
         return 2
-    if args[0] == "--cross":
-        paths = [Path(a) for a in args[1:]]
-        if not paths:
-            print("--cross 需要至少一个正文文件")
-            return 2
-        return cross(paths, load_categories())
-    rules = load_rules()
-    high = 0
-    for arg in args:
-        high += scan(Path(arg), rules)
-    return 1 if high else 0
+    try:
+        if args[0] == "--cross":
+            paths = [Path(a) for a in args[1:]]
+            if not paths:
+                print("--cross 需要至少一个正文文件")
+                return 2
+            return cross(paths, load_categories())
+        rules = load_rules()
+        high = 0
+        for arg in args:
+            high += scan(Path(arg), rules)
+        return 1 if high else 0
+    except (OSError, UnicodeError, re.error) as exc:
+        print(f"读取或规则错误：{exc}", file=sys.stderr)
+        return 2
 
 
 if __name__ == "__main__":
